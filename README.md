@@ -59,3 +59,9 @@ Les quatre tableaux sont tous différents et répartis à raison de deux par cô
 ## Tableau du panneau gauche
 
 Le panneau central du mur gauche reçoit une cinquième composition originale représentant le Colisée. Les quatre tableaux précédents sont conservés ; les cinq textures sont différentes. Le plafond, les matériaux et la navigation ne sont pas modifiés par cette correction.
+
+## Maquette sous verre
+
+Dans le coin gauche opposé à la porte et aux statues (x = -5,9 ; z = 9,4), une vitrine présente une interprétation miniature de l'extérieur de Saint-Pierre : façade à portails et fronton, nef et transept, abside, grande coupole nervurée, lanterne, croix et deux petites coupoles. La place ovale comporte un obélisque, deux fontaines et une double colonnade, dont les 80 colonnes sont instanciées. Les proportions sont simplifiées pour rester dans le style du projet, sans prétendre à une reproduction architecturale exacte.
+
+Le verre transparent ne projette pas d'ombre opaque. Le socle dispose d'une collision rectangulaire avec marge pour empêcher de traverser la vitrine ; le passage central et l'approche par la droite restent ouverts. La capture `artifacts/maquette-saint-pierre.png` montre la vitrine à hauteur de visite.

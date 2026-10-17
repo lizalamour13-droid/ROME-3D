@@ -326,6 +326,110 @@ for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
 }
 ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
 
+// Maquette extérieure de Saint-Pierre, exposée à l'opposé du mur monumental.
+const displayCase={x:-5.9,z:9.4,halfWidth:1.9,halfDepth:1.95};
+const miniature=new THREE.Group();miniature.name='basilica-miniature';
+miniature.position.set(displayCase.x,1.055,displayCase.z);miniature.rotation.y=Math.PI;scene.add(miniature);
+function miniBox(w,h,d,x,y,z,material=cream){
+  const mesh=new THREE.Mesh(boxGeometry,material);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;miniature.add(mesh);return mesh;
+}
+function miniCylinder(rt,rb,h,x,y,z,material=cream,n=12){
+  const mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,n),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;miniature.add(mesh);return mesh;
+}
+// Socle de musée et plateau sombre, maintenus hors du passage central.
+box(3.85,.16,3.95,displayCase.x,.12,displayCase.z,black);
+box(3.45,.7,3.55,displayCase.x,.55,displayCase.z,stone);
+box(3.82,.12,3.92,displayCase.x,.96,displayCase.z,black);
+box(3.84,.035,3.94,displayCase.x,1.035,displayCase.z,gold);
+miniBox(3.63,.035,3.73,0,.015,0,stone);
+// Plan en croix, abside, volumes de la nef et façade occidentale.
+miniBox(.7,.38,1.22,0,.23,-.89);
+miniBox(1.42,.34,.43,0,.21,-1.03);
+miniCylinder(.3,.3,.33,0,.2,-1.45,cream,20);
+miniBox(1.9,.48,.24,0,.3,-.25);
+miniBox(1.97,.065,.3,0,.57,-.25,white);
+miniBox(1.98,.045,.31,0,.66,-.25,cream);
+miniBox(1.91,.08,.22,0,.615,-.25,stone);
+const roofMaterial=mat('#8e8b7e');
+miniBox(.76,.055,1.2,0,.44,-.91,roofMaterial);
+for(const x of [-.58,.58]){
+  miniCylinder(.14,.16,.15,x,.46,-1.03,stone,12);
+  const smallDome=new THREE.Mesh(new THREE.SphereGeometry(.16,12,6,0,Math.PI*2,0,Math.PI/2),roofMaterial);
+  smallDome.position.set(x,.535,-1.03);miniature.add(smallDome);
+}
+// Portails et fenêtres contrastés pour reconnaître la façade à cette échelle.
+for(const x of [-.76,-.38,0,.38,.76]){
+  miniBox(.13,x===0?.22:.18,.012,x,.2,-.122,bronze);
+  miniBox(.115,.095,.012,x,.43,-.122,black);
+}
+for(const x of [-.88,-.64,-.27,.27,.64,.88]){
+  miniCylinder(.025,.03,.36,x,.325,-.095,white,8);
+  miniBox(.08,.035,.075,x,.51,-.095,cream);
+}
+const pedimentShape=new THREE.Shape();pedimentShape.moveTo(-.38,0);pedimentShape.lineTo(.38,0);pedimentShape.lineTo(0,.18);pedimentShape.closePath();
+const miniPediment=new THREE.Mesh(new THREE.ExtrudeGeometry(pedimentShape,{depth:.035,bevelEnabled:false}),white);
+miniPediment.position.set(0,.565,-.085);miniature.add(miniPediment);
+for(let i=0;i<11;i++){
+  const x=-.87+i*.174;
+  miniCylinder(.017,.024,.075,x,.72,-.25,white,6);
+  const head=new THREE.Mesh(new THREE.IcosahedronGeometry(.023,0),white);head.position.set(x,.775,-.25);miniature.add(head);
+}
+// Grande coupole nervurée, tambour, lanterne et croix.
+miniCylinder(.32,.35,.23,0,.62,-1.03,cream,24);
+for(let i=0;i<12;i++){
+  const a=i*Math.PI/6;
+  const window=miniBox(.06,.105,.015,Math.sin(a)*.326,.63,-1.03+Math.cos(a)*.326,bronze);
+  window.rotation.y=a;
+}
+const domeGeometry=new THREE.SphereGeometry(.365,24,12,0,Math.PI*2,0,Math.PI/2);
+const dome=new THREE.Mesh(domeGeometry,roofMaterial);dome.scale.y=1.08;dome.position.set(0,.735,-1.03);dome.name='miniature-dome';dome.castShadow=true;miniature.add(dome);
+for(let i=0;i<12;i++){
+  const a=i*Math.PI/6;const points=[];
+  for(let j=0;j<=10;j++){
+    const t=j/10*Math.PI/2;
+    points.push(new THREE.Vector3(Math.sin(t)*.37*Math.cos(a),.735+Math.cos(t)*.4,-1.03+Math.sin(t)*.37*Math.sin(a)));
+  }
+  const rib=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),10,.008,4,false),cream);miniature.add(rib);
+}
+miniCylinder(.073,.095,.105,0,1.17,-1.03,cream,12);
+miniCylinder(.012,.075,.08,0,1.26,-1.03,roofMaterial,12);
+miniBox(.015,.1,.015,0,1.34,-1.03,gold);miniBox(.065,.013,.015,0,1.36,-1.03,gold);
+// Place ovale et double rang de colonnes : géométrie répétée instanciée.
+const square=new THREE.Mesh(new THREE.CircleGeometry(1,48),cream);square.rotation.x=-Math.PI/2;square.scale.set(1.39,1.02,1);square.position.set(0,.039,.65);miniature.add(square);
+const miniColumns=new THREE.InstancedMesh(new THREE.CylinderGeometry(.018,.022,.21,6),white,80);
+miniColumns.name='miniature-colonnades';const miniDummy=new THREE.Object3D();let miniIndex=0;
+for(const side of [-1,1]){
+  for(const row of [0,.08])for(let i=0;i<20;i++){
+    const a=-1.32+i/19*2.42;
+    miniDummy.position.set(side*Math.cos(a)*(1.23+row),.15,.65+Math.sin(a)*(.89+row));
+    miniDummy.updateMatrix();miniColumns.setMatrixAt(miniIndex++,miniDummy.matrix);
+  }
+  for(const y of [.055,.267]){
+    const points=[];for(let i=0;i<=24;i++){const a=-1.32+i/24*2.42;points.push(new THREE.Vector3(side*Math.cos(a)*1.27,y,.65+Math.sin(a)*.93));}
+    const cornice=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),28,.04,4,false),cream);miniature.add(cornice);
+  }
+}
+miniColumns.instanceMatrix.needsUpdate=true;miniature.add(miniColumns);
+miniBox(.17,.06,.17,0,.08,.65,gray);miniCylinder(.015,.055,.4,0,.31,.65,stone,4);
+for(const x of [-.59,.59]){miniCylinder(.09,.12,.035,x,.07,.65,gray,12);miniCylinder(.025,.04,.09,x,.12,.65,cream,8);}
+// Vitrine transparente, sans ombres opaques sur la maquette.
+const glass=new THREE.MeshPhysicalMaterial({color:'#dce9e4',transparent:true,opacity:.1,roughness:.08,metalness:0,depthWrite:false,side:THREE.DoubleSide});
+const cover=new THREE.Mesh(new THREE.BoxGeometry(3.8,1.48,3.9),glass);
+cover.name='miniature-glass';cover.position.set(displayCase.x,1.79,displayCase.z);cover.renderOrder=10;scene.add(cover);
+for(const dx of [-1.9,1.9])for(const dz of [-1.95,1.95])box(.025,1.5,.025,displayCase.x+dx,1.79,displayCase.z+dz,gold);
+for(const y of [1.05,2.53]){
+  for(const dx of [-1.9,1.9])box(.025,.025,3.9,displayCase.x+dx,y,displayCase.z,gold);
+  for(const dz of [-1.95,1.95])box(3.8,.025,.025,displayCase.x,y,displayCase.z+dz,gold);
+}
+// Cartel lisible posé sur le socle, sans image distante.
+const labelCanvas=document.createElement('canvas');labelCanvas.width=768;labelCanvas.height=160;
+const labelContext=labelCanvas.getContext('2d');labelContext.fillStyle='#38382f';labelContext.fillRect(0,0,768,160);
+labelContext.textAlign='center';labelContext.fillStyle='#e4d6b5';labelContext.font='30px Georgia';labelContext.fillText('BASILICA DI SAN PIETRO',384,61);
+labelContext.font='20px Arial';labelContext.fillText('VATICAN · MAQUETTE EXTÉRIEURE',384,110);
+const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.colorSpace=THREE.SRGBColorSpace;
+const label=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.35),new THREE.MeshStandardMaterial({map:labelTexture,roughness:1}));
+label.position.set(displayCase.x,.62,displayCase.z-1.783);label.rotation.y=Math.PI;scene.add(label);
+
 scene.add(new THREE.HemisphereLight('#fff0d8','#918271',2));
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);
@@ -341,7 +445,7 @@ addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
 addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*3.5*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*3.5*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);renderer.render(scene,camera);});
