@@ -131,3 +131,7 @@ Les visiteurs debout utilisent désormais des jambes articulées aux hanches et 
 ## Décor inspiré de la référence visuelle
 
 La seconde salle conserve son plan avec abside elliptique, ses vingt chaises et tous les personnages animés. Ses murs sont désormais en pierre crème, avec pilastres à soubassements noirs, panneaux bordeaux bordés d’or et six petits anges à trompette en hauteur. La voûte existante reçoit un bleu étoilé plus lisible et des nervures dorées ; le dallage latéral alterne marbre sombre et bordeaux avec médaillons clairs. L’éclairage ambiant de cette salle est rehaussé. Le baldaquin, saint Pierre, le tapis, le pupitre et la prière sont conservés.
+
+## Reconstruction de la seconde salle selon l’image
+
+Le décor précédent est remplacé par `src/chapel-architecture.js` : voûte crème à caissons en relief, coupole bleue nervurée sur tambour à douze fenêtres, couverture arrondie de l’abside, niches bordeaux, statues de pierre avec clefs et épée, anges à trompette, dallage géométrique crème/noir/bordeaux et baldaquin à frontons noirs bordés d’or. Le grand siège et la statue centrale précédents sont remplacés par un autel dégagé et une gloire rayonnante au fond. L’emprise elliptique, les vingt chaises et les personnages animés restent identiques ; le pupitre et la prière restent disponibles.
