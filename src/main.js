@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import './style.css';
+import {createExterior} from './exterior.js';
 import { createChapel } from './chapel.js';
 import { setupPrayerAudio } from './prayer-audio.js';
 
@@ -14,7 +15,7 @@ renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene();scene.background=new THREE.Color('#c9bda5');
-const camera=new THREE.PerspectiveCamera(65,1,.1,100);
+const camera=new THREE.PerspectiveCamera(65,1,.1,300);
 camera.rotation.order='YXZ';
 const mat=(color,roughness=.8,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const cream=mat('#e5ddc9'),stone=mat('#b7ad99'),wall=mat('#d1c5ae'),gray=mat('#8e8b81'),red=mat('#784c40'),black=mat('#343630'),gold=mat('#a28b51',.48,.42),white=mat('#eee6d5');
@@ -26,7 +27,7 @@ box(18,.3,26,0,-.16,0,cream);
 for(let x=-8;x<=8;x+=2)for(let z=-12;z<=12;z+=2){box(1.94,.018,1.94,x,.008,z,((x+z)/2)%2===0?cream:white);if(x>-7&&x<7){const tile=box(.72,.025,.72,x,.024,z,red);tile.rotation.y=Math.PI/4;const inset=box(.37,.028,.37,x,.029,z,black);inset.rotation.y=Math.PI/4;}}
 for(const x of [-7,7]){box(.19,.04,25.7,x,.035,0,black);box(.14,.04,25.7,x+Math.sign(x)*.28,.035,0,red);}
 for(const z of [-10,10])box(13.8,.04,.2,0,.035,z,black);
-box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(18,12,.5,0,6,13,wall);
+box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(13,12,.5,-2.5,6,13,wall);box(2,12,.5,8,6,13,wall);box(3,6.3,.5,5.5,8.85,13,wall);
 // Mur du fond et arche ouverte sur une niche peu profonde, dans la même salle.
 box(4.4,12,.7,-6.8,6,-13,wall);box(4.4,12,.7,6.8,6,-13,wall);box(9.2,1.4,.7,0,11.3,-13,wall);
 for(const x of [-3.45,3.45])box(2.1,11,.3,x,5.5,-14.7,stone);box(4.8,4.5,.3,0,8.75,-14.7,stone);box(9,.2,2,0,0,-13.8,cream);box(9,.3,2,0,11,-13.8,cream);
@@ -686,6 +687,7 @@ const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.colorSpace=
 const label=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.35),new THREE.MeshStandardMaterial({map:labelTexture,roughness:1}));
 label.position.set(displayCase.x,.62,displayCase.z-1.783);label.rotation.y=Math.PI;scene.add(label);
 
+const exterior=createExterior({scene,mat,cream,stone,gold,gray});
 const chapel=createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white});
 
 const roomAmbient=new THREE.HemisphereLight('#fff0d8','#918271',2);roomAmbient.name='room-ambient';scene.add(roomAmbient);
@@ -703,12 +705,12 @@ addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
 addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
-function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*3.5*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*3.5*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
+function allowed(x,z){if(z>11.8&&Math.abs(x-5.5)<1.18||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const prayer=setupPrayerAudio();
 let currentRoom=1;
 const roomNumber=document.querySelector('footer b');
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.7,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);const nextRoom=camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===2?'02 / 02 · LA CHAIRE':'01 / 02 · LES MARBRES';}renderer.render(scene,camera);});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.7,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);camera.position.y=1.75+(camera.position.z>13?exterior.groundAt(camera.position.z):0);scene.background.set(camera.position.z>14?'#b6cbd5':'#c9bda5');const nextRoom=camera.position.z>17?3:camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===3?'03 / 03 · PLACE SAINT-PIERRE':nextRoom===2?'02 / 03 · LA CHAIRE':'01 / 03 · LES MARBRES';}renderer.render(scene,camera);});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,allowed,reset,prayerAudio:prayer.audio,get active(){return active;}};
+window.room={camera,scene,renderer,allowed,reset,exterior,prayerAudio:prayer.audio,get active(){return active;}};

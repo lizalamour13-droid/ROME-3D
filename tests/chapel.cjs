@@ -23,7 +23,7 @@ const path=require('node:path');
     await page.evaluate(()=>dispatchEvent(new MouseEvent('mousemove',{movementX:room.camera.rotation.y/.002,movementY:room.camera.rotation.x/.002})));
     await page.keyboard.down('KeyZ');
     try{await page.waitForFunction(()=>room.camera.position.z<-18.2,{},{timeout:30000});}finally{await page.keyboard.up('KeyZ');}
-    await page.waitForFunction(()=>document.querySelector('footer b').textContent.includes('02 / 02'));
+    await page.waitForFunction(()=>document.querySelector('footer b').textContent.includes('02 / 03'));
     await page.keyboard.down('KeyS');
     try{await page.waitForFunction(()=>room.camera.position.z>-10.9,{},{timeout:30000});}finally{await page.keyboard.up('KeyS');}
     if(errors.length)throw Error(errors.join('\n'));

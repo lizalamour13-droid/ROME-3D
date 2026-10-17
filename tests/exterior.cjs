@@ -1,0 +1,14 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');const path=require('node:path');
+(async()=>{const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});try{
+ const page=await browser.newPage({viewport:{width:1000,height:750}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(process.env.ROME_TEST_URL||'http://127.0.0.1:5174/ROME-3D/');await page.waitForFunction(()=>window.room?.exterior);
+ const checks=await page.evaluate(()=>{let passage=true;for(let z=11;z<30;z+=.1)passage&&=room.allowed(5.5,z);return {passage,door:!!room.scene.getObjectByName('exterior-door'),columns:room.scene.getObjectByName('exterior-colonnades').count,basilica:!!room.scene.getObjectByName('saint-peter-basilica'),obeliskBlocked:!room.allowed(0,66),fountainBlocked:!room.allowed(15,66),boundaryBlocked:!room.allowed(50,70),stairs:room.exterior.groundAt(19)===0&&room.exterior.groundAt(28)===-2};});
+ if(!checks.passage||!checks.door||checks.columns!==192||!checks.basilica||!checks.obeliskBlocked||!checks.fountainBlocked||!checks.boundaryBlocked||!checks.stairs)throw Error(JSON.stringify(checks));
+ await page.evaluate(()=>{room.camera.position.set(0,-.25,97);room.camera.lookAt(0,15,8);document.querySelector('#app').classList.add('visiting');room.renderer.setPixelRatio(.8);});await page.screenshot({path:path.join(__dirname,'../artifacts/vatican-exterieur.png')});
+ await page.evaluate(()=>{room.camera.position.set(5.5,1.75,19);room.camera.lookAt(0,2,75);});await page.screenshot({path:path.join(__dirname,'../artifacts/place-saint-pierre.png')});
+ await page.setViewportSize({width:480,height:360});await page.evaluate(()=>{room.reset();room.camera.position.set(5.5,1.75,11);room.renderer.setPixelRatio(.5);room.renderer.shadowMap.enabled=false;document.querySelector('#app').classList.remove('visiting');});await page.click('#enter');await page.waitForFunction(()=>room.active);
+ await page.evaluate(()=>dispatchEvent(new MouseEvent('mousemove',{movementX:room.camera.rotation.y/.002,movementY:room.camera.rotation.x/.002})));
+ await page.keyboard.down('KeyS');try{await page.waitForFunction(()=>room.camera.position.z>28,null,{timeout:60000});}finally{await page.keyboard.up('KeyS');}
+ await page.waitForFunction(()=>document.querySelector('footer b').textContent.includes('PLACE SAINT-PIERRE'));const height=await page.evaluate(()=>room.camera.position.y);if(Math.abs(height+.25)>.01)throw Error('Wrong stair height '+height);
+ await page.keyboard.down('KeyZ');try{await page.waitForFunction(()=>room.camera.position.z<11.5,null,{timeout:60000});}finally{await page.keyboard.up('KeyZ');}
+ if(errors.length)throw Error(errors.join());console.log(JSON.stringify({checks,walk:'outside and back',errors}));
+}finally{await browser.close();}})();
