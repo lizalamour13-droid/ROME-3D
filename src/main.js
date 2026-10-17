@@ -645,7 +645,7 @@ labelContext.textAlign='center';labelContext.fillStyle='#e4d6b5';labelContext.fo
 labelContext.font='20px Arial';labelContext.fillText('VATICAN · MAQUETTE EXTÉRIEURE',384,110);
 const labelTexture=new THREE.CanvasTexture(labelCanvas);labelTexture.colorSpace=THREE.SRGBColorSpace;
 const label=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.35),new THREE.MeshStandardMaterial({map:labelTexture,roughness:1}));
-label.position.set(displayCase.x,.62,displayCase.z-1.783);label.rotation.y=Math.PI;scene.add(label);
+label.position.set(displayCase.x,.62,displayCase.z+1.783);label.rotation.y=0;scene.add(label);
 
 const exterior=createExterior({scene,mat,cream,stone,gold,gray});
 const chapel=createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white});
