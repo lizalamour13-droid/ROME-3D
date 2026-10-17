@@ -88,10 +88,14 @@ Les deux niches de la porte présentent des statues distinctes : à gauche, robe
 
 ## Salle de la chaire
 
-Traverser la porte entre les statues bordeaux et noires pour entrer dans une nef à abside elliptique, sous une voûte arrondie. L'allée centrale mène à une interprétation géométrique de la Cathedra Petri : reliquaire en bronze sombre et or ancien, quatre figures de soutien, gloire dorée et fenêtre ambrée avec colombe. La palette suit les matériaux du monument sans prétendre reproduire ses sculptures ou proportions exactes.
+Traverser la porte entre les statues bordeaux et noires pour entrer dans une nef à abside elliptique, sous une voûte arrondie. L'allée centrale mène à une interprétation géométrique de la Cathedra Petri : trône monumental en or ancien et noir, quatre figures de soutien, gloire dorée et fenêtre ambrée avec colombe. La palette suit les matériaux du monument sans prétendre reproduire ses sculptures ou proportions exactes.
 
 Huit bancs en bois accueillent vingt visiteurs assis en vêtements sobres. Six vitraux colorés, deux éclairages latéraux, des taches colorées au sol et de fins rayons transparents créent les effets de lumière. Ces effets sont stylisés ; aucune simulation coûteuse de vitrail ou de volume n'est utilisée. Le plafond de la seconde salle a une voûte en berceau et une demi-coupole sur l'abside.
 
 Les murs courbes, les bancs et l'estrade disposent de collisions ; l'allée centrale et les passages latéraux restent libres. L'indicateur de salle change pendant la visite. Les commandes et le point de départ sont conservés. Capture : `artifacts/salle-chaire.png`.
 
 Le test `node tests/chapel.cjs` utilise les mêmes prérequis que `tests/browser.cjs`. Il contrôle les vingt visiteurs, les six vitraux, les collisions, le passage jusqu'à l'estrade et effectue un vrai trajet au clavier aller-retour à travers la porte.
+
+## Sanctuaire monumental
+
+La chaire est agrandie de 45 % et reçoit une structure dorée, des panneaux noirs, deux colonnes en or ancien et un fronton monumental. Le fond courbe de l'abside est habillé de bleu nuit très sombre, de 108 petites étoiles dorées instanciées et de contours architecturaux en or ancien. Le reste de la salle conserve sa pierre claire, ses vitraux, ses bancs et ses visiteurs. Les nouveaux éléments du sanctuaire restent à l'intérieur de la zone de l'estrade déjà protégée par collision.

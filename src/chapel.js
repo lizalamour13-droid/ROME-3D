@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Salle II : nef avec abside elliptique, Cathedra Petri interprétée géométriquement.
 export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white}){
   const chapel=new THREE.Group();chapel.name='chapel';scene.add(chapel);
-  const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#5b412c',.52,.4),chairGold=mat('#ad8b4b',.42,.5);
+  const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
   const obstacles=[];
   const floorShape=new THREE.Shape();floorShape.moveTo(-8,-17);floorShape.lineTo(8,-17);floorShape.lineTo(8,-28);
   floorShape.absellipse(0,-28,8,9,0,Math.PI,true);floorShape.lineTo(-8,-17);floorShape.closePath();
@@ -80,12 +80,12 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   // Estrade de la chaire, laissant une allée devant elle.
   box(7.4,.18,4.8,0,.12,-33.4,gray);box(6.7,.22,4.3,0,.3,-33.55,cream);box(6,.2,3.8,0,.51,-33.7,stone);
   obstacles.push({x:0,z:-33.5,hx:4,hz:2.9});
-  const chair=new THREE.Group();chair.name='cathedra-petri';chair.userData.palette='bronze sombre, or ancien, ivoire et ambre';chair.position.set(0,.63,-33.8);chapel.add(chair);
+  const chair=new THREE.Group();chair.name='cathedra-petri';chair.userData.palette='or massif et noir';chair.position.set(0,.63,-33.8);chair.scale.set(1.45,1.45,1.15);chapel.add(chair);
   const cbox=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;chair.add(mesh);return mesh;};
   // Le trône est une interprétation du reliquaire en bronze de Bernin.
-  for(const x of [-.95,.95])for(const z of [-.5,.5])cbox(.24,1.25,.24,x,.94,z,chairBronze);
-  cbox(2.35,.3,1.65,0,1.65,0,chairBronze);cbox(1.75,.12,1.25,0,1.86,.05,mat('#704734'));
-  cbox(2.05,2.12,.28,0,2.77,-.65,chairBronze);cbox(1.6,1.67,.06,0,2.78,-.48,chairGold);cbox(1.35,1.43,.07,0,2.78,-.43,chairBronze);
+  for(const x of [-.95,.95])for(const z of [-.5,.5])cbox(.24,1.25,.24,x,.94,z,chairGold);
+  cbox(2.35,.3,1.65,0,1.65,0,chairGold);cbox(1.75,.12,1.25,0,1.86,.05,chairBronze);
+  cbox(2.05,2.12,.28,0,2.77,-.65,chairGold);cbox(1.6,1.67,.06,0,2.78,-.48,chairGold);cbox(1.35,1.43,.07,0,2.78,-.43,chairBronze);
   for(const x of [-1.14,1.14]){cbox(.25,.23,1.65,x,2.16,0,chairGold);cbox(.18,.65,.18,x,1.95,.55,chairBronze);}
   for(const x of [-1.05,1.05])cbox(.13,2.2,.38,x,2.8,-.65,chairGold);
   for(const y of [1.78,3.86])cbox(2.3,.13,.38,0,y,-.65,chairGold);
@@ -98,8 +98,44 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const sash=box(.09,1.1,.07,x,1.8,z+.28,chairGold);sash.rotation.z=Math.sign(x)*.17;
     const arm=box(.17,.78,.2,x-Math.sign(x)*.26,2.5,z+.09,chairBronze);arm.rotation.z=-Math.sign(x)*.55;
   }
+  // Fond d'abside bleu nuit, galbé suivant le mur ; le reste reste en pierre claire.
+  const midnight=mat('#101c2c',.94,0);
+  const backdrop=new THREE.Group();backdrop.name='cathedra-night-backdrop';chapel.add(backdrop);
+  for(let i=0;i<28;i++){
+    const a=.45+i/28*(Math.PI-.9),b=.45+(i+1)/28*(Math.PI-.9);
+    const x1=7.79*Math.cos(a),z1=-28-8.79*Math.sin(a),x2=7.79*Math.cos(b),z2=-28-8.79*Math.sin(b);
+    const width=Math.hypot(x2-x1,z2-z1)+.025;
+    for(const [y,h,m] of [[5.4,7.6,midnight],[1.62,.12,chairGold],[9.18,.16,chairGold],[8.95,.055,chairGold]]){
+      const panel=box(width,h,.06,(x1+x2)/2,y,(z1+z2)/2,m);panel.rotation.y=-Math.atan2(z2-z1,x2-x1);panel.castShadow=false;backdrop.attach(panel);
+    }
+  }
+  for(const a of [.45,.95,Math.PI/2,Math.PI-.95,Math.PI-.45]){
+    const x=7.7*Math.cos(a),z=-28-8.7*Math.sin(a);
+    const pilaster=box(.13,7.5,.12,x,5.4,z,chairGold);pilaster.rotation.y=Math.atan2(-Math.cos(a),Math.sin(a));pilaster.castShadow=false;
+    for(const y of [1.7,8.95]){const cap=box(.35,.15,.22,x,y,z,chairGold);cap.rotation.y=pilaster.rotation.y;cap.castShadow=false;}
+  }
+  const starShape=new THREE.Shape();
+  for(let i=0;i<10;i++){const a=i*Math.PI/5+Math.PI/2,r=i%2?.42:1;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?starShape.lineTo(x,y):starShape.moveTo(x,y);}starShape.closePath();
+  const stars=new THREE.InstancedMesh(new THREE.ExtrudeGeometry(starShape,{depth:.08,bevelEnabled:false}),chairGold,108);stars.name='cathedra-gold-stars';
+  const starDummy=new THREE.Object3D();
+  for(let i=0;i<108;i++){
+    const row=Math.floor(i/18),a=.54+(i%18+(row%2)*.35)/18*(Math.PI-1.08);
+    starDummy.position.set(7.72*Math.cos(a),2.25+row*1.19,-28-8.72*Math.sin(a));
+    starDummy.rotation.set(0,Math.atan2(-Math.cos(a),Math.sin(a)),i%2?.15:-.15);starDummy.scale.setScalar(.065+(i%3)*.015);starDummy.updateMatrix();stars.setMatrixAt(i,starDummy.matrix);
+  }
+  stars.instanceMatrix.needsUpdate=true;backdrop.add(stars);
+  // Encadrement de sanctuaire : colonnes dorées sur bases noires et fronton monumental.
+  for(const x of [-3.35,3.35]){
+    box(.82,.22,.86,x,.72,-34.7,black);cylinder(.23,.32,5.65,x,3.62,-34.7,chairGold,12);cylinder(.4,.28,.25,x,6.57,-34.7,chairGold,12);box(.91,.18,.89,x,6.79,-34.7,chairGold);
+    for(const y of [1.03,6.33])cylinder(.34,.34,.09,x,y,-34.7,black,12);
+  }
+  box(7.6,.3,.7,0,7.03,-34.72,chairGold);box(7.25,.095,.73,0,7.24,-34.72,black);
+  const templeFront=new THREE.Shape();templeFront.moveTo(-3.9,0);templeFront.lineTo(3.9,0);templeFront.lineTo(0,1.05);templeFront.closePath();
+  const fronton=new THREE.Mesh(new THREE.ExtrudeGeometry(templeFront,{depth:.26,bevelEnabled:false}),chairGold);fronton.position.set(0,7.31,-34.85);chapel.add(fronton);
+  const insetFront=new THREE.Shape();insetFront.moveTo(-3.12,0);insetFront.lineTo(3.12,0);insetFront.lineTo(0,.69);insetFront.closePath();
+  const darkFront=new THREE.Mesh(new THREE.ShapeGeometry(insetFront),chairBronze);darkFront.position.set(0,7.46,-34.575);chapel.add(darkFront);
   // Gloire dorée et fenêtre ambrée avec colombe, marqueurs visuels de la chaire.
-  const glory=new THREE.Group();glory.name='cathedra-glory';glory.position.set(0,7.45,-36.58);chapel.add(glory);
+  const glory=new THREE.Group();glory.name='cathedra-glory';glory.position.set(0,9,-34.38);glory.scale.setScalar(.62);chapel.add(glory);
   const amber=new THREE.Mesh(new THREE.CircleGeometry(1.02,48),new THREE.MeshBasicMaterial({color:'#d7b365'}));amber.scale.y=1.3;amber.position.z=.12;glory.add(amber);
   for(const radius of [1.07,1.17]){const rim=new THREE.Mesh(new THREE.TorusGeometry(radius,.06,6,48),chairGold);rim.scale.y=1.3;rim.position.z=.17;glory.add(rim);}
   for(let i=0;i<36;i++){
@@ -110,7 +146,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const doveShape=new THREE.Shape();doveShape.moveTo(0,-.35);doveShape.lineTo(-.16,-.05);doveShape.quadraticCurveTo(-.67,.14,-.72,.48);doveShape.quadraticCurveTo(-.26,.32,0,.12);doveShape.quadraticCurveTo(.26,.32,.72,.48);doveShape.quadraticCurveTo(.67,.14,.16,-.05);doveShape.closePath();
   const dove=new THREE.Mesh(new THREE.ShapeGeometry(doveShape),new THREE.MeshBasicMaterial({color:'#fff0cf'}));dove.position.z=.2;glory.add(dove);
   const glow=new THREE.PointLight('#f3d19a',32,13,1.6);glow.position.set(0,7,-34.5);scene.add(glow);
-  const focus=new THREE.SpotLight('#ffe4b9',100,24,.52,.8,1.5);focus.position.set(0,10,-28);focus.target.position.set(0,2.5,-33.8);scene.add(focus,focus.target);
+  const focus=new THREE.SpotLight('#ffe4b9',145,24,.56,.8,1.5);focus.position.set(0,10,-28);focus.target.position.set(0,4.3,-33.8);scene.add(focus,focus.target);
   function visitor(x,z,index){
     const person=new THREE.Group();person.name='seated-visitor';person.position.set(x,0,z);person.rotation.y=Math.PI;chapel.add(person);
     const clothes=[mat('#4b5961'),mat('#653d46'),mat('#aaa28d'),mat('#53584b')][index%4];
