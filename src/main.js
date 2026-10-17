@@ -3,6 +3,7 @@ import './style.css';
 import {createInteriorVisitors} from './interior-visitors.js';
 import {createCeremonyExperience} from './ceremony-experience.js';
 import {createVerticalRoutes} from './vertical-routes.js';
+import {createChapelOrgan} from './chapel-organ.js';
 import {createExterior} from './exterior.js';
 import { createChapel } from './chapel.js';
 import {setupInteractions} from './interactions.js';
@@ -650,6 +651,7 @@ const exterior=createExterior({scene,mat,cream,stone,gold,gray});
 const chapel=createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white});
 
 const verticalRoutes=createVerticalRoutes({scene});
+const organ=createChapelOrgan({scene,camera});
 
 const roomAmbient=new THREE.HemisphereLight('#fff0d8','#918271',2);roomAmbient.name='room-ambient';scene.add(roomAmbient);
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
@@ -669,6 +671,8 @@ addEventListener('mousemove',e=>{if(scene.userData.experienceActive||(!active&&!
 function staticAllowed(x,z){if(z>11.8&&Math.abs(x)<2.1||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function navigationAt(x,z,height=camera.position.y-1.75){
   if(height<.3&&(z>11.8&&Math.abs(x)<2.1||z>=20))return exterior.allowed(x,z)?{height:exterior.groundAt(z)}:null;
+  const organSurface=organ.surfaceAt(x,z,height);
+  if(organSurface!==undefined)return organSurface;
   const surface=verticalRoutes.surfaceAt(x,z,height);
   if(surface===null)return null;
   if(surface){if(Math.abs(surface.height)<.05&&(!staticAllowed(x,z)||visitors.blocked(x,z)))return null;return surface;}
@@ -696,6 +700,6 @@ function renderScene(){
   view.layers.set(2);scene.background=null;renderer.autoClear=false;renderer.render(scene,view);
   scene.background=background;view.layers.mask=mask;renderer.autoClear=true;
 }
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);move(dt);visitors.update(clock.elapsedTime,camera.position);experience.update(clock.elapsedTime);verticalRoutes.update(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position,experience.active);interactions.update();prayer.update(camera.position.z,clock.elapsedTime,THREE.MathUtils.smoothstep(camera.position.y,-4.5,.5));renderScene();});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);move(dt);visitors.update(clock.elapsedTime,camera.position);experience.update(clock.elapsedTime);verticalRoutes.update(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position,experience.active);interactions.update();organ.update();prayer.update(camera.position.z,clock.elapsedTime,THREE.MathUtils.smoothstep(camera.position.y,-4.5,.5));renderScene();});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};
+window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,organ,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};

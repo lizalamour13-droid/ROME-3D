@@ -172,7 +172,9 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   // Baldaquin noir et or à toit triangulaire, comme dans la référence.
   const baldachin=new THREE.Group();baldachin.name='bernin-baldachin';architecture.add(baldachin);
   for(const x of [-2.65,2.65])for(const z of [-31.35,-34.85]){
-    box(.92,.35,.92,x,.83,z,cream,baldachin);
+    box(1.06,.16,1.06,x,.08,z,chairBronze,baldachin).name='baldachin-ground-footing';
+    box(1.08,.04,1.08,x,.18,z,chairGold,baldachin);
+    box(.92,.9,.92,x,.55,z,cream,baldachin).name='baldachin-column-pedestal';
     const points=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*6;points.push(new THREE.Vector3(x+Math.cos(a)*.13,1.05+i/80*5.7,z+Math.sin(a)*.13));}
     path(points,.27,chairBronze,baldachin).name='baldachin-twisted-column';
     for(const y of [1.05,6.85]){add(new THREE.CylinderGeometry(.43,.43,.22,12),chairGold,x,y,z,baldachin);box(.88,.18,.88,x,y+.17,z,chairGold,baldachin);}

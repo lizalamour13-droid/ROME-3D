@@ -4,8 +4,8 @@ const assert=require('node:assert/strict'),path=require('node:path');
  const page=await browser.newPage({viewport:{width:320,height:240}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.ROME_TEST_URL||'http://127.0.0.1:5174/ROME-3D/');await page.waitForFunction(()=>window.room?.verticalRoutes);
  await page.evaluate(()=>{room.renderer.setPixelRatio(.4);room.renderer.shadowMap.enabled=false;});
- const layout=await page.evaluate(()=>{const s=room.scene,tomb=s.getObjectByName('saint-peter-tomb'),crypt=s.getObjectByName('saint-peter-crypt');return {tombInCrypt:tomb.parent===crypt,tombY:tomb.position.y,tombZ:tomb.position.z,cryptCandles:s.getObjectsByProperty('name','crypt-candle').length,spiralCandles:s.getObjectsByProperty('name','spiral-candle').length,pitHole:s.getObjectByName('chapel-floor').geometry.parameters.shapes.holes.length,balconies:!!s.getObjectByName('marble-room-upper-balconies'),aboveTombPrompt:room.interactions.nearby};});
- assert(layout.tombInCrypt&&layout.tombY<-7&&layout.tombZ<-38&&layout.cryptCandles>=6&&layout.spiralCandles>=6&&layout.pitHole===1&&layout.balconies);
+ const layout=await page.evaluate(()=>{const s=room.scene,tomb=s.getObjectByName('saint-peter-tomb'),crypt=s.getObjectByName('saint-peter-crypt');return {tombInCrypt:tomb.parent===crypt,tombY:tomb.position.y,tombZ:tomb.position.z,cryptCandles:s.getObjectsByProperty('name','crypt-candle').length,spiralCandles:s.getObjectsByProperty('name','spiral-candle').length,pitHole:s.getObjectByName('chapel-floor').geometry.parameters.shapes.holes.length,balconies:!!s.getObjectByName('marble-room-upper-balconies'),benches:s.getObjectsByProperty('name','balcony-bench').length,smallStatues:s.getObjectsByProperty('name','balcony-small-statue').length,warmStrips:s.getObjectsByProperty('name','balcony-warm-light-strip').length,aboveTombPrompt:room.interactions.nearby};});
+ assert(layout.tombInCrypt&&layout.tombY<-7&&layout.tombZ<-38&&layout.cryptCandles>=6&&layout.spiralCandles>=6&&layout.pitHole===1&&layout.balconies&&layout.benches===2&&layout.smallStatues===2&&layout.warmStrips===2);
  await page.click('#enter');await page.waitForFunction(()=>room.active);
  // Quelques marches franchies au vrai clavier : la hauteur doit changer sans touche spéciale.
  await page.evaluate(()=>{const s=room.verticalRoutes.spirals.gallery;room.camera.position.set(s.x,1.75,s.z-1.15);dispatchEvent(new MouseEvent('mousemove',{movementX:(room.camera.rotation.y+Math.PI/2)/.002,movementY:room.camera.rotation.x/.002}));});
@@ -24,11 +24,11 @@ const assert=require('node:assert/strict'),path=require('node:path');
    line(0,11.55);line(-5.5,11.55);line(-5.5,10.685);report.downFromBalcony=travel('gallery',true);
    const down=room.verticalRoutes.spirals.crypt;room.camera.position.set(1.9,1.75,-32.9);report.approach=[line(1.9,-33.1),line(3.425,-33.1)].every(Boolean);report.down=travel('crypt');
    report.cryptExit=[line(1.9,-33.1),line(1.3,-37),line(6.4,-37.5)].every(Boolean);report.cryptY=room.camera.position.y;
-   report.tombBlocked=!room.allowed(4.3,-39.1);report.wellBlocked=!room.navigationAt(5.8,-33.1,-8);
+   report.tombBlocked=!room.allowed(4.3,-39.1);report.wellOpen=!!room.navigationAt(5.8,-33.1,-8);
    report.returnToStairs=[line(1.3,-37),line(1.9,-33.1),line(3.425,-33.1)].every(Boolean);report.backUp=travel('crypt',true);return report;
  });
  for(const key of ['up','downFromBalcony','down','backUp']){assert.equal(paths[key].blocked,0,`${key}: ${JSON.stringify(paths)}`);assert(paths[key].maxJump<.2);}
- assert(Math.abs(paths.up.end-6.4)<.01&&Math.abs(paths.down.end+8)<.01&&Math.abs(paths.backUp.end)<.01);for(const key of ['balcony','noFall','noEscapeFromBalcony','approach','cryptExit','tombBlocked','wellBlocked','returnToStairs'])assert(paths[key],`${key}: ${JSON.stringify(paths)}`);assert.equal(paths.cryptY,-6.25);
+ assert(Math.abs(paths.up.end-6.4)<.01&&Math.abs(paths.down.end+8)<.01&&Math.abs(paths.backUp.end)<.01);for(const key of ['balcony','noFall','noEscapeFromBalcony','approach','cryptExit','tombBlocked','wellOpen','returnToStairs'])assert(paths[key],`${key}: ${JSON.stringify(paths)}`);assert.equal(paths.cryptY,-6.25);
  // Dialogue impossible depuis le sanctuaire ; le cartel fonctionne dans la crypte.
  await page.evaluate(()=>{room.camera.position.set(6.4,1.75,-36.3);room.interactions.update();});assert.notEqual(await page.evaluate(()=>room.interactions.nearby),'Mémoire de saint Pierre');
  await page.evaluate(()=>{room.camera.position.set(6.4,-6.25,-37.5);room.interactions.update();});await page.keyboard.press('KeyE');await page.waitForFunction(()=>room.interactions.open);await page.keyboard.press('Digit1');await page.waitForFunction(()=>room.experience.kind==='tomb');

@@ -64,10 +64,10 @@ export function createVerticalRoutes({scene}){
     }
     if(underground){
       const lining=dark.clone();lining.side=THREE.DoubleSide;
-      // Le puits laisse une ouverture sous l’arche du palier inférieur.
+      // Le chemisage s’arrête au plafond : toute la partie basse est ouverte sur la crypte.
       const radius=s.outer+.19;
-      const wall=add(new THREE.CylinderGeometry(radius,radius,8,64,1,true,.34,TAU-.68),lining,s.x,-4,s.z,group);wall.rotation.y=Math.PI/2-s.start;
-      const upperLintel=add(new THREE.CylinderGeometry(radius,radius,5.15,8,1,true,-.34,.68),lining,s.x,-2.575,s.z,group);upperLintel.rotation.y=Math.PI/2-s.start;
+      const wall=add(new THREE.CylinderGeometry(radius,radius,4.65,64,1,true,.34,TAU-.68),lining,s.x,-2.325,s.z,group);wall.rotation.y=Math.PI/2-s.start;wall.name='crypt-upper-shaft-lining';
+      const upperLintel=add(new THREE.CylinderGeometry(radius,radius,4.65,8,1,true,-.34,.68),lining,s.x,-2.325,s.z,group);upperLintel.rotation.y=Math.PI/2-s.start;
       for(let i=0;i<8;i++){
         const a=.7+i*Math.PI/2,y=-8*a/(TAU*2)+1.35;
         const c=candle(s.x+Math.cos(a+s.start)*(radius-.14),y,s.z+Math.sin(a+s.start)*(radius-.14),group,'spiral-candle',i%3===0);c.rotation.y=Math.PI/2-a;
@@ -175,8 +175,29 @@ export function createVerticalRoutes({scene}){
     box(12.7,.006,.22,0,level+.004,z,balconyBurgundy,decor);
     for(const edge of [-1,1])box(12.7,.008,.035,0,level+.006,z+edge*.2,gold,decor);
   }
+  // Éclairage discret sous corniche, sans teintes fluorescentes.
+  const warmStrip=new THREE.MeshStandardMaterial({color:'#d9c296',emissive:'#e6bd7b',emissiveIntensity:.65,roughness:.8});
+  for(const side of [-1,1]){
+    box(.055,.035,17.9,side*8.02,9.04,.1,warmStrip,decor).name='balcony-warm-light-strip';
+    for(const z of [-5,2,8]){const light=new THREE.PointLight('#ffe0af',5,4,2);light.position.set(side*7.85,8.85,z);decor.add(light);}
+    // Banc au fond de la galerie, hors de l’axe de circulation.
+    const bench=new THREE.Group();bench.name='balcony-bench';bench.position.set(side*2.8,level,12.06);decor.add(bench);
+    box(1.65,.1,.38,0,.46,0,balconyBurgundy,bench);
+    box(1.65,.42,.065,0,.78,.17,balconyBurgundy,bench);
+    for(const x of [-.73,.73]){box(.065,.85,.065,x,.43,.17,gold,bench);box(.065,.45,.065,x,.23,-.12,gold,bench);box(.055,.08,.38,x,.65,0,gold,bench);}
+    box(1.72,.04,.075,0,1.01,.17,gold,bench);
+    // Deux petites sculptures, sur les bords de la galerie transversale.
+    const statue=new THREE.Group();statue.name='balcony-small-statue';statue.position.set(side*5.3,level,-8.66);decor.add(statue);
+    box(.36,.28,.32,0,.14,0,cream,statue);box(.39,.035,.35,0,.3,0,gold,statue);
+    add(new THREE.ConeGeometry(.17,.55,8),cream,0,.6,0,statue);
+    add(new THREE.SphereGeometry(.105,10,8),cream,0,.99,0,statue);
+    box(.06,.46,.04,side*.07,.66,-.14,gold,statue);
+    for(const armSide of [-1,1]){const arm=box(.075,.3,.075,armSide*.17,.79+(armSide===side?.06:0),0,cream,statue);arm.rotation.z=armSide*(armSide===side?-.8:.35);}
+    if(side<0){box(.045,.42,.045,-.23,.88,-.02,gold,statue);box(.2,.035,.04,-.23,.99,-.02,gold,statue);}else{box(.17,.22,.05,.2,.75,-.08,balconyBurgundy,statue);}
+  }
   function inCrypt(x,z){return Math.abs(x-CRYPT.centerX)<4.5&&z>-41.1&&z<-30.3;}
   function onBalcony(x,z){
+    if([-1,1].some(side=>Math.abs(x-side*2.8)<.94&&z>11.78||Math.abs(x-side*5.3)<.28&&Math.abs(z+8.66)<.25))return false;
     const sides=Math.abs(x)>6.75&&Math.abs(x)<7.91&&z>-8.8&&z<12.2;
     const rear=Math.abs(x)<7.91&&z>10.55&&z<12.2&&upperStairs.every(stair=>Math.hypot(x-stair.x,z-stair.z)>r+.03);
     const landing=upperStairs.some(stair=>Math.abs(x-stair.x)<.56)&&z>10.72&&z<12.2;
@@ -203,7 +224,7 @@ export function createVerticalRoutes({scene}){
     if(h<-7.7&&inCrypt(x,z)){
       const a=Math.abs(Math.atan2(Math.sin(Math.atan2(z-down.z,x-down.x)-down.start),Math.cos(Math.atan2(z-down.z,x-down.x)-down.start)));
       // Le mur du puits ne s’ouvre que sur le palier inférieur, à droite.
-      const outsideWell=rd>down.outer+.32;
+      const outsideWell=rd>down.outer-.14;
       const exit=a<.29&&rd>down.inner+.15;
       const tombBlocked=Math.abs(x-CRYPT.tomb.x)<1.75&&Math.abs(z-CRYPT.tomb.z)<1.28;
       if((outsideWell||exit)&&!tombBlocked)options.push(cy);

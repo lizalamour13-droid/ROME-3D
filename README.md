@@ -218,3 +218,15 @@ La silhouette extérieure conserve ses deux grandes coupoles latérales et quatr
 Les escaliers utilisent désormais exactement la même navigation que le reste de la visite : ZQSD/flèches et souris. Aucun bouton, aucun guidage sur un trajet, aucun changement de caméra. Orientez-vous librement pour suivre les marches ; vous pouvez tourner, vous arrêter, reculer ou vous décaler. Les garde-corps et limites de marche empêchent de tomber. Les pancartes d’accès sont supprimées. Le petit cartel de la crypte est fixé au mur, sans pied au sol.
 
 Les balcons forment un circuit complet autour du vide central. Les sorties des paliers restent ouvertes. Les garde-corps bordeaux, filets et rosettes en or ancien, panneaux muraux et incrustations au sol décorent les galeries sans encombrer le passage.
+
+### Crypte ouverte, orgue et détails des balcons
+
+Le chemisage de l’escalier souterrain s’arrête au plafond de la crypte. Les dernières marches donnent directement sur la chambre, sans mur circulaire autour du palier inférieur.
+
+Dans la seconde salle, un escalier droit à gauche du maître de cérémonie rejoint une tribune au-dessus de l’entrée. On y monte librement avec ZQSD/flèches et la souris. L’orgue comporte cinq tourelles et 35 tuyaux, un buffet bordeaux et bois sombre, des couronnes et des ornements en or ancien, ainsi qu’une console à deux claviers. À proximité de la console, **O** lance ou arrête une courte composition originale en boucle, synthétisée par harmoniques d’orgue et réverbération de nef avec Web Audio. Le son décroît avec la distance et s’efface hors de la salle ; le réglage de volume des ambiances s’applique. Il est atténué pendant les séquences de messe ou de récit. Aucun téléchargement sonore supplémentaire n’est nécessaire.
+
+Les balcons de la première salle possèdent deux lignes lumineuses chaudes sous corniche, deux petites statues aux poses distinctes et deux bancs placés au fond de la galerie. Les bancs et statues sont exclus de la surface de marche, et le tour reste dégagé.
+
+Validation : `tests/chapel-organ.cjs` vérifie l’aller-retour au clavier jusqu’à la tribune, la touche O seulement à proximité, le signal audio réellement produit et l’ouverture du bas de l’escalier de la crypte. `tests/vertical-routes.cjs` vérifie les escaliers existants, le tour des balcons, les nouveaux décors et le récit du tombeau.
+
+Les quatre colonnes noires torsadées du baldaquin reposent désormais sur des socles continus jusqu’au dallage : plinthes noires, filets d’or et dés de pierre claire.
