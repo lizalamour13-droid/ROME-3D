@@ -203,7 +203,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       const forearm=localBox(.08,.085,.25,side*(index%3===0?.09:.19),.87,.2,skin);forearm.rotation.y=side*(index%3===0?.5:0);
     }
     const book=prayerBook(person,'visitor-prayer-book',0,.865,.29);book.rotation.x=-.2;
-    if(index===1||index===4||index===11||index===14){
+    if(index===1||index===11){
       const walking=standingPerson(x,z,'walking-standing-visitor',index);walking.group.visible=false;
       const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:-Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z,rx:mesh.rotation.x}))};
       risingVisitors.push(actor);
@@ -229,12 +229,12 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   let visitorIndex=0;
   for(const z of [-20.5,-23,-25.5,-28])for(const side of [-1,1]){
     const x=side*4.15;
-    for(const dx of z===-23||z===-28?[-1,0,1]:[-.8,.8]){ceremonialChair(x+dx,z);visitor(x+dx,z,visitorIndex++);obstacles.push({x:x+dx,z,hx:.40,hz:.43});}
+    for(const dx of z===-23||z===-28?[-1,0,1]:[-.8,.8]){ceremonialChair(x+dx,z);const index=visitorIndex++;if(index!==4&&index!==14)visitor(x+dx,z,index);obstacles.push({x:x+dx,z,hx:.40,hz:.43});}
   }
   for(const [list,material,geometry] of [[chairFrames,chairGold,new THREE.BoxGeometry(1,1,1)],[chairVelvet,velvet,new THREE.BoxGeometry(1,1,1)],[chairRosettes,chairGold,new THREE.OctahedronGeometry(1)]]){
     const mesh=new THREE.InstancedMesh(geometry,material,list.length);list.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;chapel.add(mesh);
   }
-  chapel.userData={shape:'abside elliptique',benches:0,chairs:20,visitors:visitorIndex,walkers:2,risingVisitors:4,ceremonyMaster:true};
+  chapel.userData={shape:'abside elliptique',benches:0,chairs:20,visitors:visitorIndex-2,walkers:walkers.length,risingVisitors:risingVisitors.length,ceremonyMaster:true};
   function allowed(x,z){
     if(z>-17.55)return Math.abs(x)<1.58&&z<-11.5;
     const inside=z>=-28?Math.abs(x)<7.35:(x/7.35)**2+((z+28)/8.3)**2<1;
