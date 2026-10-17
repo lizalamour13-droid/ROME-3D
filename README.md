@@ -135,3 +135,5 @@ La seconde salle conserve son plan avec abside elliptique, ses vingt chaises et 
 ## Reconstruction de la seconde salle selon l’image
 
 Le décor précédent est remplacé par `src/chapel-architecture.js` : voûte crème à caissons en relief, coupole bleue nervurée sur tambour à douze fenêtres, couverture arrondie de l’abside, niches bordeaux, statues de pierre avec clefs et épée, anges à trompette, dallage géométrique crème/noir/bordeaux et baldaquin à frontons noirs bordés d’or. Le grand siège et la statue centrale précédents sont remplacés par un autel dégagé et une gloire rayonnante au fond. L’emprise elliptique, les vingt chaises et les personnages animés restent identiques ; le pupitre et la prière restent disponibles.
+
+Les quatre statues sont désormais polychromes (robes bordeaux/bleues et liserés dorés) et placées dans des niches réellement ouvertes dans les murs, avec couverture cintrée et fond bordeaux. La coupole est approfondie et son éclairage adouci. Le dallage précédent et son tapis bordeaux sont rétablis.

@@ -194,7 +194,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   function allowed(x,z){
     if(z>-17.55)return Math.abs(x)<1.58&&z<-11.5;
     const inside=z>=-28?Math.abs(x)<7.35:(x/7.35)**2+((z+28)/8.3)**2<1;
-    return inside&&z>-36.3&&![...walkers,...risingVisitors].some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
+    return inside&&z>-36.3&&!(Math.abs(x)>6.95&&[-20.75,-25.65].some(nz=>Math.abs(z-nz)<1.6))&&![...walkers,...risingVisitors].some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
   }
   return {allowed,animate};
 }

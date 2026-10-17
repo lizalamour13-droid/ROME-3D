@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Architecture géométrique de la référence ; emprise et circulation conservées.
 export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze}){
   const architecture=new THREE.Group();architecture.name='chapel-reference-architecture';chapel.add(architecture);
-  const marble=mat('#393737',.38),red=mat('#70383c',.58),pale=mat('#d5c5b0',.7),blue=mat('#365b87',.8);
+  const marble=mat('#393737',.38),red=mat('#70383c',.58),pale=mat('#d5c5b0',.7),blue=mat('#163663',.85);
   const add=(g,m,x,y,z,parent=architecture)=>{const a=new THREE.Mesh(g,m);a.position.set(x,y,z);a.receiveShadow=true;parent.add(a);return a;};
   const box=(w,h,d,x,y,z,m,parent)=>add(new THREE.BoxGeometry(w,h,d),m,x,y,z,parent);
   const path=(points,r,m,parent=architecture)=>{const a=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,r,6,false),m);parent.add(a);return a;};
@@ -11,15 +11,19 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const shape=new THREE.Shape();shape.moveTo(-8,-17);shape.lineTo(8,-17);shape.lineTo(8,-28);shape.absellipse(0,-28,8,9,0,Math.PI,true);shape.lineTo(-8,-17);shape.closePath();
   const floor=add(new THREE.ShapeGeometry(shape,40),pale,0,0,0);floor.rotation.x=Math.PI/2;floor.material=pale.clone();floor.material.side=THREE.DoubleSide;floor.name='chapel-floor';
   box(4.2,.22,3.2,0,-.12,-15.5,cream);
-  for(let z=-18;z>=-35;z-=2)for(let x=-6;x<=6;x+=2){
-    if(z<-28&&(Math.abs(x)+1)**2/64+(Math.abs(z+28)+1)**2/81>.96)continue;
-    box(1.91,.025,1.91,x,.02,z,(Math.round(x/2)+Math.round((z+18)/2))%2?marble:red);
-    for(const dx of [-.97,.97])box(.03,.03,1.96,x+dx,.025,z,chairGold);
-    const ring=add(new THREE.TorusGeometry(.64,.035,5,24),cream,x,.045,z);ring.rotation.x=-Math.PI/2;
+  // Retour au dallage précédent et à son tapis bordeaux.
+  for(let z=-19;z>=-29;z-=2)for(const x of [-6,-4,-2,2,4,6]){
+    box(1.88,.018,1.88,x,.025,z,(Math.round(x/2)+Math.round(z))%2?marble:red);
+    for(const dx of [-.96,.96])box(.025,.022,1.94,x+dx,.029,z,chairGold);
+    const ring=add(new THREE.TorusGeometry(.58,.025,5,28),cream,x,.042,z);ring.rotation.x=-Math.PI/2;
   }
+  box(2.4,.024,12.85,0,.051,-24.175,mat('#741e32',1)).name='chapel-red-carpet';
+  for(const x of [-1.13,1.13])box(.035,.005,12.63,x,.066,-24.175,chairGold);
   // Les chaises et personnages restent à leurs coordonnées d'origine.
   for(const side of [-1,1]){
-    box(.4,10.7,11,side*8,5.35,-22.5,cream);
+    // Ouvertures réelles dans le mur : les niches ne sont plus plaquées dessus.
+    for(const [start,end] of [[-28,-27.15],[-24.15,-22.25],[-19.25,-17]])box(.4,10.7,end-start,side*8,5.35,(start+end)/2,cream);
+    for(const z of [-20.75,-25.65]){box(.4,4.6,3,side*8,8.4,z,cream);box(.4,1,3,side*8,.5,z,marble);}
     box(6.25,10.7,.4,side*4.875,5.35,-17,cream);
     for(const y of [.25,8.85,9.15])box(.5,.17,11,side*7.75,y,-22.5,y<1?marble:chairGold);
   }
@@ -32,13 +36,13 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const pos=[],idx=[];
   for(let j=0;j<24;j++)for(let i=0;i<32;i++){
     const a=i*Math.PI/32,b=(i+1)*Math.PI/32,z=-17-j*11/24,z2=z-11/24,x=8*Math.cos((a+b)/2);
-    if(x*x+((z+z2)/2+23)**2<3.5**2)continue;
+    if([a,b].some(angle=>[z,z2].some(depth=>(8*Math.cos(angle))**2+(depth+23)**2<4.15**2)))continue;
     const k=pos.length/3;pos.push(8*Math.cos(a),8.9+4*Math.sin(a),z,8*Math.cos(b),8.9+4*Math.sin(b),z,8*Math.cos(a),8.9+4*Math.sin(a),z2,8*Math.cos(b),8.9+4*Math.sin(b),z2);idx.push(k,k+1,k+2,k+1,k+3,k+2);
   }
   const roofGeo=new THREE.BufferGeometry();roofGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));roofGeo.setIndex(idx);roofGeo.computeVertexNormals();const roofMat=cream.clone();roofMat.side=THREE.DoubleSide;add(roofGeo,roofMat,0,0,0).name='chapel-coffered-vault';
   for(let i=0;i<12;i++)for(let j=0;j<7;j++){
     const a=(i+.5)*Math.PI/12,z=-17.8-j*1.56,x=7.92*Math.cos(a),y=8.83+3.98*Math.sin(a);
-    if(x*x+(z+23)**2<3.8**2)continue;
+    if(x*x+(z+23)**2<4.7**2)continue;
     const panel=new THREE.Group();panel.position.set(x,y,z);panel.rotation.z=Math.atan2(3.98*Math.cos(a),-7.92*Math.sin(a));architecture.add(panel);
     const w=Math.hypot(7.92*Math.sin(a),3.98*Math.cos(a))*Math.PI/12*.85;
     box(w,.065,1.3,0,0,0,pale,panel);
@@ -56,21 +60,23 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   // Coupole centrale bleu étoilé, tambour percé de fenêtres lumineuses.
   const domeGroup=new THREE.Group();domeGroup.name='chapel-blue-dome';architecture.add(domeGroup);
   const domeMat=blue.clone();domeMat.side=THREE.DoubleSide;
-  const dome=add(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,Math.PI/2),domeMat,0,12,-23,domeGroup);dome.scale.set(3.65,3.5,3.65);
+  const dome=add(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,Math.PI/2),domeMat,0,12,-23,domeGroup);dome.scale.set(3.65,5,3.65);
+  const collarMaterial=pale.clone();collarMaterial.side=THREE.DoubleSide;
+  const collar=add(new THREE.RingGeometry(3.5,4.65,64),collarMaterial,0,9.54,-23,domeGroup);collar.rotation.x=Math.PI/2;
   const glass=new THREE.MeshBasicMaterial({color:'#e8f0ee'});
   for(let i=0;i<12;i++){
     const a=i*Math.PI/6,x=3.6*Math.cos(a),z=-23+3.6*Math.sin(a);
     const drum=new THREE.Group();drum.position.set(x,10.8,z);drum.rotation.y=Math.PI/2-a;domeGroup.add(drum);
-    box(1.82,2.4,.15,0,0,0,cream,drum);
+    box(1.93,2.4,.15,0,0,0,cream,drum);
     const window=box(.74,1.65,.03,0,.13,-.1,glass,drum);window.name='chapel-clerestory-window';
     for(const dx of [-.4,0,.4])box(.035,1.76,.06,dx,.13,-.14,chairGold,drum);
     for(const y of [-.72,.08,.96])box(.84,.035,.06,0,y,-.14,chairGold,drum);
-    const ribs=[];for(let j=0;j<=24;j++){const b=j*Math.PI/48;ribs.push(new THREE.Vector3(3.61*Math.cos(b)*Math.cos(a),12+3.47*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a)));}path(ribs,.045,chairGold,domeGroup);
+    const ribs=[];for(let j=0;j<=24;j++){const b=j*Math.PI/48;ribs.push(new THREE.Vector3(3.61*Math.cos(b)*Math.cos(a),12+4.97*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a)));}path(ribs,.045,chairGold,domeGroup);
   }
-  for(const y of [9.65,12]){const rim=add(new THREE.TorusGeometry(3.65,.12,6,64),chairGold,0,y,-23,domeGroup);rim.rotation.x=Math.PI/2;}
+  for(const y of [9.55,9.75,10,12]){const rim=add(new THREE.TorusGeometry(3.65,.12,6,64),chairGold,0,y,-23,domeGroup);rim.rotation.x=Math.PI/2;}
   for(let row=0;row<4;row++)for(let i=0;i<12;i++){
     const a=(i+(row%2)*.5)*Math.PI/6,b=.25+row*.25;
-    const star=add(new THREE.OctahedronGeometry(.075),chairGold,3.61*Math.cos(b)*Math.cos(a),12+3.46*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a),domeGroup);star.scale.y=1.7;
+    const star=add(new THREE.OctahedronGeometry(.075),chairGold,3.61*Math.cos(b)*Math.cos(a),12+4.96*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a),domeGroup);star.scale.y=1.7;
   }
   // Colonnes murales et niches, sans encombrer les allées.
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
@@ -80,26 +86,31 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     box(.85,.3,1.1,x,8.65,z,pale);
   }
   function statue(x,z,side,keys,scale=1){
-    const g=new THREE.Group();g.name=keys?'chapel-statue-peter':'chapel-statue-paul';g.position.set(x,1.1,z);g.rotation.y=-side*Math.PI/2;g.scale.setScalar(scale);architecture.add(g);
+    const g=new THREE.Group();g.name=keys?'chapel-statue-peter':'chapel-statue-paul';g.position.set(x,1.25,z);g.rotation.y=-side*Math.PI/2-side*.12;g.scale.setScalar(scale);architecture.add(g);
     box(.85,.22,.85,0,-.1,0,cream,g);
-    add(new THREE.CylinderGeometry(.25,.42,1.5,12),cream,0,.78,0,g);
+    add(new THREE.CylinderGeometry(.25,.42,1.5,12),keys?red:blue,0,.78,0,g);
     add(new THREE.SphereGeometry(.23,12,8),cream,0,1.97,.02,g);
     add(new THREE.ConeGeometry(.19,.35,10),pale,0,1.78,.14,g).rotation.x=Math.PI;
     for(let i=0;i<8;i++){const a=i*Math.PI/4;add(new THREE.SphereGeometry(.1,8,6),cream,.21*Math.cos(a),2.08+.07*Math.sin(a),.12*Math.sin(a),g);}
-    for(const s of [-1,1]){const arm=box(.17,.73,.2,s*.38,1.35,.13,cream,g);arm.rotation.z=s*.25;add(new THREE.SphereGeometry(.1,8,6),cream,s*.42,1.04,.17,g);}
-    box(.4,.54,.11,-.33,1.12,.3,pale,g);
+    for(const s of [-1,1]){const arm=box(.17,.73,.2,s*.38,1.35,.13,keys?red:blue,g);arm.rotation.z=s*.25;add(new THREE.SphereGeometry(.1,8,6),cream,s*.42,1.04,.17,g);}
+    box(.4,.54,.11,-.33,1.12,.3,chairGold,g);
+    for(const x of [-.18,.18])box(.07,1.4,.06,x,.83,.3,chairGold,g);
+    box(.06,.6,.06,0,1.1,.33,chairGold,g);box(.3,.06,.06,0,1.26,.33,chairGold,g);
     if(keys)for(const dx of [-.08,.08]){add(new THREE.TorusGeometry(.11,.03,5,16),chairGold,.33+dx,1.25,.3,g);box(.04,.5,.04,.33+dx,.92,.3,chairGold,g);box(.17,.06,.05,.37+dx,.72,.3,chairGold,g);}
     else{box(.055,1.75,.055,.42,1.03,.3,chairGold,g);box(.38,.055,.06,.42,1.48,.3,chairGold,g);}
   }
-  for(const side of [-1,1]){
-    for(const z of [-20.75,-25.65]){
-      box(.1,5.6,1.75,side*7.72,5.1,z,red);
-      for(const dz of [-.9,.9])box(.15,5.75,.06,side*7.6,5.1,z+dz,chairGold);
-      arch(side*7.5,7.9,z,.95,1.1,'yz',chairGold,.1);
-      box(.13,1,.08,side*7.58,5.25,z,chairGold);box(.13,.08,.55,side*7.58,5.45,z,chairGold);
-    }
-    box(.65,.95,1.2,side*7.3,.48,-18.6,red);statue(side*7.28,-18.6,side,side<0,1.25);
-    statue(side*7.3,-27,side,side>0,.85);
+  for(const side of [-1,1])for(const [index,z] of [-20.75,-25.65].entries()){
+    const niche=new THREE.Group();niche.name='chapel-recessed-niche';architecture.add(niche);
+    box(.12,3.4,2.9,side*8.5,2.9,z,red,niche);
+    const capShape=new THREE.Shape();capShape.moveTo(-1.45,0);capShape.absarc(0,0,1.45,Math.PI,0,true);capShape.closePath();
+    const capMaterial=red.clone();capMaterial.side=THREE.DoubleSide;const cap=add(new THREE.ShapeGeometry(capShape,32),capMaterial,side*8.53,4.6,z,niche);cap.rotation.y=Math.PI/2;
+    const vertices=[],indices=[];
+    for(let i=0;i<=32;i++){const a=i*Math.PI/32;for(const x of [side*7.4,side*8.55])vertices.push(x,4.6+1.45*Math.sin(a),z+1.45*Math.cos(a));if(i<32){const k=i*2;indices.push(k,k+1,k+2,k+1,k+3,k+2);}}
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geo.setIndex(indices);geo.computeVertexNormals();const lining=red.clone();lining.side=THREE.DoubleSide;add(geo,lining,0,0,0,niche);
+    for(const dz of [-1.48,1.48]){box(1.15,3.5,.15,side*7.98,2.9,z+dz,pale,niche);box(.15,3.55,.12,side*7.36,2.9,z+dz,chairGold,niche);}
+    arch(side*7.36,4.6,z,1.48,1.48,'yz',pale,.23,niche);arch(side*7.13,4.6,z,1.48,1.48,'yz',chairGold,.065,niche);
+    box(.8,.22,2.8,side*7.8,1.1,z,chairGold,niche);
+    statue(side*7.85,z,side,index===(side<0?0:1),1.45);
   }
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
     const angel=new THREE.Group();angel.name='chapel-trumpet-angel';angel.position.set(side*7.1,6.8,z);angel.rotation.y=-side*Math.PI/2;architecture.add(angel);
@@ -150,6 +161,6 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     for(const x of [-.18,0,.18]){add(new THREE.CylinderGeometry(.035,.04,.35,8),cream,x,.2,0,g);const flame=add(new THREE.SphereGeometry(1,6,5),new THREE.MeshBasicMaterial({color:'#ffd28c'}),x,.45,0,g);flame.scale.set(.04,.11,.04);flames.push(flame);}
   }
   for(const side of [-1,1])for(const z of [-21,-28.5]){const light=new THREE.PointLight('#ffe0b1',65,12,1.65);light.position.set(side*6.5,4,z);scene.add(light);candleLights.push(light);}
-  const daylight=new THREE.PointLight('#fff1da',160,24,1.5);daylight.position.set(0,11.5,-23);scene.add(daylight);
+  const daylight=new THREE.PointLight('#fff1da',65,24,1.5);daylight.position.set(0,11.5,-23);scene.add(daylight);
   return {flames,candleLights};
 }
