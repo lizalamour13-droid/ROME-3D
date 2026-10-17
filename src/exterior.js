@@ -172,7 +172,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     for(const side of [-1,1]){const pivot=new THREE.Group();pivot.position.x=side*.08;bird.add(pivot);const wing=box(.47,.045,.22,side*.22,0,0,feather,pivot);const tip=box(.2,.04,.16,side*.52,0,-.05,wingTip,pivot);wings.push({pivot,side});}
     birds.push({group:bird,wings,phase:i*Math.PI*.2});
   }
-  const city=createExteriorCity({parent:group,mat,cream,stone});
+  const city=createExteriorCity({parent:group,mat,cream,stone,planters});
   function animate(time,viewer){
     city.animate(time,viewer);
     for(let i=0;i<160;i++){

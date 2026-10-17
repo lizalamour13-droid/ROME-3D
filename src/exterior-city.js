@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // Décor romain stylisé : façades regroupées par matériau pour limiter les appels de dessin.
-export function createExteriorCity({parent,mat,cream,stone}){
+export function createExteriorCity({parent,mat,cream,stone,planters=[]}){
   const city=new THREE.Group();city.name='rome-city-surroundings';parent.add(city);
   const plaster=['#c8ac80','#d0bd9d','#b98e72','#d6c8ab','#c2a58b'].map(c=>mat(c));
   const terracotta=mat('#885d49'),dark=mat('#3e4947'),shutter=mat('#526553'),wood=mat('#79553e'),iron=mat('#3d443e');
@@ -100,15 +100,66 @@ export function createExteriorCity({parent,mat,cream,stone}){
     for(const dx of [-.35,0,.35]){const lantern=new THREE.Mesh(new THREE.SphereGeometry(.14,8,6),new THREE.MeshBasicMaterial({color:'#e9d2a2'}));lantern.position.set(x+dx,2+(dx===0?.2:0),z);city.add(lantern);}
   }
   for(const [material,matrices] of batches){const mesh=new THREE.InstancedMesh(unit,material,matrices.length);matrices.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.receiveShadow=true;city.add(mesh);}
+  const staticClear=(x,z,stroller=false)=>!obstacles.some(o=>Math.abs(x-o.x)<o.hx+.35&&Math.abs(z-o.z)<o.hz+.35)
+    &&!planters.some(p=>Math.abs(x-p.x)<1.7&&Math.abs(z-p.z)<1.7)
+    &&![-15,15].some(fx=>Math.hypot(x-fx,z-66)<(stroller?4:3.4));
+  // Circuits emboîtés, sans carrefours partagés : départs espacés sur la longueur des chemins.
+  const lanes=[[4,10,.68],[7,15,.72],[10.5,21,.52],[20,28,.7]];
+  const placed=[];
+  walkers.forEach((actor,index)=>{
+    const lane=actor.stroller?2:index%4,[rx,rz,speed]=lanes[lane];
+    actor.speed=speed;actor.route=Array.from({length:64},(_,i)=>{const a=i*Math.PI/32;return [Math.cos(a)*rx,66+Math.sin(a)*rz];});
+    let selected=null;
+    for(let attempt=0;attempt<64;attempt++){
+      const phase=(index*.61803398875+attempt*.137)%1,segment=Math.floor(phase*64),blend=phase*64-segment;
+      const a=actor.route[segment],b=actor.route[(segment+1)%64],x=a[0]+(b[0]-a[0])*blend,z=a[1]+(b[1]-a[1])*blend;
+      if(!staticClear(x,z,actor.stroller))continue;
+      const separation=placed.length?Math.min(...placed.map(p=>Math.hypot(x-p.x,z-p.z))):100;
+      if(!selected||separation>selected.separation)selected={x,z,target:(segment+1)%64,separation};
+      if(separation>3)break;
+    }
+    actor.group.position.set(selected.x,-2,selected.z);actor.target=selected.target;placed.push(selected);
+    const target=actor.route[actor.target];actor.group.rotation.y=Math.atan2(target[0]-selected.x,target[1]-selected.z);
+  });
   let previousTime=null;
   function animate(time,viewer){
     const dt=previousTime===null?0:Math.min(.1,Math.max(0,time-previousTime));previousTime=time;
     walkers.forEach((actor,index)=>{
+      if(actor.group.userData.isConversing){
+        actor.limbs.forEach(({hip,knee,arm,elbow})=>{hip.rotation.x=0;knee.rotation.x=0;arm.rotation.x=actor.stroller?-.9:-.07;elbow.rotation.x=actor.stroller?-.25:-.22;});
+        actor.group.position.y=-2;return;
+      }
+      // Ne pas chercher à atteindre un point de parcours occupé par une personne arrêtée.
+      for(let skip=0;skip<8;skip++){
+        const point=actor.route[actor.target];
+        if(staticClear(point[0],point[1],actor.stroller)&&!walkers.some(other=>other!==actor&&Math.hypot(point[0]-other.group.position.x,point[1]-other.group.position.z)<2.3))break;
+        actor.target=(actor.target+1)%actor.route.length;
+      }
       const [tx,tz]=actor.route[actor.target],dx=tx-actor.group.position.x,dz=tz-actor.group.position.z,length=Math.hypot(dx,dz);
       if(length<.12){actor.target=(actor.target+1)%actor.route.length;return;}
-      const step=Math.min(length,dt*(actor.speed??(.65+(index%3)*.09))),nx=actor.group.position.x+dx/length*step,nz=actor.group.position.z+dz/length*step;
-      const clear=!actor.group.userData.isConversing&&(!viewer||Math.hypot(viewer.x-nx,viewer.z-nz)>(actor.stroller?1.9:.95))&&!walkers.some(other=>other!==actor&&Math.hypot(other.group.position.x-nx,other.group.position.z-nz)<(actor.stroller||other.stroller?1.1:.6));
-      if(clear){actor.group.position.x=nx;actor.group.position.z=nz;actor.distance+=step;actor.group.rotation.y=Math.atan2(dx,dz);}
+      const step=Math.min(length,dt*actor.speed),forwardX=dx/length,forwardZ=dz/length;
+      let steerX=forwardX,steerZ=forwardZ;
+      // Dépasser doucement une personne arrêtée plutôt que former une file bloquée.
+      for(const other of walkers){
+        if(other===actor)continue;
+        const ox=other.group.position.x-actor.group.position.x,oz=other.group.position.z-actor.group.position.z,distance=Math.hypot(ox,oz);
+        if(distance<4&&ox*forwardX+oz*forwardZ>0&&Math.abs(ox*forwardZ-oz*forwardX)<1.5){
+          const strength=(4-distance)*.8;steerX+=forwardZ*strength;steerZ-=forwardX*strength;
+        }
+      }
+      const canMove=(nx,nz)=>staticClear(nx,nz,actor.stroller)
+        &&!walkers.some(other=>other!==actor&&Math.hypot(other.group.position.x-nx,other.group.position.z-nz)<(actor.stroller||other.stroller?2.1:2));
+      const viewerClear=!viewer||Math.hypot(viewer.x-actor.group.position.x,viewer.z-actor.group.position.z)>(actor.stroller?1.9:.95);
+      let moved=false;
+      if(!actor.group.userData.isConversing&&viewerClear){
+        const heading=Math.atan2(steerX,steerZ);
+        for(const offset of [0,.7,1.3,-.7,-1.3,Math.PI/2,-Math.PI/2,2.1,-2.1]){
+          const angle=heading+offset,nx=actor.group.position.x+Math.sin(angle)*step,nz=actor.group.position.z+Math.cos(angle)*step;
+          if(!canMove(nx,nz))continue;
+          actor.group.position.x=nx;actor.group.position.z=nz;actor.distance+=step;actor.group.rotation.y=angle;moved=true;break;
+        }
+      }
+      const clear=moved;
       const phase=actor.distance*10;
       actor.limbs.forEach(({hip,knee,arm,elbow,side})=>{const a=phase+(side<0?Math.PI:0);hip.rotation.x=clear?Math.sin(a)*.4:0;knee.rotation.x=clear?Math.max(0,-Math.sin(a))*.65:0;arm.rotation.x=actor.stroller?-.9:clear?-Math.sin(a)*.23:-.07;elbow.rotation.x=actor.stroller?-.25:-.22+(clear?Math.sin(a)*.06:0);});
       actor.group.position.y=-2+(clear?Math.abs(Math.sin(phase))*.025:0);

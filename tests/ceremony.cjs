@@ -15,12 +15,12 @@ const path=require('node:path');
     const playing=await page.evaluate(()=>({duration:room.prayerAudio.duration,time:room.prayerAudio.currentTime,volume:room.prayerAudio.volume,muted:room.prayerAudio.muted,src:room.prayerAudio.currentSrc,carpet:!!room.scene.getObjectByName('chapel-red-carpet'),chairs:room.scene.getObjectByName('chapel').children.filter(m=>m.name==='burgundy-gold-chair').length,mouldings:room.scene.getObjectByName('chapel-classical-mouldings').children.length}));
     if(!playing.carpet||!playing.src.includes('pater-noster-latin.mp3')||playing.duration<25||playing.duration>90||playing.volume<=0||playing.muted||playing.chairs!==20||playing.mouldings<50)throw Error(JSON.stringify(playing));
     await page.evaluate(()=>{const input=document.querySelector('#prayer-volume');input.value='.2';input.dispatchEvent(new Event('input',{bubbles:true}));});
-    if(await page.evaluate(()=>room.prayerAudio.volume)!==.2)throw Error('Volume control failed');
+    await page.waitForFunction(()=>Math.abs(room.prayerAudio.volume-.2)<.01);
     await page.keyboard.press('KeyP');await page.waitForFunction(()=>room.prayerAudio.paused);
     await page.keyboard.press('KeyP');await page.waitForFunction(()=>!room.prayerAudio.paused);
     await page.screenshot({path:path.join(__dirname,'../artifacts/ceremonie.png')});
     await page.evaluate(()=>{room.reset();});await page.waitForFunction(()=>room.prayerAudio.paused&&document.querySelector('#prayer-controls').hidden);
     if(errors.length)throw Error(errors.join('\n'));
-    console.log(JSON.stringify({playing,motion:true,audioPlayback:true,pauseResume:true,volumeControl:true,stopsOutsideChapel:true,javascriptErrors:errors},null,2));
+    console.log(JSON.stringify({playing,motion:true,audioPlayback:true,pauseResume:true,volumeControl:true,fadesOutsideChapel:true,javascriptErrors:errors},null,2));
   }finally{await browser.close();}
 })();

@@ -7,6 +7,22 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
   const obstacles=[{x:0,z:-33.5,hx:4,hz:2.9}];
   const {flames,candleLights,floatingCandles}=buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze});
+  // Livrets ouverts partagés : pages imprimées et couverture bordeaux sobre.
+  const pageCanvas=document.createElement('canvas');pageCanvas.width=256;pageCanvas.height=320;const pageContext=pageCanvas.getContext('2d');pageContext.fillStyle='#eee3cb';pageContext.fillRect(0,0,256,320);pageContext.fillStyle='#625747';pageContext.textAlign='center';pageContext.font='bold 23px Georgia';pageContext.fillText('PATER NOSTER',128,48);pageContext.font='17px Georgia';
+  ['Pater noster,','qui es in caelis,','sanctificetur','nomen tuum.','Adveniat regnum tuum.','Fiat voluntas tua.','Amen.'].forEach((line,i)=>pageContext.fillText(line,128,92+i*27));
+  const pageTexture=new THREE.CanvasTexture(pageCanvas);pageTexture.colorSpace=THREE.SRGBColorSpace;
+  const printedPage=new THREE.MeshStandardMaterial({map:pageTexture,roughness:.95}),bookCover=mat('#462b34'),bookPaper=mat('#e4d9bd');
+  function prayerBook(parent,name,x,y,z,scale=1){
+    const book=new THREE.Group();book.name=name;book.position.set(x,y,z);book.scale.setScalar(scale);parent.add(book);
+    const cover=new THREE.Mesh(new THREE.BoxGeometry(.36,.025,.25),bookCover);book.add(cover);
+    for(const side of [-1,1]){
+      const page=new THREE.Group();page.position.set(side*.085,.025,0);page.rotation.z=-side*.1;book.add(page);
+      page.add(new THREE.Mesh(new THREE.BoxGeometry(.16,.015,.23),bookPaper));
+      const print=new THREE.Mesh(new THREE.PlaneGeometry(.155,.225),printedPage);print.rotation.x=-Math.PI/2;print.position.y=.008;page.add(print);
+    }
+    const spine=new THREE.Mesh(new THREE.BoxGeometry(.018,.035,.24),chairGold);spine.position.y=.02;book.add(spine);
+    return book;
+  }
   const sparkleCanvas=document.createElement('canvas');sparkleCanvas.width=32;sparkleCanvas.height=32;
   const sparkleContext=sparkleCanvas.getContext('2d');
   const shimmer=sparkleContext.createRadialGradient(16,16,0,16,16,16);shimmer.addColorStop(0,'#fff1c7');shimmer.addColorStop(.2,'#e1b860aa');shimmer.addColorStop(1,'#bb8b3000');sparkleContext.fillStyle=shimmer;sparkleContext.fillRect(0,0,32,32);
@@ -91,7 +107,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   deskPart(.62,1.13,.28,0,.69,0,chairBronze);
   for(const x of [-.29,.29])deskPart(.045,1.12,.31,x,.69,0,chairGold);
   const desktop=deskPart(.95,.09,.65,0,1.31,0,chairGold);desktop.rotation.x=.18;
-  const pages=deskPart(.43,.025,.33,0,1.38,-.05,cream);pages.rotation.x=.18;
+  const pages=prayerBook(lectern,'lectern-open-book',0,1.39,-.05,1.55);pages.rotation.x=.18;
   deskPart(.035,.31,.035,0,.89,.155,chairGold);deskPart(.18,.035,.035,0,.95,.155,chairGold);
   const microphone=new THREE.Group();microphone.name='ceremony-microphone';lectern.add(microphone);
   const neck=new THREE.CatmullRomCurve3([new THREE.Vector3(.3,1.36,0),new THREE.Vector3(.3,1.65,0),new THREE.Vector3(.13,1.78,-.22)]);
@@ -179,7 +195,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       const arm=localBox(.085,.28,.1,side*.215,1.01,.08,clothes);arm.rotation.x=-.48;
       const forearm=localBox(.08,.085,.25,side*(index%3===0?.09:.19),.87,.2,skin);forearm.rotation.y=side*(index%3===0?.5:0);
     }
-    if(index%3===1){const book=localBox(.23,.025,.2,0,.86,.3,cream);book.rotation.x=-.2;}
+    const book=prayerBook(person,'visitor-prayer-book',0,.865,.29);book.rotation.x=-.2;
     if(index===1||index===4||index===11||index===14){
       const walking=standingPerson(x,z,'walking-standing-visitor',index);walking.group.visible=false;
       const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z}))};
