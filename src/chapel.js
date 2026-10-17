@@ -5,6 +5,24 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const chapel=new THREE.Group();chapel.name='chapel';scene.add(chapel);
   const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
   const chapelBlack=mat('#11151a'),nightFloor=mat('#292a29'),darkStone=mat('#282a2b');
+  // Même décor étoilé sur les murs et la voûte, sans panneaux de vitrail.
+  const starCanvas=document.createElement('canvas');starCanvas.width=512;starCanvas.height=512;
+  const starContext=starCanvas.getContext('2d');starContext.fillStyle='#101922';starContext.fillRect(0,0,512,512);
+  for(const [index,[x,y]] of [[52,80],[218,43],[411,102],[133,219],[334,243],[465,351],[53,433],[242,397],[365,471]].entries()){
+    starContext.fillStyle=index%2?'#b19a5f':'#9d8958';starContext.beginPath();
+    for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?2.5:6;const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;i?starContext.lineTo(px,py):starContext.moveTo(px,py);}starContext.closePath();starContext.fill();
+  }
+  const starTexture=new THREE.CanvasTexture(starCanvas);starTexture.colorSpace=THREE.SRGBColorSpace;starTexture.wrapS=starTexture.wrapT=THREE.RepeatWrapping;
+  const starWallMaterial=new THREE.MeshStandardMaterial({map:starTexture,roughness:.92,metalness:.08});
+  function starred(mesh){
+    mesh.material=starWallMaterial;mesh.geometry=mesh.geometry.clone();const uv=mesh.geometry.attributes.uv,normal=mesh.geometry.attributes.normal;
+    for(let i=0;i<uv.count;i++){
+      const nx=Math.abs(normal.getX(i)),ny=Math.abs(normal.getY(i));
+      const width=nx>.5?mesh.scale.z:mesh.scale.x,height=ny>.5?mesh.scale.z:mesh.scale.y;
+      uv.setXY(i,uv.getX(i)*width/3.8,uv.getY(i)*height/3.8);
+    }
+    uv.needsUpdate=true;mesh.userData.starred=true;return mesh;
+  }
   const obstacles=[];
   const floorShape=new THREE.Shape();floorShape.moveTo(-8,-17);floorShape.lineTo(8,-17);floorShape.lineTo(8,-28);
   floorShape.absellipse(0,-28,8,9,0,Math.PI,true);floorShape.lineTo(-8,-17);floorShape.closePath();
@@ -13,35 +31,35 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const floor=new THREE.Mesh(floorGeometry,cream);floor.rotation.x=Math.PI/2;floor.receiveShadow=true;floor.material=nightFloor.clone();floor.material.side=THREE.DoubleSide;floor.name='chapel-floor';chapel.add(floor);
   box(4.2,.22,3.2,0,-.12,-15.5,cream);
   for(const side of [-1,1]){
-    box(6.25,10.7,.4,side*4.875,5.35,-17,chapelBlack);
-    box(.4,10.7,11,side*8,5.35,-22.5,chapelBlack);
+    starred(box(6.25,10.7,.4,side*4.875,5.35,-17,chapelBlack));
+    starred(box(.4,10.7,11,side*8,5.35,-22.5,chapelBlack));
     box(.48,.7,11,side*7.76,.35,-22.5,black);
     box(.5,.05,11,side*7.74,.75,-22.5,gold);
   }
-  box(3.5,4.2,.4,0,8.6,-17,chapelBlack);
+  starred(box(3.5,4.2,.4,0,8.6,-17,chapelBlack));
   // Murs courbes de l'abside : segments tangents, sans modèles importés.
   for(let i=0;i<32;i++){
     const a=i*Math.PI/32,b=(i+1)*Math.PI/32;
     const x1=8*Math.cos(a),z1=-28-9*Math.sin(a),x2=8*Math.cos(b),z2=-28-9*Math.sin(b);
     const x=(x1+x2)/2,z=(z1+z2)/2,length=Math.hypot(x2-x1,z2-z1)+.04;
     for(const [y,h,m] of [[5.35,10.7,chapelBlack],[.35,.7,black],[9.7,.12,gold]]){
-      const segment=box(length,h,.3,x,y,z,m);segment.rotation.y=-Math.atan2(z2-z1,x2-x1);
+      const segment=box(length,h,.3,x,y,z,m);segment.rotation.y=-Math.atan2(z2-z1,x2-x1);if(m===chapelBlack)starred(segment);
     }
   }
   // Dallage sobre et allée centrale : la zone arrondie reste en marbre crème.
   for(let z=-18;z>=-30;z-=2){box(2.6,.022,1.94,0,.015,z,darkStone);for(const side of [-1,1])box(.065,.03,1.97,side*1.39,.02,z,black);}
   for(const z of [-18.7,-30.2])box(14.8,.025,.12,0,.025,z,stone);
   // Voûte en berceau au-dessus de la nef, prolongée par une demi-coupole.
-  const vaultMaterial=chapelBlack.clone();vaultMaterial.side=THREE.DoubleSide;
-  const vaultPositions=[],vaultIndices=[];
+  const vaultMaterial=starWallMaterial.clone();vaultMaterial.side=THREE.DoubleSide;
+  const vaultPositions=[],vaultIndices=[],vaultUV=[];
   for(let i=0;i<=32;i++){
     const a=i*Math.PI/32,x=8*Math.cos(a),y=8.9+3.1*Math.sin(a);
-    vaultPositions.push(x,y,-17,x,y,-28);
+    vaultPositions.push(x,y,-17,x,y,-28);vaultUV.push(i/32*6,0,i/32*6,3);
     if(i<32){const k=i*2;vaultIndices.push(k,k+1,k+2,k+1,k+3,k+2);}
   }
-  const vaultGeometry=new THREE.BufferGeometry();vaultGeometry.setAttribute('position',new THREE.Float32BufferAttribute(vaultPositions,3));vaultGeometry.setIndex(vaultIndices);vaultGeometry.computeVertexNormals();
+  const vaultGeometry=new THREE.BufferGeometry();vaultGeometry.setAttribute('position',new THREE.Float32BufferAttribute(vaultPositions,3));vaultGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(vaultUV,2));vaultGeometry.setIndex(vaultIndices);vaultGeometry.computeVertexNormals();
   chapel.add(new THREE.Mesh(vaultGeometry,vaultMaterial));
-  const dome=new THREE.Mesh(new THREE.SphereGeometry(1,40,16,0,Math.PI,0,Math.PI/2),vaultMaterial);dome.scale.set(8,3.1,9);dome.position.set(0,8.9,-28);dome.rotation.y=Math.PI;chapel.add(dome);
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(1,40,16,0,Math.PI,0,Math.PI/2),vaultMaterial);dome.scale.set(8,3.1,9);dome.position.set(0,8.9,-28);dome.rotation.y=Math.PI;const domeUV=dome.geometry.attributes.uv;for(let i=0;i<domeUV.count;i++)domeUV.setXY(i,domeUV.getX(i)*6,domeUV.getY(i)*3);domeUV.needsUpdate=true;chapel.add(dome);
   // Nervures fines dorées, qui soulignent la courbe au lieu d'un plafond carré.
   for(const z of [-17.3,-22.4,-27.7]){
     const points=[];for(let i=0;i<=32;i++){const a=i*Math.PI/32;points.push(new THREE.Vector3(7.95*Math.cos(a),8.87+3.08*Math.sin(a),z));}
@@ -49,34 +67,6 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   }
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
     box(.22,8.5,.44,side*7.67,4.25,z,darkStone);box(.38,.18,.64,side*7.6,8.6,z,gold);
-  }
-  function stainedGlass(index){
-    const canvas=document.createElement('canvas');canvas.width=256;canvas.height=512;const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#756951';ctx.fillRect(0,0,256,512);
-    const colors=['#55788a','#9b655e','#b89758','#74856c'];
-    for(let row=0;row<8;row++)for(let col=0;col<4;col++){
-      ctx.fillStyle=colors[(row+col+index)%4];ctx.fillRect(10+col*60,10+row*62,56,58);
-      ctx.strokeStyle='#363c38';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10+col*60,39+row*62);ctx.lineTo(38+col*60,10+row*62);ctx.lineTo(66+col*60,39+row*62);ctx.lineTo(38+col*60,68+row*62);ctx.closePath();ctx.stroke();
-    }
-    ctx.fillStyle='#d4ba7c';ctx.beginPath();ctx.ellipse(128,248,58,84,0,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#554f3e';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#e8d6a6';
-    for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.ellipse(128+Math.cos(a)*28,248+Math.sin(a)*37,12,23,a,0,Math.PI*2);ctx.fill();}
-    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;return texture;
-  }
-  // Six vitraux, avec lumière colorée et taches lumineuses géométriques au sol.
-  for(const side of [-1,1])for(const [index,z] of [-20.4,-24.7,-28.8].entries()){
-    const x=side*(z<-28?7.5:7.77),texture=stainedGlass(index+(side>0?1:0));
-    const material=new THREE.MeshStandardMaterial({map:texture,emissive:'#e6c98b',emissiveMap:texture,emissiveIntensity:.16,roughness:.5});
-    const window=new THREE.Mesh(new THREE.PlaneGeometry(1.55,3.4),material);window.rotation.y=-side*Math.PI/2;window.position.set(x,6.5,z);window.name='chapel-stained-glass';chapel.add(window);
-    for(const dz of [-.84,.84])box(.16,3.6,.1,x-side*.08,6.5,z+dz,stone);
-    for(const y of [4.72,8.28])box(.16,.12,1.8,x-side*.08,y,z,gold);
-    if(index===1){const light=new THREE.SpotLight(side>0?'#e2bc83':'#a7c4cd',10,15,.47,.8,1.5);light.position.set(x-side*.3,6.2,z);light.target.position.set(side*1.8,.1,z+2);scene.add(light,light.target);}
-    for(let p=0;p<4;p++){
-      const patch=new THREE.Mesh(new THREE.PlaneGeometry(.75,2.8),new THREE.MeshBasicMaterial({color:['#7f9dae','#b48660','#9e7870','#94a386'][p],transparent:true,opacity:.075,depthWrite:false}));
-      patch.rotation.set(-Math.PI/2,0,-side*.45);patch.position.set(side*(3.8+p*.65),.045,z+1.1+p*.24);chapel.add(patch);
-    }
-    const beamGeometry=new THREE.BufferGeometry();beamGeometry.setAttribute('position',new THREE.Float32BufferAttribute([x,7.7,z-.65,x,7.7,z+.65,side*2.2,.07,z+3, x,7.7,z-.65,side*2.2,.07,z+3,side*3.7,.07,z+1.1],3));beamGeometry.computeVertexNormals();
-    const beam=new THREE.Mesh(beamGeometry,new THREE.MeshBasicMaterial({color:'#d5c5a0',transparent:true,opacity:.012,side:THREE.DoubleSide,depthWrite:false}));chapel.add(beam);
   }
   // Estrade de la chaire, laissant une allée devant elle.
   box(7.4,.18,4.8,0,.12,-33.4,gray);box(6.7,.22,4.3,0,.3,-33.55,cream);box(6,.2,3.8,0,.51,-33.7,stone);
@@ -107,7 +97,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const x1=7.79*Math.cos(a),z1=-28-8.79*Math.sin(a),x2=7.79*Math.cos(b),z2=-28-8.79*Math.sin(b);
     const width=Math.hypot(x2-x1,z2-z1)+.025;
     for(const [y,h,m] of [[5.4,7.6,midnight],[1.62,.12,chairGold],[9.18,.16,chairGold],[8.95,.055,chairGold]]){
-      const panel=box(width,h,.06,(x1+x2)/2,y,(z1+z2)/2,m);panel.rotation.y=-Math.atan2(z2-z1,x2-x1);panel.castShadow=false;backdrop.attach(panel);
+      const panel=box(width,h,.06,(x1+x2)/2,y,(z1+z2)/2,m);panel.rotation.y=-Math.atan2(z2-z1,x2-x1);panel.castShadow=false;if(m===midnight)starred(panel);backdrop.attach(panel);
     }
   }
   for(const a of [.45,.95,Math.PI/2,Math.PI-.95,Math.PI-.45]){
@@ -211,17 +201,34 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const orb=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),chairGold);orb.position.set(0,9.53,-33.1);baldachin.add(orb);
   box(.065,.65,.065,0,9.98,-33.1,chairGold);box(.37,.065,.065,0,10.09,-33.1,chairGold);
   baldachin.userData={columns:4,style:'bronze sombre et or ancien, colonnes torsadées'};
+  const sparkleCanvas=document.createElement('canvas');sparkleCanvas.width=32;sparkleCanvas.height=32;
+  const sparkleContext=sparkleCanvas.getContext('2d');
+  const shimmer=sparkleContext.createRadialGradient(16,16,0,16,16,16);shimmer.addColorStop(0,'#fff1c7');shimmer.addColorStop(.2,'#e1b860aa');shimmer.addColorStop(1,'#bb8b3000');sparkleContext.fillStyle=shimmer;sparkleContext.fillRect(0,0,32,32);
+  const sparkleTexture=new THREE.CanvasTexture(sparkleCanvas);sparkleTexture.colorSpace=THREE.SRGBColorSpace;
+  const sparklePositions=new Float32Array(180*3),sparkleSeeds=[];let sparkleSeed=2319;
+  const random=()=>{sparkleSeed=(sparkleSeed*1664525+1013904223)>>>0;return sparkleSeed/4294967296;};
+  for(let i=0;i<180;i++){
+    const z=-18-random()*17,maxX=z<-28?6.6*Math.sqrt(Math.max(.1,1-((z+28)/8.4)**2)):6.6;
+    sparkleSeeds.push({x:(random()*2-1)*maxX,y:random()*8.1,z,phase:random()*Math.PI*2,speed:.06+random()*.08});
+  }
+  const sparkleGeometry=new THREE.BufferGeometry();sparkleGeometry.setAttribute('position',new THREE.BufferAttribute(sparklePositions,3).setUsage(THREE.DynamicDrawUsage));
+  const sparkles=new THREE.Points(sparkleGeometry,new THREE.PointsMaterial({map:sparkleTexture,color:'#d6b268',size:.085,transparent:true,opacity:.63,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
+  sparkles.name='chapel-gold-sparkles';sparkles.frustumCulled=false;chapel.add(sparkles);
   function animate(time){
+    sparkleSeeds.forEach((p,i)=>{sparklePositions[i*3]=p.x+.12*Math.sin(time*.25+p.phase);sparklePositions[i*3+1]=1+(p.y+time*p.speed)%8.1;sparklePositions[i*3+2]=p.z+.1*Math.cos(time*.22+p.phase);});sparkleGeometry.attributes.position.needsUpdate=true;
     flames.forEach((flame,index)=>flame.scale.y=.11*(1+.06*Math.sin(time*5+index*1.7)));
     candleLights.forEach((light,index)=>light.intensity=65*(1+.025*Math.sin(time*3+index*2)));
   }
 
+  const burgundyRobe=mat('#63323e');
   function visitor(x,z,index){
     const person=new THREE.Group();person.name='seated-visitor';person.position.set(x,0,z);person.rotation.y=Math.PI;chapel.add(person);
-    const clothes=[mat('#4b5961'),mat('#653d46'),mat('#aaa28d'),mat('#53584b')][index%4];
+    const clothes=burgundyRobe;person.userData.outfit='robe bordeaux';
     const skin=mat(['#c5a184','#b98d6a','#82664f','#d1b59a'][index%4]),hair=mat(index%3?'#4b4034':'#aaa390');
     const localBox=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);person.add(mesh);return mesh;};
-    localBox(.36,.42,.25,0,1.02,0,clothes);localBox(.34,.12,.36,0,.77,.12,darkWood);
+    localBox(.36,.42,.25,0,1.02,0,clothes);localBox(.34,.12,.36,0,.77,.12,clothes);
+    const skirt=new THREE.Mesh(new THREE.CylinderGeometry(.18,.3,.53,10),clothes);skirt.position.set(0,.47,.17);person.add(skirt);
+    localBox(.1,.035,.025,0,1.19,.139,cream);
     const head=new THREE.Mesh(new THREE.SphereGeometry(.14,10,7),skin);head.position.set(0,1.4,.015);person.add(head);
     const cap=new THREE.Mesh(new THREE.SphereGeometry(.146,10,6,0,Math.PI*2,0,Math.PI*.55),hair);cap.position.set(0,1.43,.005);person.add(cap);
     for(const side of [-1,1]){
