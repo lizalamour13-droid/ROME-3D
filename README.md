@@ -46,10 +46,12 @@ Deux niches cintrées avec statues géométriques en pierre claire encadrent dé
 
 La salle comporte désormais une fontaine centrale à vasques superposées, en pierre crème avec bordures en or ancien. L'eau et les gouttes sont animées ; les gouttes partagent un seul objet instancié. Une collision circulaire laisse une marge autour du socle et permet de contourner le bassin.
 
-Six tableaux originaux de paysages et d'architecture sont dessinés localement sur Canvas, dans une palette terre, pierre et vert grisé, avec des cadres dorés. Des rosaces et feuilles géométriques complètent les pilastres et chapiteaux. Aucun téléchargement de texture, aucune image personnelle ou œuvre historique reproduite.
+Quatre tableaux originaux (Saint-Pierre, le Tibre, une nature morte et une figure drapée) sont dessinés localement sur Canvas, dans une palette terre, pierre et vert grisé, avec des cadres dorés. Des rosaces et feuilles géométriques complètent les pilastres et chapiteaux. Aucun téléchargement de texture, aucune image personnelle ou œuvre historique reproduite.
 
-Les tests navigateur vérifient aussi la collision de la fontaine, le passage tout autour, l'animation de l'eau et la présence des six tableaux.
+Les tests navigateur vérifient aussi la collision de la fontaine, le passage tout autour, l'animation de l'eau et la présence des quatre tableaux.
 
 ## Marbre noir et plafond de Saint-Pierre
 
-Des filets de marbre noir soulignent les soubassements, socles de colonnes, bordures de la fontaine et encadrements du fond. Le plafond reçoit des rosaces en relief, de fins filets noirs et un médaillon elliptique noir et or aux clés croisées de saint Pierre. Ce décor est une interprétation géométrique, sans prétendre reproduire exactement le plafond historique. Les pétales des rosaces et les feuilles du médaillon utilisent des géométries instanciées. La circulation et l'éclairage sont conservés.
+Des filets de marbre noir soulignent les soubassements, socles de colonnes, bordures de la fontaine et encadrements du fond. Les moulures du plafond ont un profil concave arrondi : les bords descendent et le centre remonte dans le plafond pour former un creux. Les rosaces et filets en or ancien restent sobres. Le médaillon noir aux clés croisées a été retiré. La circulation et l'éclairage sont conservés.
+
+Les quatre tableaux sont tous différents et répartis à raison de deux par côté, sans duplication : Saint-Pierre, le Tibre, une nature morte et une figure drapée. Les textures sont créées localement sans téléchargement.

@@ -110,7 +110,19 @@ for(const side of [-1,1]){for(const z of [-10,-3,4,11]){box(.28,9,.65,side*8.65,
 for(const y of [9.6,10,10.3]){box(18,.18,.3,0,y,-12.55,y===10?gold:cream);for(const side of [-1,1])box(.4,.18,26,side*8.6,y,0,y===10?gold:cream);}
 // Plafond à caissons, aux bordures or ancien.
 box(18,.35,26,0,12.1,0,cream);
-for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){box(5.2,.12,5.2,x,11.86,z,stone);box(4.8,.14,4.8,x,11.78,z,cream);for(const dx of [-2.42,2.42])box(.08,.12,4.92,x+dx,11.65,z,gold);for(const dz of [-2.42,2.42])box(4.92,.12,.08,x,11.65,z+dz,gold);const rosette=cylinder(.32,.4,.12,x,11.61,z,gold,8);rosette.rotation.y=Math.PI/8;}
+// Profil concave : le centre remonte dans le plafond, les bords sont arrondis.
+const coveMaterial=cream.clone();coveMaterial.side=THREE.DoubleSide;
+const coveGeometry=new THREE.LatheGeometry([
+  [0,11.87],[1.35,11.87],[1.6,11.82],[1.81,11.7],[1.99,11.52],
+  [2.13,11.32],[2.25,11.16],[2.4,11.06],[2.52,11.04]
+].map(([r,y])=>new THREE.Vector2(r,y)),48);
+for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
+  const cove=new THREE.Mesh(coveGeometry,coveMaterial);cove.position.set(x,0,z);
+  cove.name='rounded-ceiling-cove';cove.receiveShadow=true;scene.add(cove);
+  ring(2.52,.085,11.04,cream,x,z);
+  ring(2.4,.035,11.08,gold,x,z);
+  ring(1.67,.025,11.79,gold,x,z);
+}
 // Fenêtres claires en hauteur, avec encadrements et meneaux simples.
 const glazing=new THREE.MeshBasicMaterial({color:'#fff2cf'});
 for(const side of [-1,1])for(const z of [-6.5,.5,7.5]){box(.09,1.65,2.6,side*8.72,8,z,glazing);box(.16,.09,2.8,side*8.58,8,z,stone);box(.16,1.8,.1,side*8.58,8,z,stone);}
@@ -171,40 +183,67 @@ for(let i=0;i<3;i++)ring(.15+i*.15,.008,.5,streamMaterial,1.48,0);
 function paintingTexture(index){
   const canvas=document.createElement('canvas');canvas.width=512;canvas.height=640;
   const ctx=canvas.getContext('2d');
-  const palettes=[['#b5b6a8','#d8c6a3','#7a816b'],['#afa89c','#c9b38c','#72745b'],['#b4bcae','#ded0b0','#7f826d']];
-  const [sky,plaster,foliage]=palettes[index%3];
-  ctx.fillStyle=sky;ctx.fillRect(0,0,512,640);
-  ctx.fillStyle='#c6baa1';ctx.beginPath();ctx.moveTo(0,355);ctx.lineTo(90,288);ctx.lineTo(190,338);ctx.lineTo(305,265);ctx.lineTo(512,345);ctx.lineTo(512,640);ctx.lineTo(0,640);ctx.fill();
-  ctx.fillStyle=foliage;ctx.fillRect(0,430,512,210);
-  ctx.fillStyle='#a49172';ctx.beginPath();ctx.moveTo(213,452);ctx.lineTo(305,452);ctx.lineTo(437,640);ctx.lineTo(78,640);ctx.fill();
-  ctx.fillStyle=plaster;
-  if(index%3===0){
-    ctx.fillRect(112,330,295,145);ctx.fillRect(203,236,112,100);
-    ctx.beginPath();ctx.ellipse(259,238,63,74,0,Math.PI,0);ctx.fill();
-    ctx.fillStyle='#827b69';ctx.fillRect(251,148,16,22);ctx.fillRect(257,128,4,24);
-    ctx.fillStyle='#81745d';ctx.beginPath();ctx.moveTo(99,333);ctx.lineTo(258,275);ctx.lineTo(419,333);ctx.fill();
-    ctx.fillStyle=plaster;ctx.beginPath();ctx.moveTo(119,328);ctx.lineTo(258,289);ctx.lineTo(399,328);ctx.fill();
-    ctx.fillStyle='#706b5b';for(let x=144;x<400;x+=42){ctx.fillRect(x,359,19,86);}
-    ctx.fillStyle='#5b584d';ctx.fillRect(237,379,43,95);
-  }else if(index%3===1){
-    ctx.fillRect(115,286,285,28);
-    ctx.beginPath();ctx.moveTo(91,284);ctx.lineTo(257,208);ctx.lineTo(421,284);ctx.fill();
-    for(let x=129;x<395;x+=52){ctx.fillRect(x,311,22,159);ctx.fillRect(x-7,308,36,12);}
-    ctx.fillStyle='#a99777';ctx.fillRect(98,472,320,15);ctx.fillRect(79,490,355,16);
+  const polygon=(points,color)=>{ctx.fillStyle=color;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
+  const ellipse=(x,y,rx,ry,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill();};
+  if(index===0){
+    // Vue frontale : coupole de Saint-Pierre et façade claire.
+    ctx.fillStyle='#aab5b2';ctx.fillRect(0,0,512,640);
+    ctx.fillStyle='#c5b293';ctx.fillRect(0,447,512,193);
+    polygon([[0,640],[225,450],[285,450],[512,640]],'#ddcbb0');
+    ctx.fillStyle='#ded0b6';ctx.fillRect(83,345,346,132);ctx.fillRect(205,250,102,100);
+    ellipse(256,250,62,80,'#d2c1a0');ctx.fillStyle='#aab5b2';ctx.fillRect(190,251,135,26);
+    ctx.fillStyle='#b9a685';ctx.fillRect(244,150,24,23);ctx.fillRect(253,124,6,28);
+    polygon([[73,348],[256,282],[440,348]],'#9b8766');polygon([[99,343],[256,299],[414,343]],'#e1d2b5');
+    for(let x=109;x<426;x+=45){ctx.fillStyle='#827660';ctx.fillRect(x,371,21,87);ctx.fillStyle='#e8d9be';ctx.fillRect(x+26,360,7,106);}
+    ctx.fillStyle='#514e43';ctx.fillRect(237,394,39,82);
+    for(const x of [36,477]){ellipse(x,410,23,100,'#69745e');}
+  }else if(index===1){
+    // Paysage horizontal : le Tibre et un pont aux arches sombres.
+    ctx.fillStyle='#b5b5a8';ctx.fillRect(0,0,512,640);
+    polygon([[0,284],[104,231],[210,285],[338,208],[512,278],[512,430],[0,430]],'#92927b');
+    ctx.fillStyle='#798e88';ctx.fillRect(0,383,512,257);
+    polygon([[0,355],[142,392],[98,640],[0,640]],'#6e775a');polygon([[512,342],[378,401],[441,640],[512,640]],'#858263');
+    ctx.fillStyle='#c9b692';ctx.fillRect(25,335,462,89);
+    for(let x=48;x<465;x+=88){ctx.fillStyle='#555b50';ctx.beginPath();ctx.arc(x+30,407,30,Math.PI,0);ctx.lineTo(x+60,426);ctx.lineTo(x,426);ctx.fill();}
+    ctx.fillStyle='#e0c9a2';ctx.fillRect(20,326,472,13);
+    for(let i=0;i<14;i++){ctx.fillStyle=i%2?'#b4b7a1':'#889f96';ctx.fillRect(140+(i%3)*31,450+i*11,100-i*3,3);}
+    for(const x of [37,471]){ellipse(x,301,17,67,'#505f49');}
+  }else if(index===2){
+    // Nature morte : vase ocre, fleurs ivoire et drapé rouge brun.
+    ctx.fillStyle='#484f46';ctx.fillRect(0,0,512,640);
+    polygon([[0,0],[131,0],[170,492],[0,558]],'#744e40');
+    ctx.fillStyle='#8f7c60';ctx.fillRect(0,480,512,160);
+    polygon([[46,489],[314,479],[442,640],[107,640]],'#c9b99b');
+    ellipse(271,473,89,19,'#433e32');
+    polygon([[222,330],[303,330],[292,371],[316,408],[297,464],[234,464],[210,408],[233,371]],'#b79c6b');
+    ellipse(263,332,42,10,'#dbc49a');ellipse(263,332,29,5,'#66563b');
+    ctx.strokeStyle='#87916d';ctx.lineWidth=5;
+    for(const [x,y] of [[191,205],[263,165],[333,218],[224,260],[301,279]]){
+      ctx.beginPath();ctx.moveTo(263,333);ctx.lineTo(x,y);ctx.stroke();
+      for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ellipse(x+Math.cos(a)*13,y+Math.sin(a)*13,12,15,'#ddd4b8');}
+      ellipse(x,y,7,7,'#b29559');
+    }
   }else{
-    ctx.fillRect(92,350,327,125);ctx.fillStyle='#716c58';
-    for(let x=116;x<410;x+=62){ctx.fillRect(x,401,35,75);ctx.beginPath();ctx.arc(x+17.5,401,17.5,Math.PI,0);ctx.fill();}
-    ctx.fillStyle=plaster;ctx.fillRect(295,235,46,120);ctx.fillRect(287,229,62,14);
+    // Figure drapée : silhouette classique, manteau bleu grisé et livre.
+    ctx.fillStyle='#958a74';ctx.fillRect(0,0,512,640);
+    ctx.fillStyle='#626759';ctx.fillRect(103,193,305,447);ellipse(256,194,152,126,'#626759');
+    polygon([[0,0],[74,0],[74,640],[0,640]],'#c5b495');polygon([[438,0],[512,0],[512,640],[438,640]],'#c5b495');
+    ellipse(260,174,48,57,'#c3ab88');ellipse(260,131,45,17,'#5f5746');
+    polygon([[220,226],[300,226],[344,528],[173,528]],'#d9cbb0');
+    polygon([[219,224],[265,247],[224,476],[184,530],[156,541],[185,315]],'#778582');
+    polygon([[297,229],[324,295],[337,509],[277,480],[263,343]],'#687976');
+    polygon([[193,296],[221,307],[257,351],[239,370],[194,338]],'#baa27f');
+    polygon([[272,337],[331,311],[343,380],[285,399]],'#765845');
+    polygon([[280,342],[323,324],[332,374],[290,389]],'#ded0ad');
+    ctx.fillStyle='#bbb09a';ctx.fillRect(150,533,211,20);ctx.fillStyle='#a3967c';ctx.fillRect(133,553,247,22);
   }
-  ctx.fillStyle=foliage;
-  for(const x of [43,468]){ctx.beginPath();ctx.ellipse(x,373,29,116,0,0,Math.PI*2);ctx.fill();ctx.fillRect(x-5,403,10,125);}
   // Patine déterministe pour évoquer une toile, sans charger de texture.
   let seed=index+17;for(let i=0;i<9500;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%512;seed=(seed*1664525+1013904223)>>>0;const y=seed%640;ctx.fillStyle=i%2?'#f1dec00a':'#3b30200a';ctx.fillRect(x,y,2,3);}
   const vignette=ctx.createRadialGradient(256,300,100,256,320,420);vignette.addColorStop(0,'#30261500');vignette.addColorStop(1,'#30261570');ctx.fillStyle=vignette;ctx.fillRect(0,0,512,640);
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);return texture;
 }
-const artworkMaterials=Array.from({length:3},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
-for(const side of [-1,1])for(const [index,z] of [-6.5,.5,7.5].entries()){
+const artworkMaterials=Array.from({length:4},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
+for(const side of [-1,1])for(const [index,z] of [-6.5,7.5].entries()){
   // Les cadres sont adossés aux panneaux existants, sous les fenêtres.
   box(.16,3.38,2.72,side*8.48,4.18,z,bronze);
   for(const dy of [-1.64,1.64]){
@@ -215,8 +254,8 @@ for(const side of [-1,1])for(const [index,z] of [-6.5,.5,7.5].entries()){
     box(.24,3.34,.18,side*8.32,4.18,z+dz,gold);
     box(.27,3.03,.045,side*8.25,4.18,z+dz-Math.sign(dz)*.15,cream);
   }
-  const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[(index+(side>0?1:0))%3]);
-  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';scene.add(picture);
+  const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[index+(side>0?2:0)]);
+  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée'][index+(side>0?2:0)];scene.add(picture);
   box(.15,.08,1.2,side*8.28,2.19,z,gold);
 }
 // Ornements en or ancien : rosaces des pilastres et feuilles géométriques des chapiteaux.
@@ -254,50 +293,16 @@ const ceilingPetals=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1),gold
 ceilingPetals.name='ceiling-rosettes';
 const petalDummy=new THREE.Object3D();let petalIndex=0;
 for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
-  for(const dx of [-2.24,2.24])box(.055,.06,4.5,x+dx,11.65,z,black);
-  for(const dz of [-2.24,2.24])box(4.5,.06,.055,x,11.65,z+dz,black);
-  ring(.68,.035,11.51,gold,x,z);
-  cylinder(.19,.26,.13,x,11.46,z,cream,8);
+  ring(.68,.035,11.79,gold,x,z);
+  cylinder(.19,.26,.13,x,11.76,z,cream,8);
   for(let i=0;i<8;i++){
     const angle=i*Math.PI/4;
-    petalDummy.position.set(x+Math.cos(angle)*.43,11.46,z+Math.sin(angle)*.43);
+    petalDummy.position.set(x+Math.cos(angle)*.43,11.76,z+Math.sin(angle)*.43);
     petalDummy.rotation.set(0,-angle,0);petalDummy.scale.set(.25,.08,.115);
     petalDummy.updateMatrix();ceilingPetals.setMatrixAt(petalIndex++,petalDummy.matrix);
   }
 }
 ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
-
-// Médaillon central : interprétation géométrique des clés de saint Pierre.
-// Le décor est orienté vers le sol et ne modifie ni hauteur de visite ni éclairage.
-const ceilingSeal=cylinder(2.05,2.05,.15,0,11.38,0,black,48);
-ceilingSeal.name='saint-peter-ceiling';ceilingSeal.scale.z=1.36;
-for(const radius of [1.92,2.13]){
-  const rim=ring(radius,.055,11.29,gold);rim.scale.y=1.36;
-}
-const emblem=new THREE.Group();emblem.name='crossed-keys';
-emblem.position.set(0,11.24,0);emblem.rotation.x=Math.PI/2;scene.add(emblem);
-function emblemBox(parent,w,h,x,y){
-  const mesh=new THREE.Mesh(boxGeometry,gold);mesh.scale.set(w,h,.07);mesh.position.set(x,y,0);parent.add(mesh);
-}
-for(const angle of [-.64,.64]){
-  const key=new THREE.Group();key.rotation.z=angle;emblem.add(key);
-  const bow=new THREE.Mesh(new THREE.TorusGeometry(.29,.07,6,24),gold);
-  bow.position.y=1.05;key.add(bow);
-  emblemBox(key,.12,1.9,0,-.04);
-  emblemBox(key,.5,.13,.19,-.77);
-  emblemBox(key,.11,.33,.38,-.67);
-  emblemBox(key,.11,.26,.19,-.7);
-  emblemBox(key,.27,.09,0,.61);
-}
-// Feuilles géométriques autour du médaillon, regroupées en un seul objet.
-const sealLeaves=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1),gold,20);
-for(let i=0;i<20;i++){
-  const angle=i*Math.PI/10;
-  petalDummy.position.set(Math.cos(angle)*1.7,11.24,Math.sin(angle)*2.31);
-  petalDummy.rotation.set(0,-angle+.5,0);petalDummy.scale.set(.23,.055,.1);
-  petalDummy.updateMatrix();sealLeaves.setMatrixAt(i,petalDummy.matrix);
-}
-scene.add(sealLeaves);
 
 scene.add(new THREE.HemisphereLight('#fff0d8','#918271',2));
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
