@@ -43,7 +43,7 @@ export function createCeremonyExperience({scene,camera,canvas,chapel,prayer,rest
   function start(kind){
     if(state||!['mass','tomb'].includes(kind))return;
     saved={position:camera.position.clone(),rotation:camera.rotation.clone()};state=kind;index=0;previous=null;scene.userData.experienceActive=true;prayer.setDucked(true);document.exitPointerLock();document.querySelector('#app').classList.add('in-experience');panel.hidden=false;
-    if(kind==='mass'){camera.position.set(2.7,1.37,-23);camera.lookAt(0,2.85,-31.5);}else{camera.position.set(CRYPT.view.x,CRYPT.floor+1.75,CRYPT.view.z);camera.lookAt(CRYPT.tomb.x,CRYPT.floor+1.9,CRYPT.tomb.z);apparition.visible=true;}
+    if(kind==='mass'){camera.position.set(3.15,1.37,-23);camera.lookAt(0,2.85,-31.5);}else{camera.position.set(CRYPT.view.x,CRYPT.floor+1.75,CRYPT.view.z);camera.lookAt(CRYPT.tomb.x,CRYPT.floor+1.9,CRYPT.tomb.z);apparition.visible=true;}
     phase();document.querySelector('#experience-close').focus();
   }
   audio.addEventListener('error',()=>{if(state){failed=true;document.querySelector('#experience-feedback').textContent='Son indisponible : suivez les sous-titres.';}});

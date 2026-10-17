@@ -254,3 +254,13 @@ La crypte conserve son escalier ouvert et sa brume légère. Une plaque murale �
 ### Ouverture de l’escalier de la deuxième salle
 
 L’entrée basse de l’escalier de l’orgue est tournée vers l’allée gauche, du côté opposé aux colonnes du baldaquin. Deux tours gardent la sortie haute orientée vers le même palier du balcon. La rampe extérieure et ses montants s’interrompent aux deux extrémités pour laisser de véritables ouvertures. L’accès depuis l’allée gauche, l’ascension, le tour du balcon et la descente sont vérifiés dans `tests/chapel-organ.cjs`.
+
+### Circulation simplifiée et crypte inspirée de la référence
+
+Les chaises de la deuxième salle sont reculées de 45 cm vers les côtés. Les collisions concernent chaque chaise, au lieu de rectangles couvrant des rangées entières : l’allée centrale, les intervalles entre rangées et l’approche de l’escalier sont réellement ouverts. Les personnages ne sont plus des obstacles pour le joueur ; les marcheurs et le prêtre s’écartent doucement à son approche. Les colonnes, chaises et limites des étages gardent leurs collisions.
+
+L’escalier de l’orgue a une largeur de passage accrue, une entrée orientée vers l’allée derrière les dernières chaises, un petit palier d’approche et une sortie supérieure élargie. La montée reste libre avec les flèches/ZQSD et la souris, sans bouton ni trajet imposé.
+
+La crypte reprend les éléments de la référence dans le style géométrique du jeu : pierre crème, berceau arrondi et arcs transversaux, piliers moulurés, deux niches avec saints en pierre, lanternes à bougie et tombeau clair avec médaillon aux clefs dorées. Le dallage alterne pierre grise et crème. Le nom « SAINT PIERRE », les accents bordeaux, la brume basse et le récit avec apparition sont conservés. L’escalier descend toujours directement dans la pièce ouverte.
+
+`tests/easy-navigation.cjs` vérifie au clavier le trajet entre les deux salles, les allées, les traversées entre les rangées et l’approche de l’escalier, ainsi que le passage près des personnages. `tests/chapel-organ.cjs` vérifie la montée et la descente libres et le balcon complet ; `tests/vertical-routes.cjs` conserve les vérifications de la crypte et du récit.

@@ -672,11 +672,11 @@ function staticAllowed(x,z){if(z>11.8&&Math.abs(x)<2.1||z>=20)return exterior.al
 function navigationAt(x,z,height=camera.position.y-1.75){
   if(height<.3&&(z>11.8&&Math.abs(x)<2.1||z>=20))return exterior.allowed(x,z)?{height:exterior.groundAt(z)}:null;
   const organSurface=organ.surfaceAt(x,z,height);
-  if(organSurface!==undefined){if(organSurface&&Math.abs(organSurface.height)<.05&&(!staticAllowed(x,z)||visitors.blocked(x,z)))return null;return organSurface;}
+  if(organSurface!==undefined){if(organSurface&&Math.abs(organSurface.height)<.05&&(!staticAllowed(x,z)))return null;return organSurface;}
   const surface=verticalRoutes.surfaceAt(x,z,height);
   if(surface===null)return null;
-  if(surface){if(Math.abs(surface.height)<.05&&(!staticAllowed(x,z)||visitors.blocked(x,z)))return null;return surface;}
-  return staticAllowed(x,z)&&!visitors.blocked(x,z)?{height:0}:null;
+  if(surface){if(Math.abs(surface.height)<.05&&(!staticAllowed(x,z)))return null;return surface;}
+  return staticAllowed(x,z)?{height:0}:null;
 }
 function allowed(x,z){return !!navigationAt(x,z);}
 function walkTo(x,z){const surface=navigationAt(x,z);if(surface&&Math.abs(surface.height-(camera.position.y-1.75))<=.35){camera.position.set(x,surface.height+1.75,z);}}

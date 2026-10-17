@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {decorateCrypt} from './crypt-architecture.js';
 
 const TAU=Math.PI*2;
 export const CRYPT={floor:-8,centerX:4.3,tomb:{x:4.3,z:-39.1},view:{x:6.2,z:-36.9}};
@@ -86,11 +87,12 @@ export function createVerticalRoutes({scene}){
   spiral(SPIRALS.galleryRight,'gallery-right-spiral-stair',false);
   // Petite chambre enterrée : toutes ses surfaces reçoivent seulement les bougies.
   const cy=CRYPT.floor;
-  box(9.6,.2,11.4,0,cy-.1,-35.7,stone,crypt);
-  for(const x of [-4.8,4.8])box(.3,3.25,11.4,x,cy+1.625,-35.7,stone,crypt);
-  for(const z of [-41.4,-30])box(9.6,3.25,.3,0,cy+1.625,z,stone,crypt);
+  const cryptStone=mat('#c8baa3');
+  box(9.6,.2,11.4,0,cy-.1,-35.7,cryptStone,crypt);
+  for(const x of [-4.8,4.8])box(.3,3.25,11.4,x,cy+1.625,-35.7,cryptStone,crypt);
+  for(const z of [-41.4,-30])box(9.6,3.25,.3,0,cy+1.625,z,cryptStone,crypt);
   const ceiling=new THREE.Shape();ceiling.moveTo(-4.8,-41.4);ceiling.lineTo(4.8,-41.4);ceiling.lineTo(4.8,-30);ceiling.lineTo(-4.8,-30);ceiling.closePath();const opening=new THREE.Path();opening.absarc(0,SPIRALS.crypt.z,SPIRALS.crypt.outer+.24,0,TAU,true);ceiling.holes.push(opening);
-  const ceilingMesh=add(new THREE.ShapeGeometry(ceiling,64),stone,0,cy+3.25,0,crypt);ceilingMesh.rotation.x=Math.PI/2;ceilingMesh.material=stone.clone();ceilingMesh.material.side=THREE.DoubleSide;ceilingMesh.name='crypt-ceiling-with-stairwell';
+  const ceilingMesh=add(new THREE.ShapeGeometry(ceiling,64),cryptStone,0,cy+3.25,0,crypt);ceilingMesh.rotation.x=Math.PI/2;ceilingMesh.material=cryptStone.clone();ceilingMesh.material.side=THREE.DoubleSide;ceilingMesh.name='crypt-ceiling-with-stairwell';
   for(const x of [-4.64,4.64])for(const z of [-32,-36.2,-39.8]){
     box(.18,2.9,.35,x,cy+1.45,z,cream,crypt);candle(x-Math.sign(x)*.19,cy+1.8,z,crypt,'crypt-candle',z!==-32);
   }
@@ -135,6 +137,7 @@ export function createVerticalRoutes({scene}){
     const material=new THREE.SpriteMaterial({map:mistTexture,color:'#b9b1a1',transparent:true,opacity:.22,depthWrite:false});
     const puff=new THREE.Sprite(material);const x=-3.6+(i%5)*1.65,z=-40.2+Math.floor(i/5)*2.3;puff.position.set(x,cy+.3+(i%3)*.1,z);puff.scale.set(3.4,.85,1);mist.add(puff);mistPuffs.push({puff,x,z,phase:i*1.73});
   }
+  decorateCrypt({crypt,tomb,floor:cy});
   crypt.traverse(object=>object.layers.set(2));
   // Balcons ouverts en circuit, au-dessus des tableaux, avec un vide sur toute la salle.
   const balcony=new THREE.Group();balcony.name='marble-room-upper-balconies';root.add(balcony);
@@ -236,7 +239,8 @@ export function createVerticalRoutes({scene}){
       const outsideWell=rd>down.outer-.14;
       const exit=a<.29&&rd>down.inner+.15;
       const tombBlocked=Math.abs(x-CRYPT.tomb.x)<1.75&&Math.abs(z-CRYPT.tomb.z)<1.28;
-      if((outsideWell||exit)&&!tombBlocked)options.push(cy);
+      const pillarBlocked=Math.abs(Math.abs(x-CRYPT.centerX)-4.3)<.3&&[-40.95,-38.25,-35.45].some(pz=>Math.abs(z-pz)<.3);
+      if((outsideWell||exit)&&!tombBlocked&&!pillarBlocked)options.push(cy);
     }
     if(options.length)return {height:options.sort((a,b)=>Math.abs(a-h)-Math.abs(b-h))[0]};
     if(rd<down.outer+.24||ru<up.outer+.18||Math.hypot(x-SPIRALS.galleryRight.x,z-SPIRALS.galleryRight.z)<SPIRALS.galleryRight.outer+.18||h>.3||h<-.3)return null;
