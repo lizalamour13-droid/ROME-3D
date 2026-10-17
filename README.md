@@ -80,4 +80,6 @@ Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pl
 
 ## Chérubins en bas-relief
 
-Chaque colonne reçoit une fresque continue de six petits anges aux poses différentes (24 anges au total), avec de petits rinceaux et motifs végétaux entre les figures. Des bordures noires, des perles dorées et des traits d'or ancien encadrent la composition sur un fond pierre beige. Le décor est peint sur une texture Canvas locale qui fait tout le tour du fût ; les anciens anges en relief sont retirés. Quatre bandes cylindriques partagent la même texture, sans téléchargement externe. La navigation reste inchangée.
+Chaque colonne reçoit une fresque continue d’anges aux six poses différentes, répétée sur toute la hauteur (54 anges par colonne, 216 au total), avec de petits rinceaux et motifs végétaux entre les figures. Des bordures noires, des perles dorées et des traits d'or ancien encadrent la composition sur un fond pierre beige. Le décor est peint sur une texture Canvas locale qui fait tout le tour du fût ; les anciens anges en relief sont retirés. Quatre bandes cylindriques partagent la même texture, sans téléchargement externe. La navigation reste inchangée.
+
+Les fresques couvrent maintenant toute la hauteur des fûts, de 1,05 m à 10,90 m, sans recouvrir les socles ni les chapiteaux. Neuf registres d’anges et de motifs noirs et or se succèdent sur chaque colonne. La texture partagée est répétée verticalement ; le nombre de maillages reste identique.
