@@ -149,3 +149,13 @@ La façade extérieure a été reconstruite selon la nouvelle référence : cinq
 Les deux fontaines de la place reçoivent des jets courbes et des gouttes animées. Dix oiseaux articulés suivent des trajectoires elliptiques au-dessus de la place. Huit jardinières fleuries bordent les parcours (avec collisions) ; dix pins parasols et un sol périphérique vert olive complètent le décor derrière les colonnades.
 
 La seconde salle accueille dix-huit bougies flottantes au-dessus des rangées, avec cire ivoire, base dorée, flammes vacillantes et léger mouvement vertical. Deux petites sources chaudes partagées complètent les halos. L’allée centrale, la coupole et les déplacements restent dégagés.
+
+## Vie urbaine autour de la place
+
+Vingt-deux immeubles stylisés aux couleurs romaines bordent la scène : enduits ocre/crème, toits de terre cuite, fenêtres à volets, cheminées et petits balcons. Les éléments de façade sont regroupés par matériau dans des objets instanciés. La ville forme un décor périphérique ; les limites de visite restent celles de la place. Huit bancs accueillent seize personnes assises, seize passants marchent avec jambes articulées et des lampadaires ponctuent les parcours. Les passants s’arrêtent près du joueur et les bancs ont des collisions.
+
+## Ambiances, scène et verrière
+
+Les ambiances utilisent des enregistrements naturels CC0 de vent, oiseaux et eau (sources dans `public/audio/ambient/README.md`). Elles démarrent au clic d’entrée ; **M** ou le bouton les coupe, et un curseur règle leur volume. Les oiseaux sont audibles dehors, l’eau se renforce près des fontaines, l’intérieur reste discret et la prière garde sa commande P. Les sons se mettent en pause quand l’onglet est masqué.
+
+La seconde salle conserve huit bougies flottantes au lieu de dix-huit. Le maître de cérémonie et son pupitre sont sur une petite estrade bordeaux et or ; la circulation centrale reste libre. Le tambour a des ouvertures vitrées avec ciel bleu nuageux et la coupole possède un oculus vitré. Les fontaines extérieures ont 160 particules d’éclaboussures supplémentaires.

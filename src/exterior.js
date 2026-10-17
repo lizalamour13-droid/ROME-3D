@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {createExteriorCity} from './exterior-city.js';
 
 export function createExterior({scene,mat,cream,stone,gold,gray}){
   const group=new THREE.Group();group.name='vatican-exterior';scene.add(group);
@@ -41,6 +42,9 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     const rim=add(new THREE.TorusGeometry(2.5,.11,6,40),cream,x,-1.42,66,fountain);rim.rotation.x=Math.PI/2;
 
   }
+  // Éclaboussures au pied des jets : une seule géométrie de points pour les deux bassins.
+  const splashPositions=new Float32Array(160*3),splashGeometry=new THREE.BufferGeometry();splashGeometry.setAttribute('position',new THREE.BufferAttribute(splashPositions,3).setUsage(THREE.DynamicDrawUsage));
+  const splashes=new THREE.Points(splashGeometry,new THREE.PointsMaterial({color:'#c6e9ed',size:.065,transparent:true,opacity:.7,depthWrite:false}));splashes.name='fountain-splashes';splashes.frustumCulled=false;group.add(splashes);
   // Deux bras elliptiques à doubles rangs de colonnes, instanciées.
   const columns=new THREE.InstancedMesh(new THREE.CylinderGeometry(.34,.43,6,10),cream,192);columns.name='exterior-colonnades';const dummy=new THREE.Object3D();let index=0;
   for(const side of [-1,1])for(const row of [0,1.8])for(let i=0;i<48;i++){
@@ -111,7 +115,9 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   }
   for(const x of [-27,27]){const clock=add(new THREE.CircleGeometry(1.2,32),cream,x,24.5,18.5,basilica);add(new THREE.TorusGeometry(1.2,.12,6,32),warm,x,24.5,18.55,basilica);box(.055,.8,.06,x,24.8,18.6,shadow,basilica);box(.65,.055,.06,x+.3,24.5,18.6,shadow,basilica);}
   // Coupole haute à tambour rythmé, nervures, oculi et lanterne.
-  box(29,8,43,0,16,-5,cream,basilica);box(34,2,46,0,20.5,-5,roof,basilica);
+  // Enveloppe creuse : le volume extérieur ne doit pas boucher la coupole intérieure.
+  for(const x of [-14.5,14.5])box(1,8,49,x,16,-8,cream,basilica);
+  box(30,8,1,0,16,-32.5,cream,basilica);box(34,2,52,0,20.5,-8,roof,basilica);
   const domeGroup=new THREE.Group();domeGroup.name='basilica-great-dome';basilica.add(domeGroup);
   cyl(9,9.6,9,0,27.5,-2,cream,48,domeGroup);
   for(let i=0;i<16;i++){
@@ -157,7 +163,14 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     for(const side of [-1,1]){const pivot=new THREE.Group();pivot.position.x=side*.08;bird.add(pivot);const wing=box(.47,.045,.22,side*.22,0,0,feather,pivot);const tip=box(.2,.04,.16,side*.52,0,-.05,wingTip,pivot);wings.push({pivot,side});}
     birds.push({group:bird,wings,phase:i*Math.PI*.2});
   }
-  function animate(time){
+  const city=createExteriorCity({parent:group,mat,cream,stone});
+  function animate(time,viewer){
+    city.animate(time,viewer);
+    for(let i=0;i<160;i++){
+      const t=(time*(.7+(i%5)*.06)+i*.137)%1,a=i*2.39996,r=1.9+t*.5,x=i<80?-15:15;
+      splashPositions[i*3]=x+Math.cos(a)*r;splashPositions[i*3+1]=-1.4+Math.sin(t*Math.PI)*(.2+(i%4)*.08);splashPositions[i*3+2]=66+Math.sin(a)*r;
+    }
+    splashGeometry.attributes.position.needsUpdate=true;
     birds.forEach((bird,i)=>{
       const a=time*(.11+i*.004)+bird.phase,rx=17+(i%3)*5,rz=13+(i%2)*7;
       bird.group.position.set(Math.cos(a)*rx,9+(i%4)*1.5+Math.sin(a*2)*1.2,65+Math.sin(a)*rz);
@@ -171,6 +184,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     if(z<20)return Math.abs(x-5.5)<1.18&&z>11.8;
     if(z<34)return Math.abs(x)<28;
     if((x/40)**2+((z-66)/39)**2>1||z<27)return false;
+    if(city.blocked(x,z))return false;
     if(planters.some(p=>Math.abs(x-p.x)<1.45&&Math.abs(z-p.z)<1.45))return false;
     if(Math.hypot(x,z-66)<2.1||[-15,15].some(fx=>Math.hypot(x-fx,z-66)<3))return false;
     return true;

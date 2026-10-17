@@ -70,8 +70,13 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     return {group,head,limbs};
   }
   const ceremonyMaster=standingPerson(1.65,-30.05,'master-of-ceremonies',0);
-  obstacles.push({x:1.65,z:-30.05,hx:.48,hz:.48});
-  const lectern=new THREE.Group();lectern.name='ceremony-lectern';lectern.position.set(1.65,0,-29.38);chapel.add(lectern);
+  ceremonyMaster.group.position.y=.42;
+  const ceremonyStage=new THREE.Group();ceremonyStage.name='ceremony-stage';chapel.add(ceremonyStage);
+  for(const [w,h,d,y,z,m] of [[2.3,.36,2.3,.18,-29.65,chairBronze],[2.35,.045,2.35,.38,-29.65,chairGold],[2.16,.035,2.16,.415,-29.65,mat('#702c40')],[2.3,.16,.42,.08,-28.3,cream]]){
+    const step=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);step.position.set(1.65,y,z);ceremonyStage.add(step);
+  }
+  obstacles.push({x:1.65,z:-29.65,hx:1.43,hz:1.55});
+  const lectern=new THREE.Group();lectern.name='ceremony-lectern';lectern.position.set(1.65,.42,-29.38);chapel.add(lectern);
   const deskPart=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);lectern.add(mesh);return mesh;};
   deskPart(.86,.12,.65,0,.08,0,chairBronze);
   deskPart(.62,1.13,.28,0,.69,0,chairBronze);

@@ -60,19 +60,30 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   // Coupole centrale bleu étoilé, tambour percé de fenêtres lumineuses.
   const domeGroup=new THREE.Group();domeGroup.name='chapel-blue-dome';architecture.add(domeGroup);
   const domeMat=blue.clone();domeMat.side=THREE.DoubleSide;
-  const dome=add(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,Math.PI/2),domeMat,0,12,-23,domeGroup);dome.scale.set(3.65,5,3.65);
+  const dome=add(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,.28,Math.PI/2-.28),domeMat,0,12,-23,domeGroup);dome.scale.set(3.65,5,3.65);
   const collarMaterial=pale.clone();collarMaterial.side=THREE.DoubleSide;
   const collar=add(new THREE.RingGeometry(3.5,4.65,64),collarMaterial,0,9.54,-23,domeGroup);collar.rotation.x=Math.PI/2;
-  const glass=new THREE.MeshBasicMaterial({color:'#e8f0ee'});
+  // Ciel bleu nuageux visible derrière le vitrage, sans surface blanche opaque.
+  const skyCanvas=document.createElement('canvas');skyCanvas.width=512;skyCanvas.height=512;
+  const skyContext=skyCanvas.getContext('2d'),skyGradient=skyContext.createLinearGradient(0,0,0,512);skyGradient.addColorStop(0,'#4f8cc4');skyGradient.addColorStop(1,'#c7e0ec');skyContext.fillStyle=skyGradient;skyContext.fillRect(0,0,512,512);
+  for(const [x,y,r] of [[100,110,52],[145,90,65],[200,120,56],[340,310,60],[390,290,70],[445,325,58]]){const cloud=skyContext.createRadialGradient(x,y,5,x,y,r);cloud.addColorStop(0,'#fffdf0cc');cloud.addColorStop(1,'#fffdf000');skyContext.fillStyle=cloud;skyContext.fillRect(x-r,y-r,r*2,r*2);}
+  const skyTexture=new THREE.CanvasTexture(skyCanvas);skyTexture.colorSpace=THREE.SRGBColorSpace;
+  const glass=new THREE.MeshBasicMaterial({map:skyTexture,side:THREE.DoubleSide});
+  const glazing=new THREE.MeshPhysicalMaterial({color:'#d7e5e9',transparent:true,opacity:.08,roughness:.12,depthWrite:false,side:THREE.DoubleSide});
   for(let i=0;i<12;i++){
     const a=i*Math.PI/6,x=3.6*Math.cos(a),z=-23+3.6*Math.sin(a);
     const drum=new THREE.Group();drum.position.set(x,10.8,z);drum.rotation.y=Math.PI/2-a;domeGroup.add(drum);
-    box(1.93,2.4,.15,0,0,0,cream,drum);
-    const window=box(.74,1.65,.03,0,.13,-.1,glass,drum);window.name='chapel-clerestory-window';
+    for(const dx of [-.7,.7])box(.53,2.4,.15,dx,0,0,cream,drum);
+    for(const y of [-1.04,1.06])box(.88,.3,.15,0,y,0,cream,drum);
+    const window=box(.74,1.65,.03,0,.13,-.1,glass,drum);window.name='chapel-clerestory-window';add(new THREE.PlaneGeometry(.74,1.65),glazing,0,.13,-.135,drum);
     for(const dx of [-.4,0,.4])box(.035,1.76,.06,dx,.13,-.14,chairGold,drum);
     for(const y of [-.72,.08,.96])box(.84,.035,.06,0,y,-.14,chairGold,drum);
-    const ribs=[];for(let j=0;j<=24;j++){const b=j*Math.PI/48;ribs.push(new THREE.Vector3(3.61*Math.cos(b)*Math.cos(a),12+4.97*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a)));}path(ribs,.045,chairGold,domeGroup);
+    const ribs=[];for(let j=0;j<=24;j++){const b=j/24*(Math.PI/2-.28);ribs.push(new THREE.Vector3(3.61*Math.cos(b)*Math.cos(a),12+4.97*Math.sin(b),-23+3.61*Math.cos(b)*Math.sin(a)));}path(ribs,.045,chairGold,domeGroup);
   }
+  const skylight=add(new THREE.CircleGeometry(1.02,40),glass,0,16.79,-23,domeGroup);skylight.rotation.x=Math.PI/2;skylight.name='chapel-sky-oculus';
+  const skylightGlass=add(new THREE.CircleGeometry(1.02,40),glazing,0,16.77,-23,domeGroup);skylightGlass.rotation.x=Math.PI/2;
+  const skylightRim=add(new THREE.TorusGeometry(1.03,.055,6,40),chairGold,0,16.76,-23,domeGroup);skylightRim.rotation.x=Math.PI/2;
+  box(2.04,.045,.035,0,16.74,-23,chairGold,domeGroup);box(.035,.045,2.04,0,16.74,-23,chairGold,domeGroup);
   for(const y of [9.55,9.75,10,12]){const rim=add(new THREE.TorusGeometry(3.65,.12,6,64),chairGold,0,y,-23,domeGroup);rim.rotation.x=Math.PI/2;}
   for(let row=0;row<4;row++)for(let i=0;i<12;i++){
     const a=(i+(row%2)*.5)*Math.PI/6,b=.25+row*.25;
@@ -169,10 +180,10 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const ctx=glowCanvas.getContext('2d'),gradient=ctx.createRadialGradient(32,32,0,32,32,32);gradient.addColorStop(0,'#ffdfaa99');gradient.addColorStop(.3,'#e7aa4b33');gradient.addColorStop(1,'#e7aa4b00');ctx.fillStyle=gradient;ctx.fillRect(0,0,64,64);
   const glowTexture=new THREE.CanvasTexture(glowCanvas);glowTexture.colorSpace=THREE.SRGBColorSpace;
   const glowMaterial=new THREE.SpriteMaterial({map:glowTexture,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
-  for(const side of [-1,1])for(let i=0;i<9;i++){
+  for(const side of [-1,1])for(let i=0;i<4;i++){
     const candle=new THREE.Group();candle.name='chapel-floating-candle';
     const height=.52+(i%3)*.13,y=4.4+(i%3)*.6;
-    candle.position.set(side*(2.65+(i%2)*1.1),y,-19.8-i*1.15);architecture.add(candle);
+    candle.position.set(side*(2.65+(i%2)*1.1),y,-20.5-i*2.15);architecture.add(candle);
     add(new THREE.CylinderGeometry(.075,.085,height,10),wax,0,0,0,candle);
     add(new THREE.CylinderGeometry(.1,.1,.055,10),chairGold,0,-height/2,0,candle);
     add(new THREE.CylinderGeometry(.009,.009,.08,5),black,0,height/2+.035,0,candle);
