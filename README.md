@@ -73,3 +73,7 @@ Le panneau central du mur droit reçoit un jardin italien avec une allée de cyp
 ## Statues entre les tableaux
 
 Quatre statues ivoire ornées d'or ancien occupent les intervalles entre les tableaux (deux par mur, z = -3 et 4). Leurs poses sont différentes : livre et main levée, mains jointes, bras ouverts, palme et livre. Leurs socles sont placés contre les pilastres à x = ±8,05, hors de l'emprise des quatre colonnes. Des collisions rectangulaires tiennent compte des socles et des bras ; le passage devant les statues est vérifié. Aucun tableau n'est déplacé ou masqué.
+
+## Dégagement des colonnes
+
+Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pleins entre les moulures concaves. Leurs chapiteaux rejoignent le plafond sans entrer dans les creux ; les colliers, feuilles et volutes utilisent l'or ancien existant. Cette implantation éloigne les colonnes des statues et conserve les dimensions de la salle. Les tests vérifient les collisions, l'écartement des statues et l'absence de recouvrement entre les chapiteaux et les moulures creusées.

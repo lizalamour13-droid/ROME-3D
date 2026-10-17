@@ -104,7 +104,25 @@ crown.position.set(0,6.47,-14.38);crown.castShadow=true;scene.add(crown);
 const seal=cylinder(.39,.39,.07,0,6.92,-14.1,gold,12);seal.rotation.x=Math.PI/2;
 // Quatre colonnes monumentales à fûts sobres et chapiteaux géométriques.
 const columns=[];
-for(const x of [-5.8,5.8])for(const z of [-6,5]){columns.push({x,z});box(1.95,.35,1.95,x,.2,z,gray);box(1.7,.25,1.7,x,.5,z,cream);cylinder(.9,.9,.25,x,.75,z,stone);cylinder(.64,.8,7.6,x,4.65,z,stone,16);cylinder(.78,.65,.24,x,8.55,z,gray);cylinder(.91,.77,.35,x,8.83,z,cream);box(1.85,.3,1.85,x,9.12,z,cream);box(1.9,.09,1.9,x,9.32,z,gold);}
+// Implantation aux croisements pleins des caissons : les chapiteaux évitent les creux.
+for(const x of [-3,3])for(const z of [-6,6]){
+  columns.push({x,z});
+  box(1.95,.35,1.95,x,.2,z,gray);box(1.7,.25,1.7,x,.5,z,cream);
+  cylinder(.9,.9,.25,x,.75,z,stone);
+  cylinder(.64,.8,10.1,x,5.9,z,stone,16);
+  cylinder(.78,.65,.24,x,11.05,z,gray);
+  cylinder(.91,.77,.35,x,11.33,z,cream);
+  box(1.85,.3,1.85,x,11.62,z,cream);
+  box(1.9,.09,1.9,x,11.82,z,gold);
+  const cap=box(1.96,.05,1.96,x,11.89,z,cream);cap.name='column-ceiling-cap';
+  // Petites volutes dorées sur les quatre faces du chapiteau.
+  for(let side=0;side<4;side++){
+    const angle=side*Math.PI/2;
+    const scroll=new THREE.Mesh(new THREE.TorusGeometry(.13,.026,6,16),gold);
+    scroll.position.set(x+Math.sin(angle)*.94,11.62,z+Math.cos(angle)*.94);
+    scroll.rotation.y=angle;scene.add(scroll);
+  }
+}
 // Pilastres, panneaux et moulures : détails réguliers sans sculptures complexes.
 for(const side of [-1,1]){for(const z of [-10,-3,4,11]){box(.28,9,.65,side*8.65,4.5,z,cream);box(.4,.25,.95,side*8.55,9,z,stone);}for(const z of [-6.5,.5,7.5]){box(.08,4.4,4.4,side*8.72,4.1,z,stone);box(.11,3.9,3.9,side*8.65,4.1,z,cream);box(.15,.12,4,side*8.56,2.2,z,gold);}box(.3,.9,26,side*8.67,.5,0,gray);}
 for(const y of [9.6,10,10.3]){box(18,.18,.3,0,y,-12.55,y===10?gold:cream);for(const side of [-1,1])box(.4,.18,26,side*8.6,y,0,y===10?gold:cream);}
@@ -358,10 +376,10 @@ for(const side of [-1,1])for(const z of [-10,-3,4,11]){
   for(const dy of [-.53,.53]){const leaf=box(.1,.31,.2,side*8.43,7.1+dy,z,gold);leaf.rotation.x=Math.PI/4;}
 }
 for(const c of columns){
-  ring(.82,.035,8.67,gold,c.x,c.z);
+  ring(.82,.035,11.17,gold,c.x,c.z);
   for(let i=0;i<8;i++){
     const a=i*Math.PI/4;const leaf=new THREE.Mesh(new THREE.OctahedronGeometry(.17),gold);
-    leaf.position.set(c.x+Math.cos(a)*.83,8.95,c.z+Math.sin(a)*.83);leaf.scale.set(.55,1.4,.55);scene.add(leaf);
+    leaf.position.set(c.x+Math.cos(a)*.83,11.45,c.z+Math.sin(a)*.83);leaf.scale.set(.55,1.4,.55);scene.add(leaf);
   }
 }
 
