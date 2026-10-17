@@ -1,6 +1,6 @@
-# ROME-3D — Première salle
+# ROME-3D — Salle des marbres et salle de la chaire
 
-Une salle unique inspirée de Saint-Pierre au Vatican : architecture géométrique Three.js, marbres crème / rouge brun / noir, quatre colonnes, une arche monumentale, plafond à caissons et or ancien. Aucune photo n'était fournie lors de cette première version : la palette suit la description, sans prétendre reproduire un relevé exact.
+Deux salles reliées inspirées de Saint-Pierre au Vatican. La première conserve son architecture géométrique Three.js, marbres crème / rouge brun / noir, quatre colonnes, une arche monumentale, plafond à caissons et or ancien. Aucune photo n'était fournie lors de cette première version : la palette suit la description, sans prétendre reproduire un relevé exact.
 
 ## Lancer
 
@@ -20,13 +20,13 @@ npm run build
 npm run preview
 ```
 
-Le rendu ne dépend d'aucun CDN, police distante, texture ou modèle externe. Les matériaux sont volontairement unis. Le ratio de pixels est plafonné à 2 ; les géométries sont simples et une seule lumière projette des ombres.
+Le rendu ne dépend d'aucun CDN, police distante, texture ou modèle externe. Les textures des tableaux, fresques et vitraux sont générées localement. Le ratio de pixels est plafonné à 2 ; les géométries sont simples et une seule lumière projette des ombres.
 
 ## Validation
 
 Compilation de production et tests Chromium réels : rendu WebGL, entrée dans la visite, déplacement Z, orientation souris, collisions des murs / colonnes, retour au point de vue initial et affichage étroit. Capture réelle dans `artifacts/salle-saint-pierre.png`.
 
-Cette version s'arrête à cette salle. Aucun autre quartier ou salle n'est créé.
+La porte au fond de la première salle mène à la seconde salle ; on peut la traverser dans les deux sens.
 
 Le test de navigation est conservé dans `tests/browser.cjs`. Il nécessite Playwright et Chromium disponibles sur la machine, ainsi que le serveur Vite lancé. Exécuter `node tests/browser.cjs` ; si nécessaire, définir `PLAYWRIGHT_MODULE` vers le module Playwright installé et `CHROMIUM_PATH` vers l'exécutable Chromium. Le test utilise le port 5173 et renouvelle la capture. Dans le navigateur sans interface, Échap est vérifié via la gestion clavier explicite de l'application.
 
@@ -40,7 +40,7 @@ Dans GitHub : **Settings → Pages → Build and deployment → Source: Deploy f
 
 ## Embellissement de la salle
 
-Deux niches cintrées avec statues géométriques en pierre claire encadrent désormais une porte monumentale à panneaux bronze et or ancien. Des cadres en marbre rouge brun, un fronton et des médaillons complètent le mur du fond. La salle, la palette, les quatre colonnes et les commandes de visite sont conservées ; la porte est décorative et fermée.
+Deux niches cintrées avec statues géométriques en pierre claire encadrent désormais une porte monumentale à panneaux bronze et or ancien. Des cadres en marbre rouge brun, un fronton et des médaillons complètent le mur du fond. La salle, la palette, les quatre colonnes et les commandes de visite sont conservées ; les deux vantaux sont ouverts pour accéder à la salle de la chaire.
 
 ## Fontaine et galerie
 
@@ -85,3 +85,13 @@ Chaque colonne est entourée d'un ruban de fresque qui descend en spirale sur tr
 ## Deux statues de la porte
 
 Les deux niches de la porte présentent des statues distinctes : à gauche, robe bordeaux, manteau noir, livre et main levée ; à droite, robe noire, manteau bordeaux, bâton doré et main sur le cœur. Les têtes et mains restent en pierre ivoire, avec des galons et détails en or ancien. Cette modification reste limitée aux deux statues et à leurs socles.
+
+## Salle de la chaire
+
+Traverser la porte entre les statues bordeaux et noires pour entrer dans une nef à abside elliptique, sous une voûte arrondie. L'allée centrale mène à une interprétation géométrique de la Cathedra Petri : reliquaire en bronze sombre et or ancien, quatre figures de soutien, gloire dorée et fenêtre ambrée avec colombe. La palette suit les matériaux du monument sans prétendre reproduire ses sculptures ou proportions exactes.
+
+Huit bancs en bois accueillent vingt visiteurs assis en vêtements sobres. Six vitraux colorés, deux éclairages latéraux, des taches colorées au sol et de fins rayons transparents créent les effets de lumière. Ces effets sont stylisés ; aucune simulation coûteuse de vitrail ou de volume n'est utilisée. Le plafond de la seconde salle a une voûte en berceau et une demi-coupole sur l'abside.
+
+Les murs courbes, les bancs et l'estrade disposent de collisions ; l'allée centrale et les passages latéraux restent libres. L'indicateur de salle change pendant la visite. Les commandes et le point de départ sont conservés. Capture : `artifacts/salle-chaire.png`.
+
+Le test `node tests/chapel.cjs` utilise les mêmes prérequis que `tests/browser.cjs`. Il contrôle les vingt visiteurs, les six vitraux, les collisions, le passage jusqu'à l'estrade et effectue un vrai trajet au clavier aller-retour à travers la porte.
