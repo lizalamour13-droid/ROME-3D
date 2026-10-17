@@ -55,3 +55,7 @@ Les tests navigateur vérifient aussi la collision de la fontaine, le passage to
 Des filets de marbre noir soulignent les soubassements, socles de colonnes, bordures de la fontaine et encadrements du fond. Les moulures du plafond ont un profil concave arrondi : les bords descendent et le centre remonte dans le plafond pour former un creux. Les rosaces et filets en or ancien restent sobres. Le médaillon noir aux clés croisées a été retiré. La circulation et l'éclairage sont conservés.
 
 Les quatre tableaux sont tous différents et répartis à raison de deux par côté, sans duplication : Saint-Pierre, le Tibre, une nature morte et une figure drapée. Les textures sont créées localement sans téléchargement.
+
+## Tableau du panneau gauche
+
+Le panneau central du mur gauche reçoit une cinquième composition originale représentant le Colisée. Les quatre tableaux précédents sont conservés ; les cinq textures sont différentes. Le plafond, les matériaux et la navigation ne sont pas modifiés par cette correction.

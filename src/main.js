@@ -223,7 +223,7 @@ function paintingTexture(index){
       for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ellipse(x+Math.cos(a)*13,y+Math.sin(a)*13,12,15,'#ddd4b8');}
       ellipse(x,y,7,7,'#b29559');
     }
-  }else{
+  }else if(index===3){
     // Figure drapée : silhouette classique, manteau bleu grisé et livre.
     ctx.fillStyle='#958a74';ctx.fillRect(0,0,512,640);
     ctx.fillStyle='#626759';ctx.fillRect(103,193,305,447);ellipse(256,194,152,126,'#626759');
@@ -236,14 +236,36 @@ function paintingTexture(index){
     polygon([[272,337],[331,311],[343,380],[285,399]],'#765845');
     polygon([[280,342],[323,324],[332,374],[290,389]],'#ded0ad');
     ctx.fillStyle='#bbb09a';ctx.fillRect(150,533,211,20);ctx.fillStyle='#a3967c';ctx.fillRect(133,553,247,22);
+  }else{
+    // Le Colisée : composition originale pour le panneau central du mur gauche.
+    ctx.fillStyle='#aebbb7';ctx.fillRect(0,0,512,640);
+    polygon([[0,390],[105,340],[220,373],[370,325],[512,380],[512,640],[0,640]],'#92967d');
+    ctx.fillStyle='#baaa89';ctx.fillRect(0,465,512,175);
+    ellipse(260,485,210,34,'#887a60');
+    ctx.fillStyle='#c8b28d';ctx.fillRect(63,275,388,204);
+    ellipse(257,279,194,48,'#d9c5a0');ellipse(257,279,155,27,'#756f5b');
+    polygon([[63,280],[120,299],[120,477],[63,462]],'#a58f6f');
+    polygon([[395,301],[451,281],[451,459],[395,477]],'#b29a75');
+    for(const y of [322,383,440]){
+      for(let x=84;x<440;x+=43){
+        ctx.fillStyle='#625e4e';ctx.fillRect(x,y,23,30);
+        ctx.beginPath();ctx.arc(x+11.5,y,11.5,Math.PI,0);ctx.fill();
+        ctx.fillStyle='#e1cba5';ctx.fillRect(x-7,y-12,5,43);
+      }
+      ctx.fillStyle='#e0c69d';ctx.fillRect(68,y+36,377,7);
+    }
+    polygon([[65,271],[65,235],[155,221],[211,233],[211,255],[156,248]],'#d6bf97');
+    polygon([[168,640],[242,500],[290,500],[378,640]],'#ddcbb0');
+    for(const x of [27,484])ellipse(x,419,19,75,'#5f7157');
   }
   // Patine déterministe pour évoquer une toile, sans charger de texture.
   let seed=index+17;for(let i=0;i<9500;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%512;seed=(seed*1664525+1013904223)>>>0;const y=seed%640;ctx.fillStyle=i%2?'#f1dec00a':'#3b30200a';ctx.fillRect(x,y,2,3);}
   const vignette=ctx.createRadialGradient(256,300,100,256,320,420);vignette.addColorStop(0,'#30261500');vignette.addColorStop(1,'#30261570');ctx.fillStyle=vignette;ctx.fillRect(0,0,512,640);
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);return texture;
 }
-const artworkMaterials=Array.from({length:4},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
-for(const side of [-1,1])for(const [index,z] of [-6.5,7.5].entries()){
+const artworkMaterials=Array.from({length:5},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
+for(const side of [-1,1])for(const [index,z] of (side<0?[-6.5,.5,7.5]:[-6.5,7.5]).entries()){
+  const artIndex=side<0?[0,4,1][index]:index+2;
   // Les cadres sont adossés aux panneaux existants, sous les fenêtres.
   box(.16,3.38,2.72,side*8.48,4.18,z,bronze);
   for(const dy of [-1.64,1.64]){
@@ -254,8 +276,8 @@ for(const side of [-1,1])for(const [index,z] of [-6.5,7.5].entries()){
     box(.24,3.34,.18,side*8.32,4.18,z+dz,gold);
     box(.27,3.03,.045,side*8.25,4.18,z+dz-Math.sign(dz)*.15,cream);
   }
-  const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[index+(side>0?2:0)]);
-  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée'][index+(side>0?2:0)];scene.add(picture);
+  const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[artIndex]);
+  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée','Le Colisée'][artIndex];scene.add(picture);
   box(.15,.08,1.2,side*8.28,2.19,z,gold);
 }
 // Ornements en or ancien : rosaces des pilastres et feuilles géométriques des chapiteaux.
