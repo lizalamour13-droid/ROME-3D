@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { createChapel } from './chapel.js';
+import { setupPrayerAudio } from './prayer-audio.js';
 
 const canvas=document.querySelector('#scene');
 const status=document.querySelector('#status');
@@ -705,8 +706,9 @@ addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.
 function allowed(x,z){if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*3.5*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*3.5*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
+const prayer=setupPrayerAudio();
 let currentRoom=1;
 const roomNumber=document.querySelector('footer b');
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.24,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);const nextRoom=camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;roomNumber.textContent=nextRoom===2?'02 / 02 · LA CHAIRE':'01 / 02 · LES MARBRES';}renderer.render(scene,camera);});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.24,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);const nextRoom=camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===2?'02 / 02 · LA CHAIRE':'01 / 02 · LES MARBRES';}renderer.render(scene,camera);});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,allowed,reset,get active(){return active;}};
+window.room={camera,scene,renderer,allowed,reset,prayerAudio:prayer.audio,get active(){return active;}};

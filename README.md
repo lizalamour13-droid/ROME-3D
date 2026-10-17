@@ -90,15 +90,15 @@ Les deux niches de la porte présentent des statues distinctes : à gauche, robe
 
 Traverser la porte entre les statues bordeaux et noires pour entrer dans une nef à abside elliptique, sous une voûte arrondie. L'allée centrale mène à une interprétation géométrique de la Cathedra Petri : trône monumental en or ancien et noir, quatre figures de soutien, gloire dorée et fenêtre ambrée avec colombe. La palette suit les matériaux du monument sans prétendre reproduire ses sculptures ou proportions exactes.
 
-Huit bancs en bois accueillent vingt visiteurs assis en robes longues bordeaux. Les vitraux et leurs effets colorés sont retirés. Les bougies éclairent des murs et une voûte noirs étoilés ; des paillettes dorées flottent doucement dans la salle. Le plafond de la seconde salle a une voûte en berceau et une demi-coupole sur l'abside.
+Vingt chaises individuelles bordeaux et or accueillent les visiteurs assis en robes longues bordeaux. Les vitraux et leurs effets colorés sont retirés. Les bougies éclairent des murs et une voûte noirs étoilés ; des paillettes dorées flottent doucement dans la salle. Le plafond de la seconde salle a une voûte en berceau et une demi-coupole sur l'abside.
 
-Les murs courbes, les bancs et l'estrade disposent de collisions ; l'allée centrale et les passages latéraux restent libres. L'indicateur de salle change pendant la visite. Les commandes et le point de départ sont conservés. Capture : `artifacts/salle-chaire.png`.
+Les murs courbes, les rangées de chaises et l'estrade disposent de collisions ; l'allée centrale et les passages latéraux restent libres. L'indicateur de salle change pendant la visite. Les commandes et le point de départ sont conservés. Capture : `artifacts/salle-chaire.png`.
 
 Le test `node tests/chapel.cjs` utilise les mêmes prérequis que `tests/browser.cjs`. Il contrôle les vingt visiteurs en robes, l’absence de vitraux, les collisions, le passage jusqu'à l'estrade et effectue un vrai trajet au clavier aller-retour à travers la porte.
 
 ## Sanctuaire monumental
 
-La chaire est agrandie de 45 % et reçoit une structure dorée, des panneaux noirs, deux colonnes en or ancien et un fronton monumental. Le fond courbe de l'abside est habillé de bleu nuit très sombre, de 108 petites étoiles dorées instanciées et de contours architecturaux en or ancien. Les bancs et visiteurs sont conservés ; une ambiance noire éclairée aux bougies remplace désormais la pierre claire de cette seconde salle. Les nouveaux éléments du sanctuaire restent à l'intérieur de la zone de l'estrade déjà protégée par collision.
+La chaire est agrandie de 45 % et reçoit une structure dorée, des panneaux noirs, deux colonnes en or ancien et un fronton monumental. Le fond courbe de l'abside est habillé de bleu nuit très sombre, de 108 petites étoiles dorées instanciées et de contours architecturaux en or ancien. Les visiteurs sont conservés, les bancs étant remplacés par des chaises individuelles ; une ambiance noire éclairée aux bougies remplace désormais la pierre claire de cette seconde salle. Les nouveaux éléments du sanctuaire restent à l'intérieur de la zone de l'estrade déjà protégée par collision.
 
 ## Salle noire aux bougies et baldaquin
 
@@ -109,3 +109,11 @@ Un baldaquin géométrique inspiré de Bernin encadre le sanctuaire : quatre col
 ## Étoiles, paillettes et robes bordeaux
 
 Le motif bleu nuit et doré couvre désormais tous les murs ainsi que la voûte de la seconde salle. Une texture locale partagée complète le fond de l'abside. Les 180 paillettes dorées sont regroupées en un seul objet `Points`, avec une dérive ascendante lente et sans collision. Les vingt visiteurs ont une robe longue bordeaux avec un col clair ; leur position assise et les bancs sont conservés. Les vitraux, éclairages colorés et faisceaux associés sont supprimés. Les bougies et le baldaquin sont maintenus.
+
+## Cérémonie, chaises et audio
+
+Les bancs sont remplacés par vingt chaises individuelles, en velours bordeaux et or ancien, dont les éléments répétés sont instanciés. Des moulures cintrées et des corniches à denticules évoquent l'architecture classique de Saint-Pierre. Un maître de cérémonie se tient près de l'estrade, avec un livre et de légers gestes ; deux visiteurs marchent lentement dans les allées latérales et s'arrêtent si le joueur approche. Les personnes assises ont une animation très légère.
+
+Dans la seconde salle, **P** lance ou coupe la récitation du Notre Père. Le bouton **Écouter la prière** et le curseur de volume sont accessibles après **Échap** pour libérer la souris. Le son ne démarre pas automatiquement avant le premier choix de l'utilisateur ; il s'interrompt à la sortie de la salle ou quand l'onglet est masqué. Le MP3 local utilise une voix synthétique française avec une réverbération discrète. Détails dans `public/audio/README.md` ; aucun accès réseau externe ni microphone requis.
+
+`node tests/ceremony.cjs` vérifie les chaises et les moulures, le mouvement des visiteurs et du maître, le chargement et la progression réelle de l'audio, la touche P, le volume et l'arrêt à la sortie. La variable facultative `ROME_TEST_URL` permet de tester la version compilée servie sous `/ROME-3D/`.

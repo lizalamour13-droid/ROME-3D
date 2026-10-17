@@ -214,7 +214,73 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const sparkleGeometry=new THREE.BufferGeometry();sparkleGeometry.setAttribute('position',new THREE.BufferAttribute(sparklePositions,3).setUsage(THREE.DynamicDrawUsage));
   const sparkles=new THREE.Points(sparkleGeometry,new THREE.PointsMaterial({map:sparkleTexture,color:'#d6b268',size:.085,transparent:true,opacity:.63,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
   sparkles.name='chapel-gold-sparkles';sparkles.frustumCulled=false;chapel.add(sparkles);
-  function animate(time){
+  // Moulures classiques : corniches à denticules et encadrements cintrés dorés.
+  const mouldings=new THREE.Group();mouldings.name='chapel-classical-mouldings';chapel.add(mouldings);
+  for(const side of [-1,1]){
+    for(const y of [9.1,9.3]){const cornice=box(.3,.1,10.9,side*7.62,y,-22.55,chairGold);cornice.castShadow=false;}
+    for(let z=-17.6;z>-28;z-=.48){const tooth=box(.22,.17,.15,side*7.55,8.98,z,chairGold);tooth.castShadow=false;mouldings.attach(tooth);}
+    for(const z of [-20.7,-25.6]){
+      const points=[];for(let i=0;i<=24;i++){const a=i*Math.PI/24;points.push(new THREE.Vector3(side*7.55,6.1+1.75*Math.sin(a),z+1.75*Math.cos(a)));}
+      const arch=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),28,.045,5,false),chairGold);mouldings.add(arch);
+      for(const dz of [-1.75,1.75]){const edge=box(.1,3.1,.075,side*7.55,4.55,z+dz,chairGold);edge.castShadow=false;mouldings.attach(edge);}
+      const sill=box(.12,.09,3.6,side*7.55,3,z,chairGold);sill.castShadow=false;mouldings.attach(sill);
+    }
+  }
+  for(let i=0;i<25;i++){
+    const a=.47+i/24*(Math.PI-.94),x=7.68*Math.cos(a),z=-28-8.68*Math.sin(a);
+    const tooth=box(.17,.18,.22,x,8.91,z,chairGold);tooth.rotation.y=Math.atan2(-Math.cos(a),Math.sin(a));tooth.castShadow=false;mouldings.attach(tooth);
+  }
+  // Personnages debout : maître de cérémonie et deux marcheurs dans les allées.
+  const walkers=[],seatedMotion=[];let animationTime=0;
+  function standingPerson(x,z,role,index){
+    const group=new THREE.Group();group.name=role;group.position.set(x,0,z);chapel.add(group);
+    const skin=mat(index%2?'#a58265':'#c2a083'),robe=mat('#63323e'),hair=mat('#514638');
+    const part=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);group.add(mesh);return mesh;};
+    const skirt=new THREE.Mesh(new THREE.CylinderGeometry(.2,.29,.75,10),robe);skirt.position.y=.76;group.add(skirt);
+    part(.38,.46,.25,0,1.25,0,robe);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.145,10,7),skin);head.position.y=1.67;group.add(head);
+    const hairCap=new THREE.Mesh(new THREE.SphereGeometry(.15,10,6,0,Math.PI*2,0,Math.PI*.5),hair);hairCap.position.y=1.71;group.add(hairCap);
+    const limbs=[];
+    for(const side of [-1,1]){
+      const leg=new THREE.Group();leg.position.set(side*.11,.63,0);group.add(leg);
+      const calf=new THREE.Mesh(new THREE.BoxGeometry(.11,.38,.13),robe);calf.position.y=-.2;leg.add(calf);
+      const shoe=new THREE.Mesh(new THREE.BoxGeometry(.14,.09,.23),black);shoe.position.set(0,-.45,.05);leg.add(shoe);
+      const arm=new THREE.Group();arm.position.set(side*.24,1.41,0);group.add(arm);
+      const sleeve=new THREE.Mesh(new THREE.BoxGeometry(.105,.42,.13),robe);sleeve.position.y=-.2;arm.add(sleeve);
+      const hand=new THREE.Mesh(new THREE.SphereGeometry(.06,8,5),skin);hand.position.y=-.44;arm.add(hand);limbs.push({leg,arm,side});
+    }
+    if(role==='master-of-ceremonies'){
+      part(.4,.28,.035,0,1.29,.144,cream);
+      for(const side of [-1,1])part(.065,.57,.04,side*.13,1.07,.17,chairGold);
+      part(.027,.2,.03,0,1.27,.17,chairGold);part(.13,.027,.03,0,1.29,.17,chairGold);
+      const book=part(.3,.04,.23,0,1.18,.37,chairBronze);book.rotation.x=-.18;
+      part(.26,.018,.21,0,1.2,.37,cream);
+      limbs[0].arm.rotation.x=-.8;limbs[1].arm.rotation.x=-1.05;
+      group.userData.role='Maître de cérémonie';group.scale.setScalar(1.08);
+    }
+    return {group,head,limbs};
+  }
+  const ceremonyMaster=standingPerson(1.65,-30.05,'master-of-ceremonies',0);
+  obstacles.push({x:1.65,z:-30.05,hx:.48,hz:.48});
+  for(const [index,side] of [-1,1].entries()){
+    const person=standingPerson(side*6.6,-20.1-index*4,'walking-visitor',index+1);
+    walkers.push({...person,phase:index*.5,direction:1});
+  }
+
+  function animate(time,viewerPosition){
+    const delta=Math.min(Math.max(time-animationTime,0),.1);animationTime=time;
+    walkers.forEach((walker,index)=>{
+      const nextZ=walker.group.position.z+walker.direction*delta*.32;
+      const clear=!viewerPosition||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95;
+      if(clear)walker.group.position.z=nextZ;
+      if(walker.group.position.z>-19.6)walker.direction=-1;
+      if(walker.group.position.z<-28.6)walker.direction=1;
+      walker.group.rotation.y=walker.direction<0?Math.PI:0;
+      walker.limbs.forEach(({leg,arm,side})=>{const stride=clear?Math.sin(time*3.1+index)*.18*side:0;leg.rotation.x=stride;arm.rotation.x=-stride*.8;});
+    });
+    ceremonyMaster.limbs[1].arm.rotation.x=-1.05+Math.sin(time*.7)*.12;
+    ceremonyMaster.head.rotation.x=.045+.025*Math.sin(time*.6);
+    seatedMotion.forEach((person,index)=>person.rotation.x=Math.sin(time*.55+index)*.006);
     sparkleSeeds.forEach((p,i)=>{sparklePositions[i*3]=p.x+.12*Math.sin(time*.25+p.phase);sparklePositions[i*3+1]=1+(p.y+time*p.speed)%8.1;sparklePositions[i*3+2]=p.z+.1*Math.cos(time*.22+p.phase);});sparkleGeometry.attributes.position.needsUpdate=true;
     flames.forEach((flame,index)=>flame.scale.y=.11*(1+.06*Math.sin(time*5+index*1.7)));
     candleLights.forEach((light,index)=>light.intensity=65*(1+.025*Math.sin(time*3+index*2)));
@@ -237,20 +303,38 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       const forearm=localBox(.08,.085,.25,side*(index%3===0?.09:.19),.87,.2,skin);forearm.rotation.y=side*(index%3===0?.5:0);
     }
     if(index%3===1){const book=localBox(.23,.025,.2,0,.86,.3,cream);book.rotation.x=-.2;}
+    seatedMotion.push(person);
   }
-  // Huit bancs et vingt visiteurs, tous tournés vers la chaire.
+  // Vingt chaises individuelles bordeaux et or, regroupées en trois objets instanciés.
+  const chairFrames=[],chairVelvet=[],chairRosettes=[];
+  const chairDummy=new THREE.Object3D(),velvet=mat('#702c40',.93,0);
+  function ceremonialChair(x,z){
+    const chairGroup=new THREE.Group();chairGroup.name='burgundy-gold-chair';chairGroup.position.set(x,0,z);chapel.add(chairGroup);
+    const instance=(list,w,h,d,dx,y,dz)=>{chairDummy.position.set(x+dx,y,z+dz);chairDummy.rotation.set(0,0,0);chairDummy.scale.set(w,h,d);chairDummy.updateMatrix();list.push(chairDummy.matrix.clone());};
+    instance(chairVelvet,.61,.14,.65,0,.57,0);instance(chairVelvet,.49,.55,.11,0,1,.32);
+    for(const dx of [-.29,.29]){
+      for(const dz of [-.25,.25])instance(chairFrames,.065,.5,.065,dx,.29,dz);
+      instance(chairFrames,.06,.86,.065,dx,.92,.33);
+      instance(chairFrames,.07,.07,.7,dx,.86,0);
+      instance(chairFrames,.055,.28,.055,dx,.73,-.24);
+    }
+    for(const y of [.7,1.32])instance(chairFrames,.64,.06,.07,0,y,.33);
+    instance(chairFrames,.64,.055,.7,0,.48,0);
+    instance(chairRosettes,.055,.075,.025,0,1.33,.38);
+  }
   let visitorIndex=0;
   for(const z of [-20.5,-23,-25.5,-28])for(const side of [-1,1]){
-    const x=side*3.7;box(3.8,.16,.78,x,.57,z,wood);box(3.8,.63,.13,x,.96,z+.34,wood);
-    for(const dx of [-1.55,1.55]){box(.16,.47,.58,x+dx,.28,z,darkWood);box(.14,.2,.82,x+dx,.85,z,wood);}
-    obstacles.push({x,z,hx:2.2,hz:.95});
-    for(const dx of z===-23||z===-28?[-1,0,1]:[-.8,.8])visitor(x+dx,z,visitorIndex++);
+    const x=side*3.7;obstacles.push({x,z,hx:2.2,hz:.95});
+    for(const dx of z===-23||z===-28?[-1,0,1]:[-.8,.8]){ceremonialChair(x+dx,z);visitor(x+dx,z,visitorIndex++);}
   }
-  chapel.userData={shape:'abside elliptique',benches:8,visitors:visitorIndex};
+  for(const [list,material,geometry] of [[chairFrames,chairGold,new THREE.BoxGeometry(1,1,1)],[chairVelvet,velvet,new THREE.BoxGeometry(1,1,1)],[chairRosettes,chairGold,new THREE.OctahedronGeometry(1)]]){
+    const mesh=new THREE.InstancedMesh(geometry,material,list.length);list.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;chapel.add(mesh);
+  }
+  chapel.userData={shape:'abside elliptique',benches:0,chairs:20,visitors:visitorIndex,walkers:2,ceremonyMaster:true};
   function allowed(x,z){
     if(z>-17.55)return Math.abs(x)<1.58&&z<-11.5;
     const inside=z>=-28?Math.abs(x)<7.35:(x/7.35)**2+((z+28)/8.3)**2<1;
-    return inside&&z>-36.3&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
+    return inside&&z>-36.3&&!walkers.some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
   }
   return {allowed,animate};
 }
