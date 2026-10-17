@@ -81,3 +81,7 @@ Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pl
 ## Chérubins en bas-relief
 
 Chaque colonne est entourée d'un ruban de fresque qui descend en spirale sur trois tours espacés. Les anges aux six poses différentes alternent avec des motifs végétaux noirs et or. Le ruban mesure 72 cm de largeur et laisse de grandes plages de pierre visible entre les passages, sans répétition couvrant tout le fût. Les bordures noires et or suivent la spirale, sans anneaux horizontaux supplémentaires. La géométrie épouse le rétrécissement de la colonne. Les quatre rubans partagent une géométrie, mais chacun reçoit une texture Canvas originale différente : palmes et anges, musique et lyres, guirlandes et fleurs, étoiles et encens. La circulation est conservée.
+
+## Deux statues de la porte
+
+Les deux niches de la porte présentent des statues distinctes : à gauche, robe bordeaux, manteau noir, livre et main levée ; à droite, robe noire, manteau bordeaux, bâton doré et main sur le cœur. Les têtes et mains restent en pierre ivoire, avec des galons et détails en or ancien. Cette modification reste limitée aux deux statues et à leurs socles.

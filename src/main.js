@@ -37,24 +37,46 @@ for(const x of [-4.18,4.18]){box(.76,6,1.1,x,3,-12.95,cream);box(.94,.26,1.3,x,6
 const nicheShadow=mat('#68665b');
 const bronze=mat('#665441',.66,.22);
 const bronzePanel=mat('#79664d',.7,.16);
+// Seules les deux statues des niches de la porte utilisent ces tenues contrastées.
+const doorBurgundy=mat('#65353d');
 function statue(x,z){
-  box(1.38,.22,.9,x,.24,z,gray);
-  box(1.12,.84,.7,x,.77,z,cream);
-  box(1.38,.16,.92,x,1.27,z,stone);
-  cylinder(.32,.49,1.52,x,2.12,z,white,8);
-  cylinder(.42,.31,.64,x,3.13,z,white,8);
-  cylinder(.14,.17,.19,x,3.54,z,white,8);
-  const head=new THREE.Mesh(new THREE.IcosahedronGeometry(.27,0),white);
-  head.position.set(x,3.87,z);head.scale.set(.83,1.18,.9);
-  head.castShadow=true;scene.add(head);
-  for(const side of [-1,1]){
-    const arm=cylinder(.13,.17,.97,x+side*.39,3,z,white,6);
-    arm.rotation.z=side*.15;
+  const left=x<0,group=new THREE.Group();group.name='door-statue';
+  group.userData={pose:left?'livre et bénédiction':'bâton et main sur le cœur',colors:['bordeaux','noir','or ancien']};
+  group.position.set(x,0,z);scene.add(group);
+  const block=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(boxGeometry,m);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;};
+  const round=(rt,rb,h,x,y,z,m,n=10)=>{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,n),m);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;};
+  const joint=(p,r,m)=>{const mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(r,0),m);mesh.position.set(...p);mesh.castShadow=true;group.add(mesh);return mesh;};
+  const limb=(a,b,r,m)=>{const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b);const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r*.82,r,start.distanceTo(end),8),m);mesh.position.copy(start).add(end).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),end.sub(start).normalize());mesh.castShadow=true;group.add(mesh);};
+  // Socles conservés à leurs dimensions, avec un filet noir et une lèvre dorée.
+  block(1.38,.22,.9,0,.24,0,black);block(1.12,.84,.7,0,.77,0,cream);
+  block(1.38,.16,.92,0,1.27,0,stone);block(1.39,.035,.93,0,1.37,0,gold);
+  const robe=left?doorBurgundy:black,mantle=left?black:doorBurgundy;
+  round(.32,.49,1.52,0,2.12,0,robe,12);round(.42,.31,.64,0,3.13,0,robe,10);
+  for(const dx of [-.22,0,.22])block(.045,1.25,.06,dx,2.1,.34,left?black:doorBurgundy);
+  round(.34,.34,.065,0,2.86,0,gold,12);
+  // Manteaux inversés : bordeaux dominant à gauche, noir dominant à droite.
+  const sash=block(.22,1.62,.09,left?-.12:.12,2.77,.34,mantle);sash.rotation.z=left?-.22:.22;
+  const edge=block(.038,1.63,.025,left?-.23:.23,2.77,.4,gold);edge.rotation.z=left?-.22:.22;
+  joint([left?-.25:.25,3.35,.31],.09,gold);
+  round(.14,.17,.19,0,3.54,0,white,8);
+  const head=joint([0,3.87,0],.27,white);head.scale.set(.83,1.18,.9);head.rotation.z=left?-.12:.1;
+  const arms=left?
+    [[[ -.34,3.3,0],[-.53,2.96,.1],[-.32,2.85,.32]],[[.34,3.3,0],[.58,3.4,.08],[.57,3.81,.12]]]:
+    [[[-.34,3.3,0],[-.5,3.03,.18],[-.06,3.13,.35]],[[.34,3.3,0],[.53,3,.12],[.53,3.16,.24]]];
+  for(const [shoulder,elbow,hand] of arms){
+    limb(shoulder,elbow,.15,mantle);limb(elbow,hand,.115,robe);
+    const cuff=hand.map((v,i)=>v*.8+elbow[i]*.2);limb(cuff,hand,.12,gold);joint(hand,.105,white);
   }
-  // Plis verticaux et tablette : quelques formes seulement, sans visage détaillé.
-  for(const dx of [-.22,0,.22])box(.06,1.25,.07,x+dx,2.1,z+.31,cream);
-  const tablet=box(.33,.43,.12,x+.35,2.75,z+.2,stone);
-  tablet.rotation.z=-.12;
+  if(left){
+    const book=block(.39,.51,.12,-.32,2.88,.37,black);book.rotation.z=-.12;
+    const cover=block(.32,.44,.024,-.32,2.88,.445,gold);cover.rotation.z=-.12;
+    const inset=block(.26,.37,.025,-.32,2.88,.463,doorBurgundy);inset.rotation.z=-.12;
+    block(.025,.19,.025,-.32,2.88,.48,gold);block(.12,.025,.025,-.32,2.92,.48,gold);
+  }else{
+    round(.023,.023,2.66,.55,2.84,.24,gold,8);
+    const finial=joint([.55,4.23,.24],.12,gold);finial.scale.set(.7,1.35,.7);
+    round(.064,.064,.08,.55,4.06,.24,black,8);
+  }
 }
 for(const x of [-6.7,6.7]){
   const recess=new THREE.Shape();
