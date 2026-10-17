@@ -114,6 +114,124 @@ for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){box(5.2,.12,5.2,x,11.86,z,st
 // Fenêtres claires en hauteur, avec encadrements et meneaux simples.
 const glazing=new THREE.MeshBasicMaterial({color:'#fff2cf'});
 for(const side of [-1,1])for(const z of [-6.5,.5,7.5]){box(.09,1.65,2.6,side*8.72,8,z,glazing);box(.16,.09,2.8,side*8.58,8,z,stone);box(.16,1.8,.1,side*8.58,8,z,stone);}
+// Fontaine centrale à deux vasques : pierre crème, lèvres dorées et eau discrète.
+function ring(radius,tube,y,material,x=0,z=0){
+  const mesh=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,6,40),material);
+  mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);
+  mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+}
+function basin(profile,material){
+  const mesh=new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r,y])=>new THREE.Vector2(r,y)),40),material);
+  mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+}
+cylinder(2.16,2.24,.16,0,.13,0,gray,32);
+cylinder(2.04,2.16,.14,0,.28,0,cream,32);
+basin([[0,.32],[1.84,.32],[2.02,.45],[2.09,.7],[1.91,.7],[1.84,.43],[0,.43]],cream);
+ring(2.015,.055,.7,gold);
+ring(2.12,.035,.25,gold);
+const waterMaterial=new THREE.MeshStandardMaterial({color:'#809a94',roughness:.25,metalness:.18,transparent:true,opacity:.86});
+function waterDisk(radius,y){const mesh=new THREE.Mesh(new THREE.CircleGeometry(radius,40),waterMaterial);mesh.rotation.x=-Math.PI/2;mesh.position.y=y;scene.add(mesh);return mesh;}
+waterDisk(1.86,.49);
+cylinder(.38,.56,.45,0,.68,0,stone);
+cylinder(.23,.36,1.1,0,1.4,0,cream);
+ring(.31,.05,1.85,gold);
+basin([[.16,1.82],[.65,1.94],[1.02,2.22],[1.08,2.4],[.96,2.4],[.88,2.24],[.2,2.06]],cream);
+ring(1.02,.045,2.4,gold);
+waterDisk(.94,2.29);
+cylinder(.13,.2,.7,0,2.66,0,stone);
+basin([[.1,2.94],[.43,3.06],[.58,3.27],[.5,3.29],[.43,3.15],[.1,3.05]],cream);
+ring(.55,.035,3.28,gold);
+waterDisk(.47,3.18);
+const finial=new THREE.Mesh(new THREE.OctahedronGeometry(.16),gold);finial.position.y=3.53;scene.add(finial);
+const streamMaterial=new THREE.MeshStandardMaterial({color:'#a9c0b7',transparent:true,opacity:.62,roughness:.2});
+for(let i=0;i<8;i++){
+  const angle=i*Math.PI/4;
+  const points=[[.94,2.3],[1.17,2.22],[1.38,1.55],[1.48,.52]].map(([r,y])=>new THREE.Vector3(Math.cos(angle)*r,y,Math.sin(angle)*r));
+  const stream=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),14,.016,4,false),streamMaterial);
+  scene.add(stream);
+}
+const drops=new THREE.InstancedMesh(new THREE.SphereGeometry(.035,6,4),streamMaterial,32);
+drops.name='fountain-drops';drops.instanceMatrix.setUsage(THREE.DynamicDrawUsage);drops.frustumCulled=false;scene.add(drops);
+const dropDummy=new THREE.Object3D();
+function animateFountain(time){
+  for(let i=0;i<32;i++){
+    const angle=(i%8)*Math.PI/4;
+    const t=(time*.45+Math.floor(i/8)*.25)%1;
+    const radius=.95+.53*t;
+    dropDummy.position.set(Math.cos(angle)*radius,2.3-1.78*t*t,Math.sin(angle)*radius);
+    dropDummy.scale.set(1,1.5,1);dropDummy.updateMatrix();drops.setMatrixAt(i,dropDummy.matrix);
+  }
+  drops.instanceMatrix.needsUpdate=true;
+}
+animateFountain(0);
+for(let i=0;i<3;i++)ring(.15+i*.15,.008,.5,streamMaterial,1.48,0);
+
+// Tableaux originaux dessinés localement : paysages et architecture en tons sourds.
+// Aucune image distante et aucune reproduction d'œuvre revendiquée.
+function paintingTexture(index){
+  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=640;
+  const ctx=canvas.getContext('2d');
+  const palettes=[['#b5b6a8','#d8c6a3','#7a816b'],['#afa89c','#c9b38c','#72745b'],['#b4bcae','#ded0b0','#7f826d']];
+  const [sky,plaster,foliage]=palettes[index%3];
+  ctx.fillStyle=sky;ctx.fillRect(0,0,512,640);
+  ctx.fillStyle='#c6baa1';ctx.beginPath();ctx.moveTo(0,355);ctx.lineTo(90,288);ctx.lineTo(190,338);ctx.lineTo(305,265);ctx.lineTo(512,345);ctx.lineTo(512,640);ctx.lineTo(0,640);ctx.fill();
+  ctx.fillStyle=foliage;ctx.fillRect(0,430,512,210);
+  ctx.fillStyle='#a49172';ctx.beginPath();ctx.moveTo(213,452);ctx.lineTo(305,452);ctx.lineTo(437,640);ctx.lineTo(78,640);ctx.fill();
+  ctx.fillStyle=plaster;
+  if(index%3===0){
+    ctx.fillRect(112,330,295,145);ctx.fillRect(203,236,112,100);
+    ctx.beginPath();ctx.ellipse(259,238,63,74,0,Math.PI,0);ctx.fill();
+    ctx.fillStyle='#827b69';ctx.fillRect(251,148,16,22);ctx.fillRect(257,128,4,24);
+    ctx.fillStyle='#81745d';ctx.beginPath();ctx.moveTo(99,333);ctx.lineTo(258,275);ctx.lineTo(419,333);ctx.fill();
+    ctx.fillStyle=plaster;ctx.beginPath();ctx.moveTo(119,328);ctx.lineTo(258,289);ctx.lineTo(399,328);ctx.fill();
+    ctx.fillStyle='#706b5b';for(let x=144;x<400;x+=42){ctx.fillRect(x,359,19,86);}
+    ctx.fillStyle='#5b584d';ctx.fillRect(237,379,43,95);
+  }else if(index%3===1){
+    ctx.fillRect(115,286,285,28);
+    ctx.beginPath();ctx.moveTo(91,284);ctx.lineTo(257,208);ctx.lineTo(421,284);ctx.fill();
+    for(let x=129;x<395;x+=52){ctx.fillRect(x,311,22,159);ctx.fillRect(x-7,308,36,12);}
+    ctx.fillStyle='#a99777';ctx.fillRect(98,472,320,15);ctx.fillRect(79,490,355,16);
+  }else{
+    ctx.fillRect(92,350,327,125);ctx.fillStyle='#716c58';
+    for(let x=116;x<410;x+=62){ctx.fillRect(x,401,35,75);ctx.beginPath();ctx.arc(x+17.5,401,17.5,Math.PI,0);ctx.fill();}
+    ctx.fillStyle=plaster;ctx.fillRect(295,235,46,120);ctx.fillRect(287,229,62,14);
+  }
+  ctx.fillStyle=foliage;
+  for(const x of [43,468]){ctx.beginPath();ctx.ellipse(x,373,29,116,0,0,Math.PI*2);ctx.fill();ctx.fillRect(x-5,403,10,125);}
+  // Patine déterministe pour évoquer une toile, sans charger de texture.
+  let seed=index+17;for(let i=0;i<9500;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%512;seed=(seed*1664525+1013904223)>>>0;const y=seed%640;ctx.fillStyle=i%2?'#f1dec00a':'#3b30200a';ctx.fillRect(x,y,2,3);}
+  const vignette=ctx.createRadialGradient(256,300,100,256,320,420);vignette.addColorStop(0,'#30261500');vignette.addColorStop(1,'#30261570');ctx.fillStyle=vignette;ctx.fillRect(0,0,512,640);
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);return texture;
+}
+const artworkMaterials=Array.from({length:3},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
+for(const side of [-1,1])for(const [index,z] of [-6.5,.5,7.5].entries()){
+  // Les cadres sont adossés aux panneaux existants, sous les fenêtres.
+  box(.16,3.38,2.72,side*8.48,4.18,z,bronze);
+  for(const dy of [-1.64,1.64]){
+    box(.24,.18,2.9,side*8.32,4.18+dy,z,gold);
+    box(.27,.045,2.58,side*8.25,4.18+dy-Math.sign(dy)*.15,z,cream);
+  }
+  for(const dz of [-1.35,1.35]){
+    box(.24,3.34,.18,side*8.32,4.18,z+dz,gold);
+    box(.27,3.03,.045,side*8.25,4.18,z+dz-Math.sign(dz)*.15,cream);
+  }
+  const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[(index+(side>0?1:0))%3]);
+  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';scene.add(picture);
+  box(.15,.08,1.2,side*8.28,2.19,z,gold);
+}
+// Ornements en or ancien : rosaces des pilastres et feuilles géométriques des chapiteaux.
+for(const side of [-1,1])for(const z of [-10,-3,4,11]){
+  const medallion=cylinder(.25,.25,.08,side*8.43,7.1,z,gold,12);medallion.rotation.z=Math.PI/2;
+  for(const dy of [-.53,.53]){const leaf=box(.1,.31,.2,side*8.43,7.1+dy,z,gold);leaf.rotation.x=Math.PI/4;}
+}
+for(const c of columns){
+  ring(.82,.035,8.67,gold,c.x,c.z);
+  for(let i=0;i<8;i++){
+    const a=i*Math.PI/4;const leaf=new THREE.Mesh(new THREE.OctahedronGeometry(.17),gold);
+    leaf.position.set(c.x+Math.cos(a)*.83,8.95,c.z+Math.sin(a)*.83);leaf.scale.set(.55,1.4,.55);scene.add(leaf);
+  }
+}
+
 scene.add(new THREE.HemisphereLight('#fff0d8','#918271',2));
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);
@@ -129,9 +247,9 @@ addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
 addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*3.5*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*3.5*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));renderer.render(scene,camera);});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);renderer.render(scene,camera);});
 // État observable pour les tests navigateur, sans modifier la scène.
 window.room={camera,scene,renderer,allowed,reset,get active(){return active;}};
