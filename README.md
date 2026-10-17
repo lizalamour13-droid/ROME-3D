@@ -121,3 +121,7 @@ Dans la seconde salle, **P** lance ou coupe la récitation du Notre Père. Le bo
 ## Tapis rouge et prière latine
 
 Un tapis rouge bordeaux à liseré doré parcourt l'allée centrale de la seconde salle. L'ancienne récitation française est remplacée par le Pater Noster en latin, avec une nouvelle voix neuronale et un débit posé. La touche P, le réglage du volume et la pause en quittant la salle sont conservés. Le nouveau fichier audio possède un nom distinct pour éviter de servir l'ancienne version depuis le cache du navigateur.
+
+## Lumière et saint Pierre
+
+Quatre faisceaux dorés translucides accompagnent une statue centrale de saint Pierre sous le baldaquin, avec livre et clefs. Les paillettes passent à 280. Quatre des vingt visiteurs se lèvent, traversent les intervalles entre les rangées puis se rassoient ; les deux marcheurs latéraux sont conservés. Les déplacements s'arrêtent à proximité du joueur.

@@ -205,18 +205,42 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const orb=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),chairGold);orb.position.set(0,9.53,-33.1);baldachin.add(orb);
   box(.065,.65,.065,0,9.98,-33.1,chairGold);box(.37,.065,.065,0,10.09,-33.1,chairGold);
   baldachin.userData={columns:4,style:'bronze sombre et or ancien, colonnes torsadées'};
+  // Rayons volumétriques légers : quatre cônes translucides, sans ombres supplémentaires.
+  const beams=new THREE.Group();beams.name='chapel-light-beams';chapel.add(beams);
+  for(const [x,z] of [[-3,-23],[3,-26],[0,-31.8],[-2,-34]]){
+    const beam=new THREE.Mesh(new THREE.CylinderGeometry(.08,1.35,8.8,24,1,true),new THREE.MeshBasicMaterial({color:'#e8cc91',transparent:true,opacity:.055,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+    beam.position.set(x,5.1,z);beam.rotation.z=x*.055;beams.add(beam);
+  }
+  // Saint Pierre, au centre sous le baldaquin : manteau doré, livre et clefs.
+  const saint=new THREE.Group();saint.name='saint-peter';saint.position.set(0,.63,-31.9);chapel.add(saint);
+  const saintPart=(geometry,material,x,y,z)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);saint.add(mesh);return mesh;};
+  saintPart(new THREE.CylinderGeometry(.62,.72,.24,16),chairBronze,0,.12,0);
+  saintPart(new THREE.CylinderGeometry(.3,.53,1.55,12),chairGold,0,1.02,0);
+  saintPart(new THREE.BoxGeometry(.78,.72,.42),chairGold,0,1.82,0);
+  saintPart(new THREE.SphereGeometry(.29,12,9),cream,0,2.48,0);
+  saintPart(new THREE.ConeGeometry(.24,.37,10),gray,0,2.25,.15).rotation.x=Math.PI;
+  saintPart(new THREE.TorusGeometry(.4,.035,6,32),chairGold,0,2.53,-.12);
+  saintPart(new THREE.BoxGeometry(.16,.74,.2),chairGold,-.5,1.75,.12).rotation.z=-.35;
+  saintPart(new THREE.BoxGeometry(.16,.65,.2),chairGold,.49,1.83,.17).rotation.x=-.7;
+  saintPart(new THREE.SphereGeometry(.11,8,6),cream,.49,1.64,.42);
+  saintPart(new THREE.BoxGeometry(.4,.5,.12),chairBronze,-.48,1.6,.3);
+  for(const dx of [-.08,.08]){
+    saintPart(new THREE.TorusGeometry(.075,.022,5,16),chairGold,.49+dx,1.52,.46);
+    saintPart(new THREE.BoxGeometry(.035,.3,.035),chairGold,.49+dx,1.3,.46);
+    saintPart(new THREE.BoxGeometry(.11,.04,.04),chairGold,.52+dx,1.18,.46);
+  }
   const sparkleCanvas=document.createElement('canvas');sparkleCanvas.width=32;sparkleCanvas.height=32;
   const sparkleContext=sparkleCanvas.getContext('2d');
   const shimmer=sparkleContext.createRadialGradient(16,16,0,16,16,16);shimmer.addColorStop(0,'#fff1c7');shimmer.addColorStop(.2,'#e1b860aa');shimmer.addColorStop(1,'#bb8b3000');sparkleContext.fillStyle=shimmer;sparkleContext.fillRect(0,0,32,32);
   const sparkleTexture=new THREE.CanvasTexture(sparkleCanvas);sparkleTexture.colorSpace=THREE.SRGBColorSpace;
-  const sparklePositions=new Float32Array(180*3),sparkleSeeds=[];let sparkleSeed=2319;
+  const sparklePositions=new Float32Array(280*3),sparkleSeeds=[];let sparkleSeed=2319;
   const random=()=>{sparkleSeed=(sparkleSeed*1664525+1013904223)>>>0;return sparkleSeed/4294967296;};
-  for(let i=0;i<180;i++){
+  for(let i=0;i<280;i++){
     const z=-18-random()*17,maxX=z<-28?6.6*Math.sqrt(Math.max(.1,1-((z+28)/8.4)**2)):6.6;
     sparkleSeeds.push({x:(random()*2-1)*maxX,y:random()*8.1,z,phase:random()*Math.PI*2,speed:.06+random()*.08});
   }
   const sparkleGeometry=new THREE.BufferGeometry();sparkleGeometry.setAttribute('position',new THREE.BufferAttribute(sparklePositions,3).setUsage(THREE.DynamicDrawUsage));
-  const sparkles=new THREE.Points(sparkleGeometry,new THREE.PointsMaterial({map:sparkleTexture,color:'#d6b268',size:.085,transparent:true,opacity:.63,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
+  const sparkles=new THREE.Points(sparkleGeometry,new THREE.PointsMaterial({map:sparkleTexture,color:'#d6b268',size:.095,transparent:true,opacity:.72,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
   sparkles.name='chapel-gold-sparkles';sparkles.frustumCulled=false;chapel.add(sparkles);
   // Moulures classiques : corniches à denticules et encadrements cintrés dorés.
   const mouldings=new THREE.Group();mouldings.name='chapel-classical-mouldings';chapel.add(mouldings);
@@ -235,7 +259,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const tooth=box(.17,.18,.22,x,8.91,z,chairGold);tooth.rotation.y=Math.atan2(-Math.cos(a),Math.sin(a));tooth.castShadow=false;mouldings.attach(tooth);
   }
   // Personnages debout : maître de cérémonie et deux marcheurs dans les allées.
-  const walkers=[],seatedMotion=[];let animationTime=0;
+  const walkers=[],seatedMotion=[],risingVisitors=[];let animationTime=0;
   function standingPerson(x,z,role,index){
     const group=new THREE.Group();group.name=role;group.position.set(x,0,z);chapel.add(group);
     const skin=mat(index%2?'#a58265':'#c2a083'),robe=mat('#63323e'),hair=mat('#514638');
@@ -285,6 +309,23 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     ceremonyMaster.limbs[1].arm.rotation.x=-1.05+Math.sin(time*.7)*.12;
     ceremonyMaster.head.rotation.x=.045+.025*Math.sin(time*.6);
     seatedMotion.forEach((person,index)=>person.rotation.x=Math.sin(time*.55+index)*.006);
+    risingVisitors.forEach((actor,index)=>{
+      // Se lever, sortir de la rangée, traverser son intervalle puis revenir s’asseoir.
+      const t=(time+index*9)%38;
+      const rise=THREE.MathUtils.smoothstep(t,3,5)*(1-THREE.MathUtils.smoothstep(t,33,35));
+      const travel=THREE.MathUtils.smoothstep(t,7,16)*(1-THREE.MathUtils.smoothstep(t,23,32));
+      const forward=THREE.MathUtils.smoothstep(t,5,7)*(1-THREE.MathUtils.smoothstep(t,32,33));
+      const nextX=actor.x+actor.side*2.05*travel,nextZ=actor.z-1.25*forward;
+      if(viewerPosition&&Math.hypot(viewerPosition.x-nextX,viewerPosition.z-nextZ)<.95)return;
+      actor.group.position.set(nextX,0,nextZ);actor.group.userData.posture=rise>.95?'debout':'assis';
+      actor.parts.forEach(({mesh,y,z})=>{
+        const targetY=y===.19?.10:y===.44?.34:y===.72?.63:y===.47?.76:y+.28;
+        mesh.position.y=THREE.MathUtils.lerp(y,targetY,rise);mesh.position.z=z*(1-rise*.85);
+        if(y===.72)mesh.rotation.x=rise*Math.PI*.5;
+      });
+      actor.group.rotation.y=Math.PI+actor.side*Math.PI*.5*travel;
+      actor.group.rotation.x=rise>.95?Math.sin(time*3)*.018*travel:0;
+    });
     sparkleSeeds.forEach((p,i)=>{sparklePositions[i*3]=p.x+.12*Math.sin(time*.25+p.phase);sparklePositions[i*3+1]=1+(p.y+time*p.speed)%8.1;sparklePositions[i*3+2]=p.z+.1*Math.cos(time*.22+p.phase);});sparkleGeometry.attributes.position.needsUpdate=true;
     flames.forEach((flame,index)=>flame.scale.y=.11*(1+.06*Math.sin(time*5+index*1.7)));
     candleLights.forEach((light,index)=>light.intensity=65*(1+.025*Math.sin(time*3+index*2)));
@@ -307,7 +348,10 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       const forearm=localBox(.08,.085,.25,side*(index%3===0?.09:.19),.87,.2,skin);forearm.rotation.y=side*(index%3===0?.5:0);
     }
     if(index%3===1){const book=localBox(.23,.025,.2,0,.86,.3,cream);book.rotation.x=-.2;}
-    seatedMotion.push(person);
+    if(index===1||index===4||index===11||index===14){
+      const actor={group:person,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z}))};
+      risingVisitors.push(actor);
+    }else seatedMotion.push(person);
   }
   // Vingt chaises individuelles bordeaux et or, regroupées en trois objets instanciés.
   const chairFrames=[],chairVelvet=[],chairRosettes=[];
@@ -334,11 +378,11 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   for(const [list,material,geometry] of [[chairFrames,chairGold,new THREE.BoxGeometry(1,1,1)],[chairVelvet,velvet,new THREE.BoxGeometry(1,1,1)],[chairRosettes,chairGold,new THREE.OctahedronGeometry(1)]]){
     const mesh=new THREE.InstancedMesh(geometry,material,list.length);list.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;chapel.add(mesh);
   }
-  chapel.userData={shape:'abside elliptique',benches:0,chairs:20,visitors:visitorIndex,walkers:2,ceremonyMaster:true};
+  chapel.userData={shape:'abside elliptique',benches:0,chairs:20,visitors:visitorIndex,walkers:2,risingVisitors:4,ceremonyMaster:true};
   function allowed(x,z){
     if(z>-17.55)return Math.abs(x)<1.58&&z<-11.5;
     const inside=z>=-28?Math.abs(x)<7.35:(x/7.35)**2+((z+28)/8.3)**2<1;
-    return inside&&z>-36.3&&!walkers.some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
+    return inside&&z>-36.3&&![...walkers,...risingVisitors].some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
   }
   return {allowed,animate};
 }
