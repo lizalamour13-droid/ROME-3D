@@ -80,4 +80,4 @@ Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pl
 
 ## Chérubins en bas-relief
 
-Chaque colonne reçoit un petit chérubin tourné vers le centre de la salle, à 3,55 m de haut : visage et ailes en pierre ivoire, bordure des ailes et auréole en or ancien. Les ailes sont de vraies formes courbes extrudées, avec des plumes en relief. La faible saillie reste dans la marge de collision des colonnes ; aucun déplacement ni éclairage n'est modifié.
+Chaque colonne reçoit désormais une frise complète de six petits anges aux poses différentes (24 anges au total), courbée sur le pourtour du fût. Les figures sont en pierre ivoire, avec des accents en or ancien et une saillie inférieure à 6 cm. Les positions des bras, jambes et ailes alternent autour de chaque colonne. Les géométries fusionnées et instanciées limitent les appels de rendu. L'ancien chérubin unique est retiré ; la navigation reste inchangée.
