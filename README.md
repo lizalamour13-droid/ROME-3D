@@ -271,3 +271,10 @@ La crypte reprend les éléments de la référence dans le style géométrique d
 Les balcons suivent tout le périmètre de la salle des marbres : les galeries latérales vont jusqu’au mur du fond et rejoignent une galerie transversale contre ce mur. Les anciennes traverses aux raccords et les barrières latérales des paliers sont retirées ; les protections du vide central et des bords restent en place. Les petites statues du balcon sont retirées. Quatre bancs en bois avec dossier droit très simple sont adossés aux bords extérieurs, deux à gauche et deux à droite, en laissant l’allée libre. Les visiteurs suivent le nouveau tour complet.
 
 La maquette centrale est tournée de 180° sous sa vitrine ; le socle et la vitrine restent en place. Les essais de circulation des balcons et des visiteurs utilisent le nouveau circuit.
+
+
+### Orgue abaissé et buffet inspiré de la référence
+
+Les cinq corps de tuyaux sont abaissés et étagés : centre plus haut, ailes progressivement plus basses. Le buffet est en pierre crème avec fonds en bois sombre, tuyaux argentés, corniches et ornements en or ancien. Les clefs croisées et la tiare décorent le sommet central et le panneau bordeaux de la façade de tribune. La console et la touche O restent à la même place ; le tour du balcon reste libre.
+
+Le buffet reste sous la corniche basse de la coupole, avec une hauteur d’environ 2,8 m au-dessus de la tribune. La console conserve sa taille et son interaction.

@@ -4,7 +4,7 @@ import * as THREE from 'three';
 export function createChapelOrgan({scene,camera}){
   const root=new THREE.Group();root.name='chapel-organ-loft';scene.add(root);
   const material=(color,metalness=0)=>new THREE.MeshStandardMaterial({color,metalness,roughness:.48});
-  const stone=material('#d3c7b1'),gold=material('#ad8c4d',.65),wood=material('#342b29'),red=material('#542c36'),ivory=material('#e2d7bc'),pipe=material('#b6ad8b',.7);
+  const stone=material('#d3c7b1'),gold=material('#ad8c4d',.65),wood=material('#342b29'),red=material('#542c36'),ivory=material('#e2d7bc'),pipe=material('#b9bdbc',.75);
   const cube=new THREE.BoxGeometry(1,1,1);
   function box(w,h,d,x,y,z,m,parent=root){const o=new THREE.Mesh(cube,m);o.scale.set(w,h,d);o.position.set(x,y,z);o.receiveShadow=true;parent.add(o);return o;}
   function tube(points,r,m=gold){const path=new THREE.CurvePath();for(let i=1;i<points.length;i++)path.add(new THREE.LineCurve3(points[i-1],points[i]));const mesh=new THREE.Mesh(new THREE.TubeGeometry(path,Math.max(32,points.length*2),r,6,false),m);root.add(mesh);return mesh;}
@@ -45,18 +45,20 @@ export function createChapelOrgan({scene,camera}){
   for(const side of [-1,1])for(const z of [-21.5,-26.7]){box(.035,.012,2.8,side*6.9,level+.008,z,gold);}
   for(const x of [-3,3]){const light=new THREE.PointLight('#ffe0a8',15,9,2);light.position.set(x,level+2.4,-19.3);root.add(light);}
   // Buffet à cinq tourelles, tuyaux ouverts, bouches, couronnes et rinceaux dorés.
-  const organ=new THREE.Group();organ.name='gilded-pipe-organ';organ.position.set(0,level,-17.85);root.add(organ);
-  box(6.4,.4,.65,0,.22,0,wood,organ);
+  const organ=new THREE.Group();organ.name='gilded-pipe-organ';organ.position.set(0,level,-17.85);organ.scale.setScalar(.7);root.add(organ);
+  box(6.4,.4,.65,0,.22,0,stone,organ);
   for(const y of [.05,.45])box(6.6,.08,.76,0,y,0,gold,organ);
   let pipeCount=0;
   for(const [index,x] of [-2.55,-1.25,0,1.25,2.55].entries()){
-    const h=index===2?3.85:index%2?2.75:3.3,w=index===2?1.35:1.08;
-    box(w,h,.38,x,.5+h/2,.1,red,organ);
+    const h=index===2?2.8:index%2?2.3:1.85,w=index===2?1.35:1.08;
+    box(w,h,.38,x,.5+h/2,.1,wood,organ);
     for(const side of [-1,1]){
-      box(.1,h+.15,.55,x+side*w/2,.48+h/2,-.01,gold,organ);
+      box(.16,h+.15,.55,x+side*w/2,.48+h/2,-.01,stone,organ);
+      for(const y of [.56,h+.47])box(.25,.1,.64,x+side*w/2,y,-.02,ivory,organ);
+      const ornament=new THREE.Mesh(new THREE.OctahedronGeometry(.09),gold);ornament.position.set(x+side*w/2,h+.21,-.31);ornament.scale.set(.6,1.35,.25);organ.add(ornament);
       const cap=new THREE.Mesh(new THREE.SphereGeometry(.12,10,6),gold);cap.position.set(x+side*w/2,h+.66,-.02);organ.add(cap);
     }
-    for(const y of [.55,h+.52])box(w+.2,.12,.6,x,y,-.02,gold,organ);
+    for(const y of [.55,h+.52])box(w+.2,.12,.6,x,y,-.02,stone,organ);
     for(let j=0;j<7;j++){
       const px=x+(j-3)*w/8,ph=h-.4-Math.abs(j-3)*.15,r=w/23;
       const p=new THREE.Mesh(new THREE.CylinderGeometry(r,r,ph,10,1,true),pipe);p.position.set(px,.65+ph/2,-.24);organ.add(p);pipeCount++;
@@ -64,11 +66,34 @@ export function createChapelOrgan({scene,camera}){
       box(r*1.35,.065,.016,px,.91,-.24-r,wood,organ);
       box(r*1.55,.025,.018,px,.86,-.25-r,gold,organ);
     }
-    const arch=[];for(let j=0;j<=24;j++){const a=j*Math.PI/24;arch.push(new THREE.Vector3(x+Math.cos(a)*(w*.56),h+.57+Math.sin(a)*.32,-.24));}
-    const crown=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arch),24,.045,6,false),gold);organ.add(crown);
+    const arch=[];for(let j=0;j<=24;j++){const a=j*Math.PI/24;arch.push(new THREE.Vector3(x+Math.cos(a)*(w*.56),h+.57+Math.sin(a)*.26,-.24));}
+    const crown=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arch),24,.075,6,false),ivory);organ.add(crown);
     for(const side of [-1,1]){const leaf=new THREE.Mesh(new THREE.OctahedronGeometry(.17),gold);leaf.position.set(x+side*.2,h+.94,-.24);leaf.scale.set(.6,1.5,.3);leaf.rotation.z=-side*.5;organ.add(leaf);}
   }
-  box(.065,.65,.065,0,4.93,0,gold,organ);box(.38,.065,.065,0,5.06,0,gold,organ);
+  function papalEmblem(parent,x,y,z,scale){
+    const group=new THREE.Group();group.name='organ-papal-emblem';group.position.set(x,y,z);group.rotation.y=Math.PI;group.scale.setScalar(scale);parent.add(group);
+    const circle=new THREE.Mesh(new THREE.CircleGeometry(.42,32),red);group.add(circle);
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(.42,.025,6,32),gold);rim.position.z=.015;group.add(rim);
+    for(const side of [-1,1]){
+      const key=new THREE.Group();key.rotation.z=side*.7;key.position.y=-.02;group.add(key);
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(.09,.024,6,20),gold);ring.position.set(0,.2,.045);key.add(ring);
+      box(.035,.5,.04,0,-.1,.045,gold,key);box(.16,.04,.04,.04,-.32,.045,gold,key);
+    }
+    for(let i=0;i<3;i++){const tiara=new THREE.Mesh(new THREE.CylinderGeometry(.14-i*.025,.18-i*.025,.11,12),gold);tiara.position.set(0,.4+i*.09,.04);group.add(tiara);}
+    box(.025,.16,.025,0,.76,.04,gold,group);box(.11,.025,.025,0,.79,.04,gold,group);
+  }
+  papalEmblem(organ,0,3.35,-.35,.72);
+  // Façade de tribune : pierre claire, panneaux bordeaux et clefs dorées.
+  const facade=new THREE.Group();facade.name='organ-cream-balustrade';root.add(facade);
+  for(const y of [level+.08,level+1.02])box(6.95,.13,.25,0,y,-20.44,stone,facade);
+  for(const x of [-3.35,-1.85,1.85,3.35]){box(.2,.85,.24,x,level+.55,-20.44,stone,facade);box(.29,.09,.29,x,level+.94,-20.44,ivory,facade);}
+  for(const [x,w] of [[0,3.4],[-2.6,1.1],[2.6,1.1]]){
+    box(w,.65,.05,x,level+.55,-20.5,red,facade);
+    for(const dy of [-.34,.34])box(w+.05,.025,.04,x,level+.55+dy,-20.54,gold,facade);
+    for(const side of [-1,1])box(.025,.69,.04,x+side*w/2,level+.55,-20.54,gold,facade);
+    if(x){box(.035,.36,.04,x,level+.55,-20.55,gold,facade);box(.22,.035,.04,x,level+.6,-20.55,gold,facade);}
+  }
+  papalEmblem(facade,0,level+.48,-20.56,.68);
   const console=new THREE.Group();console.name='organ-console';console.position.set(0,level,-18.75);root.add(console);
   box(1.5,.85,.45,0,.43,0,wood,console);box(1.65,.08,.55,0,.9,0,gold,console);
   for(let row=0;row<2;row++)for(let k=0;k<24;k++){
