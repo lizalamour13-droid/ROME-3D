@@ -384,9 +384,10 @@ for(const c of columns){
 }
 
 // Fresque continue autour des fûts : anges peints, rinceaux noirs et or ancien.
+function createFriezeTexture(theme){
 const friezeCanvas=document.createElement('canvas');friezeCanvas.width=3072;friezeCanvas.height=640;
 const fresco=friezeCanvas.getContext('2d');
-fresco.fillStyle='#c4b79b';fresco.fillRect(0,0,3072,640);
+fresco.fillStyle=['#c4b79b','#cec2a7','#beb69f','#c8bba0'][theme];fresco.fillRect(0,0,3072,640);
 const frescoIvory='#e4d8bc',frescoInk='#3c3b31',frescoGold='#a48b50';
 function frescoEllipse(x,y,rx,ry,color){fresco.fillStyle=color;fresco.beginPath();fresco.ellipse(x,y,rx,ry,0,0,Math.PI*2);fresco.fill();}
 function frescoLimb(points){
@@ -395,8 +396,9 @@ function frescoLimb(points){
     points.forEach(([x,y],i)=>i?fresco.lineTo(x,y):fresco.moveTo(x,y));fresco.stroke();
   }
 }
-for(let pose=0;pose<6;pose++){
-  fresco.save();fresco.translate(pose*512+193,310);
+for(let slot=0;slot<6;slot++){
+  const pose=(slot+theme)%6;
+  fresco.save();fresco.translate(slot*512+193,310);
   // Ailes dessinées dans l'enduit, avec une fine ligne dorée.
   for(const side of [-1,1]){
     fresco.save();fresco.scale(side,1);fresco.rotate((pose%3-1)*.12);
@@ -429,9 +431,25 @@ for(let pose=0;pose<6;pose++){
   fresco.strokeStyle=pose%2?frescoInk:frescoGold;fresco.lineWidth=10;fresco.beginPath();fresco.moveTo(-23,-61);fresco.lineTo(25,22);fresco.stroke();
   fresco.strokeStyle=frescoGold;fresco.lineWidth=6;fresco.beginPath();fresco.moveTo(-29,20);fresco.quadraticCurveTo(0,30,29,20);fresco.stroke();
   if(pose===4){fresco.fillStyle=frescoInk;fresco.fillRect(-24,-3,48,58);fresco.strokeStyle=frescoGold;fresco.lineWidth=4;fresco.strokeRect(-20,1,40,50);}
+  // Attributs peints propres à chaque composition, pas de simple recoloration.
+  fresco.strokeStyle=frescoGold;fresco.lineWidth=5;
+  if(theme===0){
+    fresco.beginPath();fresco.moveTo(65,25);fresco.lineTo(100,-97);fresco.stroke();
+    for(let i=0;i<4;i++)for(const side of [-1,1])frescoEllipse(78+i*6+side*9,-20-i*19,12,5,frescoGold);
+  }else if(theme===1){
+    fresco.beginPath();fresco.moveTo(-27,-38);fresco.lineTo(-22,22);fresco.quadraticCurveTo(0,43,22,22);fresco.lineTo(27,-38);fresco.moveTo(-27,-31);fresco.lineTo(27,-31);fresco.stroke();
+    fresco.lineWidth=2;for(let x=-15;x<=15;x+=10){fresco.beginPath();fresco.moveTo(x,-30);fresco.lineTo(x,26);fresco.stroke();}
+  }else if(theme===2){
+    fresco.beginPath();fresco.moveTo(-72,5);fresco.quadraticCurveTo(0,82,72,5);fresco.stroke();
+    for(let i=0;i<7;i++){const x=-60+i*20,y=30*(1-x*x/3600)+14;frescoEllipse(x,y,7,7,i%2?frescoGold:frescoIvory);}
+  }else{
+    fresco.fillStyle=frescoGold;fresco.beginPath();fresco.moveTo(-23,-6);fresco.lineTo(23,-6);fresco.quadraticCurveTo(19,20,0,24);fresco.quadraticCurveTo(-19,20,-23,-6);fresco.fill();
+    fresco.strokeStyle=frescoInk;fresco.lineWidth=2;for(const x of [-13,0,13]){fresco.beginPath();fresco.moveTo(x,-14);fresco.bezierCurveTo(x-12,-30,x+12,-39,x,-52);fresco.stroke();}
+  }
   fresco.restore();
   // Rinceau entre les anges : feuilles et petites volutes noires bordées d'or.
-  fresco.save();fresco.translate(pose*512+440,320);
+  fresco.save();fresco.translate(slot*512+440,320);
+  if(theme===0){
   fresco.strokeStyle=frescoInk;fresco.lineWidth=5;fresco.beginPath();fresco.moveTo(0,163);fresco.bezierCurveTo(-16,75,15,-56,0,-165);fresco.stroke();
   for(let i=0;i<5;i++)for(const side of [-1,1]){
     const y=-120+i*59;
@@ -440,6 +458,30 @@ for(let pose=0;pose<6;pose++){
   }
   frescoEllipse(0,-181,12,17,frescoGold);
   fresco.fillStyle=frescoInk;fresco.beginPath();fresco.moveTo(0,175);fresco.lineTo(15,196);fresco.lineTo(0,217);fresco.lineTo(-15,196);fresco.closePath();fresco.fill();
+
+  }else if(theme===1){
+    // Lyre monumentale, volutes et cordes dorées.
+    fresco.strokeStyle=frescoInk;fresco.lineWidth=13;fresco.beginPath();fresco.moveTo(-50,-137);fresco.bezierCurveTo(-80,-55,-62,104,0,129);fresco.bezierCurveTo(62,104,80,-55,50,-137);fresco.stroke();
+    fresco.strokeStyle=frescoGold;fresco.lineWidth=5;fresco.beginPath();fresco.moveTo(-53,-104);fresco.lineTo(53,-104);fresco.stroke();
+    fresco.lineWidth=3;for(let x=-30;x<=30;x+=15){fresco.beginPath();fresco.moveTo(x,-104);fresco.lineTo(x,85-Math.abs(x)*.4);fresco.stroke();}
+    for(const side of [-1,1])frescoEllipse(side*50,-140,16,12,frescoGold);
+    for(const y of [-189,185])frescoEllipse(0,y,11,11,frescoInk);
+  }else if(theme===2){
+    // Couronnes de fleurs et feuillages, silhouette nettement circulaire.
+    for(const cy of [-112,112]){
+      fresco.strokeStyle=frescoInk;fresco.lineWidth=5;fresco.beginPath();fresco.ellipse(0,cy,48,69,0,0,Math.PI*2);fresco.stroke();
+      for(let i=0;i<10;i++){const a=i*Math.PI/5;frescoEllipse(Math.cos(a)*48,cy+Math.sin(a)*69,10,7,i%2?frescoGold:frescoInk);}
+      frescoEllipse(0,cy,13,13,frescoGold);for(let i=0;i<5;i++){const a=i*Math.PI*2/5;frescoEllipse(Math.cos(a)*20,cy+Math.sin(a)*20,10,12,frescoIvory);}
+    }
+    fresco.fillStyle=frescoGold;fresco.fillRect(-3,-30,6,60);
+  }else{
+    // Étoiles et rosaces, encadrées de petites arabesques noires.
+    for(const cy of [-147,0,147]){
+      fresco.fillStyle=cy===0?frescoGold:frescoInk;fresco.beginPath();
+      for(let i=0;i<16;i++){const a=i*Math.PI/8,r=i%2?19:48;const x=Math.cos(a)*r,y=cy+Math.sin(a)*r;i?fresco.lineTo(x,y):fresco.moveTo(x,y);}fresco.closePath();fresco.fill();frescoEllipse(0,cy,9,9,cy===0?frescoInk:frescoGold);
+    }
+    fresco.strokeStyle=frescoGold;fresco.lineWidth=3;for(const cy of [-75,75]){fresco.beginPath();fresco.ellipse(0,cy,21,20,0,0,Math.PI*2);fresco.stroke();}
+  }
   fresco.restore();
 }
 // Encadrement continu noir / or et petites perles dorées.
@@ -449,20 +491,23 @@ for(let x=12;x<3072;x+=32)for(const y of [25,615])frescoEllipse(x,y,3,3,frescoGo
 const friezeTexture=new THREE.CanvasTexture(friezeCanvas);friezeTexture.colorSpace=THREE.SRGBColorSpace;
 friezeTexture.wrapS=THREE.RepeatWrapping;friezeTexture.repeat.set(1,1);
 friezeTexture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);
-const friezeMaterial=new THREE.MeshStandardMaterial({map:friezeTexture,roughness:1});
+return friezeTexture;
+}
+const frescoThemes=['Palmes et anges','Musique et lyres','Guirlandes et fleurs','Étoiles et encens'];
+const friezeMaterials=frescoThemes.map((_,theme)=>new THREE.MeshStandardMaterial({map:createFriezeTexture(theme),roughness:1}));
 const cherubFrieze=new THREE.Group();cherubFrieze.name='column-cherub-frieze';
-cherubFrieze.userData={angelsPerColumn:18,totalAngels:72,poses:6,maxRelief:.025,fullHeight:false,style:'painted',motifs:true,spiral:true,turns:2};scene.add(cherubFrieze);
-// Ruban hélicoïdal : deux tours espacés, descendant sous les chapiteaux.
+cherubFrieze.userData={angelsPerColumn:24,totalAngels:96,poses:6,maxRelief:.025,fullHeight:false,style:'painted',motifs:true,spiral:true,turns:3,themes:4};scene.add(cherubFrieze);
+// Ruban hélicoïdal : trois tours espacés, descendant sous les chapiteaux.
 // Chaque rive épouse le rayon décroissant du fût ; aucune bande horizontale ne reste.
 const ribbonPositions=[],ribbonUVs=[],ribbonIndices=[];
-const ribbonSteps=192,ribbonWidth=.72;
+const ribbonSteps=288,ribbonWidth=.72;
 for(let i=0;i<=ribbonSteps;i++){
-  const t=i/ribbonSteps,angle=t*Math.PI*4,centerY=10.35-t*8.8;
+  const t=i/ribbonSteps,angle=t*Math.PI*6,centerY=10.35-t*8.8;
   for(const edge of [-1,1]){
     const y=centerY+edge*ribbonWidth/2;
     const radius=.8-(y-.85)*.16/10.1+.004;
     ribbonPositions.push(Math.sin(angle)*radius,y,Math.cos(angle)*radius);
-    ribbonUVs.push(t*3,(edge+1)/2);
+    ribbonUVs.push(t*4,(edge+1)/2);
   }
   if(i<ribbonSteps){const k=i*2;ribbonIndices.push(k,k+2,k+1,k+2,k+3,k+1);}
 }
@@ -471,8 +516,8 @@ paintedBandGeometry.setAttribute('position',new THREE.Float32BufferAttribute(rib
 paintedBandGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(ribbonUVs,2));
 paintedBandGeometry.setIndex(ribbonIndices);paintedBandGeometry.computeVertexNormals();
 columns.forEach((column,index)=>{
-  const band=new THREE.Mesh(paintedBandGeometry,friezeMaterial);
-  band.name='painted-column-band';band.position.set(column.x,0,column.z);
+  const band=new THREE.Mesh(paintedBandGeometry,friezeMaterials[index]);
+  band.name='painted-column-band';band.userData.theme=frescoThemes[index];band.position.set(column.x,0,column.z);
   band.rotation.y=index*Math.PI/3;band.receiveShadow=true;cherubFrieze.add(band);
 });
 
