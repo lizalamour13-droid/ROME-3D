@@ -447,16 +447,16 @@ for(const y of [15,605]){fresco.fillStyle=frescoInk;fresco.fillRect(0,y,3072,20)
 for(const y of [7,41,594,632]){fresco.fillStyle=frescoGold;fresco.fillRect(0,y,3072,4);}
 for(let x=12;x<3072;x+=32)for(const y of [25,615])frescoEllipse(x,y,3,3,frescoGold);
 const friezeTexture=new THREE.CanvasTexture(friezeCanvas);friezeTexture.colorSpace=THREE.SRGBColorSpace;
-friezeTexture.wrapT=THREE.RepeatWrapping;friezeTexture.repeat.set(1,9);
+friezeTexture.repeat.set(1,1);
 friezeTexture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);
 const friezeMaterial=new THREE.MeshStandardMaterial({map:friezeTexture,roughness:1});
 const cherubFrieze=new THREE.Group();cherubFrieze.name='column-cherub-frieze';
-cherubFrieze.userData={angelsPerColumn:54,totalAngels:216,poses:6,maxRelief:.025,fullHeight:true,style:'painted',motifs:true};scene.add(cherubFrieze);
-const paintedBandGeometry=new THREE.CylinderGeometry(.644,.8,9.85,64,1,true);
+cherubFrieze.userData={angelsPerColumn:6,totalAngels:24,poses:6,maxRelief:.025,fullHeight:false,style:'painted',motifs:true};scene.add(cherubFrieze);
+const paintedBandGeometry=new THREE.CylinderGeometry(.751,.769,1.1,64,1,true);
 columns.forEach((column,index)=>{
   const band=new THREE.Mesh(paintedBandGeometry,friezeMaterial);
-  band.name='painted-column-band';band.position.set(column.x,5.975,column.z);band.rotation.y=index*Math.PI/6;band.receiveShadow=true;cherubFrieze.add(band);
-  ring(.8,.008,1.06,gold,column.x,column.z);ring(.644,.008,10.89,gold,column.x,column.z);
+  band.name='painted-column-band';band.position.set(column.x,3.55,column.z);band.rotation.y=index*Math.PI/6;band.receiveShadow=true;cherubFrieze.add(band);
+  ring(.772,.008,3.01,gold,column.x,column.z);ring(.754,.008,4.09,gold,column.x,column.z);
 });
 
 // Accents de marbre noir : socles, soubassements et filets, sans assombrir les murs.
