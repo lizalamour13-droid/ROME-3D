@@ -232,6 +232,73 @@ for(const c of columns){
   }
 }
 
+// Accents de marbre noir : socles, soubassements et filets, sans assombrir les murs.
+for(const side of [-1,1]){
+  box(.34,.13,25.8,side*8.6,1.02,0,black);
+  box(.37,.045,25.8,side*8.58,1.11,0,gold);
+}
+for(const c of columns){
+  box(1.97,.11,1.97,c.x,.38,c.z,black);
+  cylinder(.82,.82,.11,c.x,.94,c.z,black,16);
+  ring(.82,.025,1.01,gold,c.x,c.z);
+}
+ring(2.13,.045,.34,black);
+for(const x of [-4.18,4.18])box(.22,5.3,.05,x,3.03,-12.37,black);
+for(const x of [-6.7,6.7]){
+  for(const dx of [-1.24,1.24])box(.07,2.07,.09,x+dx,7.35,-12.43,black);
+  for(const y of [6.32,8.38])box(2.55,.07,.09,x,y,-12.43,black);
+}
+
+// Caissons à filets noirs et rosaces en relief : une lecture plus riche du plafond.
+const ceilingPetals=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1),gold,96);
+ceilingPetals.name='ceiling-rosettes';
+const petalDummy=new THREE.Object3D();let petalIndex=0;
+for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
+  for(const dx of [-2.24,2.24])box(.055,.06,4.5,x+dx,11.65,z,black);
+  for(const dz of [-2.24,2.24])box(4.5,.06,.055,x,11.65,z+dz,black);
+  ring(.68,.035,11.51,gold,x,z);
+  cylinder(.19,.26,.13,x,11.46,z,cream,8);
+  for(let i=0;i<8;i++){
+    const angle=i*Math.PI/4;
+    petalDummy.position.set(x+Math.cos(angle)*.43,11.46,z+Math.sin(angle)*.43);
+    petalDummy.rotation.set(0,-angle,0);petalDummy.scale.set(.25,.08,.115);
+    petalDummy.updateMatrix();ceilingPetals.setMatrixAt(petalIndex++,petalDummy.matrix);
+  }
+}
+ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
+
+// Médaillon central : interprétation géométrique des clés de saint Pierre.
+// Le décor est orienté vers le sol et ne modifie ni hauteur de visite ni éclairage.
+const ceilingSeal=cylinder(2.05,2.05,.15,0,11.38,0,black,48);
+ceilingSeal.name='saint-peter-ceiling';ceilingSeal.scale.z=1.36;
+for(const radius of [1.92,2.13]){
+  const rim=ring(radius,.055,11.29,gold);rim.scale.y=1.36;
+}
+const emblem=new THREE.Group();emblem.name='crossed-keys';
+emblem.position.set(0,11.24,0);emblem.rotation.x=Math.PI/2;scene.add(emblem);
+function emblemBox(parent,w,h,x,y){
+  const mesh=new THREE.Mesh(boxGeometry,gold);mesh.scale.set(w,h,.07);mesh.position.set(x,y,0);parent.add(mesh);
+}
+for(const angle of [-.64,.64]){
+  const key=new THREE.Group();key.rotation.z=angle;emblem.add(key);
+  const bow=new THREE.Mesh(new THREE.TorusGeometry(.29,.07,6,24),gold);
+  bow.position.y=1.05;key.add(bow);
+  emblemBox(key,.12,1.9,0,-.04);
+  emblemBox(key,.5,.13,.19,-.77);
+  emblemBox(key,.11,.33,.38,-.67);
+  emblemBox(key,.11,.26,.19,-.7);
+  emblemBox(key,.27,.09,0,.61);
+}
+// Feuilles géométriques autour du médaillon, regroupées en un seul objet.
+const sealLeaves=new THREE.InstancedMesh(new THREE.OctahedronGeometry(1),gold,20);
+for(let i=0;i<20;i++){
+  const angle=i*Math.PI/10;
+  petalDummy.position.set(Math.cos(angle)*1.7,11.24,Math.sin(angle)*2.31);
+  petalDummy.rotation.set(0,-angle+.5,0);petalDummy.scale.set(.23,.055,.1);
+  petalDummy.updateMatrix();sealLeaves.setMatrixAt(i,petalDummy.matrix);
+}
+scene.add(sealLeaves);
+
 scene.add(new THREE.HemisphereLight('#fff0d8','#918271',2));
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);

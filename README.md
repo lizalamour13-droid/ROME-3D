@@ -49,3 +49,7 @@ La salle comporte désormais une fontaine centrale à vasques superposées, en p
 Six tableaux originaux de paysages et d'architecture sont dessinés localement sur Canvas, dans une palette terre, pierre et vert grisé, avec des cadres dorés. Des rosaces et feuilles géométriques complètent les pilastres et chapiteaux. Aucun téléchargement de texture, aucune image personnelle ou œuvre historique reproduite.
 
 Les tests navigateur vérifient aussi la collision de la fontaine, le passage tout autour, l'animation de l'eau et la présence des six tableaux.
+
+## Marbre noir et plafond de Saint-Pierre
+
+Des filets de marbre noir soulignent les soubassements, socles de colonnes, bordures de la fontaine et encadrements du fond. Le plafond reçoit des rosaces en relief, de fins filets noirs et un médaillon elliptique noir et or aux clés croisées de saint Pierre. Ce décor est une interprétation géométrique, sans prétendre reproduire exactement le plafond historique. Les pétales des rosaces et les feuilles du médaillon utilisent des géométries instanciées. La circulation et l'éclairage sont conservés.
