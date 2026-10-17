@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import './style.css';
 
 const canvas=document.querySelector('#scene');
@@ -384,83 +383,80 @@ for(const c of columns){
   }
 }
 
-// Frise de six petits anges par colonne : poses variées, relief inférieur à 6 cm.
-// Les géométries sont courbées sur le fût et regroupées par pose / matériau.
-const cherubRadius=.762;
-const cherubSphere=new THREE.SphereGeometry(1,10,6);
-function cherubPoseGeometry(pose){
-  const pieces={ivory:[],gold:[]};
-  const dummy=new THREE.Object3D();
-  function part(geometry,x,y,z,sx,sy,sz,rotation=0,material='ivory'){
-    dummy.position.set(x,y,z);dummy.rotation.set(0,0,rotation);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();
-    pieces[material].push(geometry.clone().applyMatrix4(dummy.matrix));
+// Fresque continue autour des fûts : anges peints, rinceaux noirs et or ancien.
+const friezeCanvas=document.createElement('canvas');friezeCanvas.width=3072;friezeCanvas.height=640;
+const fresco=friezeCanvas.getContext('2d');
+fresco.fillStyle='#c4b79b';fresco.fillRect(0,0,3072,640);
+const frescoIvory='#e4d8bc',frescoInk='#3c3b31',frescoGold='#a48b50';
+function frescoEllipse(x,y,rx,ry,color){fresco.fillStyle=color;fresco.beginPath();fresco.ellipse(x,y,rx,ry,0,0,Math.PI*2);fresco.fill();}
+function frescoLimb(points){
+  for(const [color,width] of [[frescoInk,27],[frescoIvory,20]]){
+    fresco.strokeStyle=color;fresco.lineWidth=width;fresco.lineCap='round';fresco.lineJoin='round';fresco.beginPath();
+    points.forEach(([x,y],i)=>i?fresco.lineTo(x,y):fresco.moveTo(x,y));fresco.stroke();
   }
-  function oval(x,y,z,sx,sy,sz,rotation=0,material='ivory'){part(cherubSphere,x,y,z,sx,sy,sz,rotation,material);}
-  function limb(a,b,width,material='ivory'){
-    const dx=b[0]-a[0],dy=b[1]-a[1];
-    oval((a[0]+b[0])/2,(a[1]+b[1])/2,.018,width,Math.hypot(dx,dy)/2+width*.3,.014,-Math.atan2(dx,dy),material);
-  }
-  const tilt=[-.14,.12,-.2,.18,0,-.1][pose];
-  oval(0,.155,.018,.071,.08,.024,tilt);
-  oval(0,-.015,.014,.072,.106,.021,-tilt*.4);
-  oval(-.025,.215,.012,.048,.025,.018,-.3);
-  oval(.026,.215,.012,.048,.025,.018,.3);
-  oval(0,.145,.044,.012,.014,.007);
-  // Petites ailes gravées : trois plumes par côté, orientations alternées.
-  for(const side of [-1,1]){
-    const raised=(pose+Number(side>0))%3;
-    for(let i=0;i<3;i++){
-      const angle=-side*(.72+i*.19+raised*.15);
-      const x=side*(.084+i*.036),y=.055+i*.025+raised*.015;
-      oval(x,y,.005,.025,.091-i*.01,.009,angle,'gold');
-      oval(x,y,.016,.02,.081-i*.01,.008,angle);
-    }
-  }
-  const arms=[
-    [[[-.055,.04],[-.11,.1],[-.13,.23]],[[.055,.04],[.115,-.015],[.11,-.06]]],
-    [[[-.055,.04],[-.11,-.02],[-.018,-.025]],[[.055,.04],[.11,-.02],[.018,-.025]]],
-    [[[-.055,.04],[-.13,.07],[-.17,.14]],[[.055,.04],[.13,.07],[.17,.14]]],
-    [[[-.055,.04],[-.11,-.015],[-.08,-.07]],[[.055,.04],[.11,.1],[.13,.23]]],
-    [[[-.055,.04],[-.12,-.02],[-.055,-.065]],[[.055,.04],[.12,-.02],[.055,-.065]]],
-    [[[-.055,.04],[-.1,.12],[-.07,.25]],[[.055,.04],[.1,.12],[.07,.25]]]
-  ];
-  for(const [shoulder,elbow,hand] of arms[pose]){limb(shoulder,elbow,.023);limb(elbow,hand,.019);oval(hand[0],hand[1],.026,.022,.023,.013);}
-  const legs=pose%2?[[[-.035,-.09],[-.09,-.16],[-.055,-.235]],[[.035,-.09],[.09,-.14],[.125,-.19]]]:[[[-.035,-.09],[-.07,-.15],[-.105,-.19]],[[.035,-.09],[.055,-.17],[.035,-.245]]];
-  for(const [hip,knee,foot] of legs){limb(hip,knee,.028);limb(knee,foot,.021);oval(foot[0],foot[1],.02,.031,.018,.014);}
-  oval(0,-.04,.037,.069,.013,.008,0,'gold');
-  if(pose===4)part(boxGeometry,0,-.035,.042,.095,.11,.012,-.12,'gold');
-  const result={};
-  for(const material of ['ivory','gold']){
-    const geometry=mergeGeometries(pieces[material],false);
-    for(const piece of pieces[material])piece.dispose();
-    // Projection sur le cylindre : les ailes suivent son pourtour au lieu de dépasser.
-    const position=geometry.attributes.position;
-    for(let i=0;i<position.count;i++){
-      const angle=position.getX(i)/cherubRadius,radius=cherubRadius+position.getZ(i);
-      position.setXYZ(i,Math.sin(angle)*radius,position.getY(i),Math.cos(angle)*radius);
-    }
-    position.needsUpdate=true;geometry.computeVertexNormals();result[material]=geometry;
-  }
-  return result;
 }
-const cherubFrieze=new THREE.Group();cherubFrieze.name='column-cherub-frieze';
-cherubFrieze.userData={angelsPerColumn:6,totalAngels:24,poses:6,maxRelief:.06};scene.add(cherubFrieze);
-const cherubDummy=new THREE.Object3D();
 for(let pose=0;pose<6;pose++){
-  const geometries=cherubPoseGeometry(pose);
-  for(const material of ['ivory','gold']){
-    const mesh=new THREE.InstancedMesh(geometries[material],material==='gold'?gold:white,4);
-    mesh.name='cherub-frieze-'+material;mesh.castShadow=true;mesh.receiveShadow=true;
-    columns.forEach((column,index)=>{
-      cherubDummy.position.set(column.x,3.55+(pose%2?.035:-.035),column.z);
-      cherubDummy.rotation.set(0,pose*Math.PI/3+index*Math.PI/6,0);cherubDummy.scale.set(1,1,1);cherubDummy.updateMatrix();
-      mesh.setMatrixAt(index,cherubDummy.matrix);
-    });
-    mesh.instanceMatrix.needsUpdate=true;cherubFrieze.add(mesh);
+  fresco.save();fresco.translate(pose*512+193,310);
+  // Ailes dessinées dans l'enduit, avec une fine ligne dorée.
+  for(const side of [-1,1]){
+    fresco.save();fresco.scale(side,1);fresco.rotate((pose%3-1)*.12);
+    fresco.fillStyle=frescoIvory;fresco.strokeStyle=frescoGold;fresco.lineWidth=5;
+    fresco.beginPath();fresco.moveTo(21,-45);fresco.bezierCurveTo(51,-91,95,-133,145,-143);
+    fresco.bezierCurveTo(140,-78,101,-33,31,-17);fresco.closePath();fresco.fill();fresco.stroke();
+    fresco.strokeStyle='#8e8164';fresco.lineWidth=3;
+    for(let feather=0;feather<4;feather++){fresco.beginPath();fresco.moveTo(39+feather*13,-37-feather*8);fresco.quadraticCurveTo(84+feather*9,-70-feather*12,119+feather*6,-104-feather*9);fresco.stroke();}
+    fresco.restore();
   }
+  // Corps, membres et positions de mains alternés.
+  const legPoses=[[[[-18,25],[-42,92],[-74,124]],[[18,25],[30,103],[15,151]]],[[[-18,25],[-57,76],[-28,135]],[[18,25],[60,69],[96,107]]]];
+  const arms=[
+    [[[-24,-53],[-70,-81],[-80,-154]],[[24,-53],[74,-18],[67,17]]],
+    [[[-24,-53],[-65,-12],[-8,2]],[[24,-53],[65,-12],[8,2]]],
+    [[[-24,-53],[-81,-54],[-116,-89]],[[24,-53],[81,-54],[116,-89]]],
+    [[[-24,-53],[-68,-5],[-42,17]],[[24,-53],[70,-81],[80,-154]]],
+    [[[-24,-53],[-68,-8],[-21,23]],[[24,-53],[68,-8],[21,23]]],
+    [[[-24,-53],[-59,-107],[-42,-178]],[[24,-53],[59,-107],[42,-178]]]
+  ];
+  for(const limb of legPoses[pose%2])frescoLimb(limb);
+  fresco.fillStyle=frescoIvory;fresco.strokeStyle=frescoInk;fresco.lineWidth=3;
+  fresco.beginPath();fresco.moveTo(-24,-67);fresco.quadraticCurveTo(-48,-24,-29,35);fresco.quadraticCurveTo(0,53,29,35);fresco.quadraticCurveTo(48,-24,24,-67);fresco.closePath();fresco.fill();fresco.stroke();
+  for(const limb of arms[pose])frescoLimb(limb);
+  fresco.strokeStyle=frescoGold;fresco.lineWidth=4;fresco.beginPath();fresco.ellipse(0,-110,45,46,pose%2?.15:-.15,0,Math.PI*2);fresco.stroke();
+  frescoEllipse(0,-107,34,39,frescoIvory);
+  for(let curl=0;curl<7;curl++){const a=curl*Math.PI/6;frescoEllipse(Math.cos(a)*29,-123-Math.sin(a)*20,10,9,'#a09070');}
+  frescoEllipse(-11,-109,2.4,2,frescoInk);frescoEllipse(11,-109,2.4,2,frescoInk);
+  fresco.strokeStyle='#8b7357';fresco.lineWidth=2;fresco.beginPath();fresco.moveTo(-5,-91);fresco.quadraticCurveTo(0,-87,5,-91);fresco.stroke();
+  fresco.strokeStyle=pose%2?frescoInk:frescoGold;fresco.lineWidth=10;fresco.beginPath();fresco.moveTo(-23,-61);fresco.lineTo(25,22);fresco.stroke();
+  fresco.strokeStyle=frescoGold;fresco.lineWidth=6;fresco.beginPath();fresco.moveTo(-29,20);fresco.quadraticCurveTo(0,30,29,20);fresco.stroke();
+  if(pose===4){fresco.fillStyle=frescoInk;fresco.fillRect(-24,-3,48,58);fresco.strokeStyle=frescoGold;fresco.lineWidth=4;fresco.strokeRect(-20,1,40,50);}
+  fresco.restore();
+  // Rinceau entre les anges : feuilles et petites volutes noires bordées d'or.
+  fresco.save();fresco.translate(pose*512+440,320);
+  fresco.strokeStyle=frescoInk;fresco.lineWidth=5;fresco.beginPath();fresco.moveTo(0,163);fresco.bezierCurveTo(-16,75,15,-56,0,-165);fresco.stroke();
+  for(let i=0;i<5;i++)for(const side of [-1,1]){
+    const y=-120+i*59;
+    fresco.fillStyle=frescoInk;fresco.strokeStyle=frescoGold;fresco.lineWidth=2;
+    fresco.beginPath();fresco.moveTo(0,y+25);fresco.bezierCurveTo(side*22,y-9,side*59,y-27,side*47,y+5);fresco.quadraticCurveTo(side*31,y+31,0,y+25);fresco.fill();fresco.stroke();
+  }
+  frescoEllipse(0,-181,12,17,frescoGold);
+  fresco.fillStyle=frescoInk;fresco.beginPath();fresco.moveTo(0,175);fresco.lineTo(15,196);fresco.lineTo(0,217);fresco.lineTo(-15,196);fresco.closePath();fresco.fill();
+  fresco.restore();
 }
-for(const column of columns){ring(.774,.009,3.16,gold,column.x,column.z);ring(.762,.009,3.94,gold,column.x,column.z);}
-cherubSphere.dispose();
+// Encadrement continu noir / or et petites perles dorées.
+for(const y of [15,605]){fresco.fillStyle=frescoInk;fresco.fillRect(0,y,3072,20);}
+for(const y of [7,41,594,632]){fresco.fillStyle=frescoGold;fresco.fillRect(0,y,3072,4);}
+for(let x=12;x<3072;x+=32)for(const y of [25,615])frescoEllipse(x,y,3,3,frescoGold);
+const friezeTexture=new THREE.CanvasTexture(friezeCanvas);friezeTexture.colorSpace=THREE.SRGBColorSpace;
+friezeTexture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);
+const friezeMaterial=new THREE.MeshStandardMaterial({map:friezeTexture,roughness:1});
+const cherubFrieze=new THREE.Group();cherubFrieze.name='column-cherub-frieze';
+cherubFrieze.userData={angelsPerColumn:6,totalAngels:24,poses:6,maxRelief:.015,style:'painted',motifs:true};scene.add(cherubFrieze);
+const paintedBandGeometry=new THREE.CylinderGeometry(.751,.769,1.1,64,1,true);
+columns.forEach((column,index)=>{
+  const band=new THREE.Mesh(paintedBandGeometry,friezeMaterial);
+  band.name='painted-column-band';band.position.set(column.x,3.55,column.z);band.rotation.y=index*Math.PI/6;band.receiveShadow=true;cherubFrieze.add(band);
+  ring(.772,.008,3.01,gold,column.x,column.z);ring(.754,.008,4.09,gold,column.x,column.z);
+});
 
 // Accents de marbre noir : socles, soubassements et filets, sans assombrir les murs.
 for(const side of [-1,1]){

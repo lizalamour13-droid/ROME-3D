@@ -80,4 +80,4 @@ Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pl
 
 ## Chérubins en bas-relief
 
-Chaque colonne reçoit désormais une frise complète de six petits anges aux poses différentes (24 anges au total), courbée sur le pourtour du fût. Les figures sont en pierre ivoire, avec des accents en or ancien et une saillie inférieure à 6 cm. Les positions des bras, jambes et ailes alternent autour de chaque colonne. Les géométries fusionnées et instanciées limitent les appels de rendu. L'ancien chérubin unique est retiré ; la navigation reste inchangée.
+Chaque colonne reçoit une fresque continue de six petits anges aux poses différentes (24 anges au total), avec de petits rinceaux et motifs végétaux entre les figures. Des bordures noires, des perles dorées et des traits d'or ancien encadrent la composition sur un fond pierre beige. Le décor est peint sur une texture Canvas locale qui fait tout le tour du fût ; les anciens anges en relief sont retirés. Quatre bandes cylindriques partagent la même texture, sans téléchargement externe. La navigation reste inchangée.
