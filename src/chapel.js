@@ -69,14 +69,14 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     }
     return {group,head,limbs};
   }
-  const ceremonyMaster=standingPerson(1.65,-30.05,'master-of-ceremonies',0);
-  ceremonyMaster.group.position.y=.42;
+  const ceremonyMaster=standingPerson(0,-31.5,'master-of-ceremonies',0);
+  ceremonyMaster.group.position.y=1.14;
   const ceremonyStage=new THREE.Group();ceremonyStage.name='ceremony-stage';chapel.add(ceremonyStage);
-  for(const [w,h,d,y,z,m] of [[2.3,.36,2.3,.18,-29.65,chairBronze],[2.35,.045,2.35,.38,-29.65,chairGold],[2.16,.035,2.16,.415,-29.65,mat('#702c40')],[2.3,.16,.42,.08,-28.3,cream]]){
-    const step=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);step.position.set(1.65,y,z);ceremonyStage.add(step);
+  for(const [w,h,d,y,z,m] of [[2.3,1.08,2.3,.54,-31.1,chairBronze],[2.35,.045,2.35,1.105,-31.1,chairGold],[2.16,.035,2.16,1.145,-31.1,mat('#702c40')],[2.3,.34,.45,.17,-29.7,cream],[2.3,.68,.45,.34,-30.1,cream]]){
+    const step=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);step.position.set(0,y,z);ceremonyStage.add(step);
   }
-  obstacles.push({x:1.65,z:-29.65,hx:1.43,hz:1.55});
-  const lectern=new THREE.Group();lectern.name='ceremony-lectern';lectern.position.set(1.65,.42,-29.38);chapel.add(lectern);
+  obstacles.push({x:0,z:-31.1,hx:1.43,hz:1.8});
+  const lectern=new THREE.Group();lectern.name='ceremony-lectern';lectern.position.set(0,1.14,-30.83);chapel.add(lectern);
   const deskPart=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);lectern.add(mesh);return mesh;};
   deskPart(.86,.12,.65,0,.08,0,chairBronze);
   deskPart(.62,1.13,.28,0,.69,0,chairBronze);
@@ -88,7 +88,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const neck=new THREE.CatmullRomCurve3([new THREE.Vector3(.3,1.36,0),new THREE.Vector3(.3,1.65,0),new THREE.Vector3(.13,1.78,-.22)]);
   microphone.add(new THREE.Mesh(new THREE.TubeGeometry(neck,16,.018,6,false),black));
   const micHead=new THREE.Mesh(new THREE.SphereGeometry(.055,10,7),gray);micHead.scale.set(1,1,1.65);micHead.position.set(.13,1.78,-.22);microphone.add(micHead);
-  obstacles.push({x:1.65,z:-29.38,hx:.65,hz:.53});
+  obstacles.push({x:0,z:-30.83,hx:.65,hz:.53});
   function walkingPose(person,distance,moving){
     const phase=distance*11;
     person.limbs.forEach(({leg,knee,arm,side})=>{

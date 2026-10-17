@@ -161,3 +161,7 @@ Les ambiances utilisent des enregistrements naturels CC0 de vent, oiseaux et eau
 La seconde salle conserve huit bougies flottantes au lieu de dix-huit. Le maître de cérémonie et son pupitre sont sur une petite estrade bordeaux et or ; la circulation centrale reste libre. Le tambour a des ouvertures vitrées avec ciel bleu nuageux et la coupole possède un oculus vitré. Les fontaines extérieures ont 160 particules d’éclaboussures supplémentaires.
 
 Le pavage de la place est désormais gris anthracite/noir, avec petits pavés à joints fins, anneaux et rayons gris, et vingt-quatre losanges de pierre. Les personnages ont des coudes articulés, des épaules moins raides et des poses assises variées. Des murmures enregistrés (domaine public, provenance dans `public/audio/ambient/README.md`) deviennent audibles près des passants et des bancs, puis disparaissent au-delà de sept mètres. La touche M et le volume des ambiances les contrôlent aussi.
+
+## Sanctuaire centré et quatre statues distinctes
+
+Le maître, son pupitre et l’estrade sont centrés sous le baldaquin. L’allée mène au pied des marches et les côtés restent accessibles. Un monument funéraire stylisé évoque le tombeau de saint Pierre près de l’autel, en noir, bordeaux et or, avec une inscription. Les quatre statues des niches sont différentes : Pierre avec clefs/livre, Paul avec épée/manuscrit, pèlerin avec bâton et main levée, évêque avec mitre/crosse. Les robes et manteaux utilisent seulement noir, bordeaux sombre et or ancien, avec visages en pierre naturelle.

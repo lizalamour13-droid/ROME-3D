@@ -96,19 +96,27 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     for(const y of [.15,2.45,8.4])box(.78,.17,1.02,x,y,z,chairGold);
     box(.85,.3,1.1,x,8.65,z,pale);
   }
-  function statue(x,z,side,keys,scale=1){
-    const g=new THREE.Group();g.name=keys?'chapel-statue-peter':'chapel-statue-paul';g.position.set(x,1.25,z);g.rotation.y=-side*Math.PI/2-side*.12;g.scale.setScalar(scale);architecture.add(g);
-    box(.85,.22,.85,0,-.1,0,cream,g);
-    add(new THREE.CylinderGeometry(.25,.42,1.5,12),keys?red:blue,0,.78,0,g);
-    add(new THREE.SphereGeometry(.23,12,8),cream,0,1.97,.02,g);
-    add(new THREE.ConeGeometry(.19,.35,10),pale,0,1.78,.14,g).rotation.x=Math.PI;
-    for(let i=0;i<8;i++){const a=i*Math.PI/4;add(new THREE.SphereGeometry(.1,8,6),cream,.21*Math.cos(a),2.08+.07*Math.sin(a),.12*Math.sin(a),g);}
-    for(const s of [-1,1]){const arm=box(.17,.73,.2,s*.38,1.35,.13,keys?red:blue,g);arm.rotation.z=s*.25;add(new THREE.SphereGeometry(.1,8,6),cream,s*.42,1.04,.17,g);}
-    box(.4,.54,.11,-.33,1.12,.3,chairGold,g);
-    for(const x of [-.18,.18])box(.07,1.4,.06,x,.83,.3,chairGold,g);
-    box(.06,.6,.06,0,1.1,.33,chairGold,g);box(.3,.06,.06,0,1.26,.33,chairGold,g);
-    if(keys)for(const dx of [-.08,.08]){add(new THREE.TorusGeometry(.11,.03,5,16),chairGold,.33+dx,1.25,.3,g);box(.04,.5,.04,.33+dx,.92,.3,chairGold,g);box(.17,.06,.05,.37+dx,.72,.3,chairGold,g);}
-    else{box(.055,1.75,.055,.42,1.03,.3,chairGold,g);box(.38,.055,.06,.42,1.48,.3,chairGold,g);}
+  const statueBlack=mat('#252326'),statueBurgundy=mat('#512c36'),statueStone=mat('#c6b89e');
+  function statue(x,z,side,variant,scale=1){
+    const g=new THREE.Group();g.name=['chapel-statue-peter','chapel-statue-paul','chapel-statue-pilgrim','chapel-statue-bishop'][variant];g.userData={pose:['clefs et livre','épée et manuscrit','bâton et main levée','crosse et bénédiction'][variant],palette:['noir','bordeaux','or ancien']};g.position.set(x,1.25,z);g.rotation.y=-side*Math.PI/2-side*.12;g.scale.setScalar(scale);architecture.add(g);
+    const robe=variant%2?statueBlack:statueBurgundy,mantle=variant%2?statueBurgundy:statueBlack;
+    box(.85,.22,.85,0,-.1,0,statueBlack,g);
+    add(new THREE.CylinderGeometry(.25,.42,1.5,12),robe,0,.78,0,g);
+    const cloak=add(new THREE.CylinderGeometry(.29,.43,1.3,12,1,true,Math.PI*.35,Math.PI*1.3),mantle,0,.9,-.035,g);
+    add(new THREE.SphereGeometry(.23,12,8),statueStone,0,1.97,.02,g);
+    if(variant!==2)add(new THREE.ConeGeometry(.18,.32,10),statueStone,0,1.78,.14,g).rotation.x=Math.PI;
+    for(let i=0;i<(variant===1?4:8);i++){const a=i*Math.PI/4;add(new THREE.SphereGeometry(.085,8,6),statueStone,.21*Math.cos(a),2.08+.07*Math.sin(a),.12*Math.sin(a),g);}
+    for(const s of [-1,1]){
+      const raised=(variant===2&&s===1)||(variant===3&&s===-1);
+      const arm=box(.17,.68,.2,s*.36,raised?1.65:1.32,.13,mantle,g);arm.rotation.z=raised?-s*.65:s*.22;
+      add(new THREE.SphereGeometry(.095,8,6),statueStone,s*(raised?.55:.42),raised?1.91:1.02,.2,g);
+    }
+    for(const dx of [-.18,.18])box(.045,1.35,.045,dx,.83,.31,chairGold,g);
+    if(variant<2){box(.4,.52,.11,-.33,1.12,.3,mantle,g);box(.32,.44,.025,-.33,1.12,.37,chairGold,g);}
+    if(variant===0)for(const dx of [-.08,.08]){add(new THREE.TorusGeometry(.11,.03,5,16),chairGold,.33+dx,1.25,.3,g);box(.04,.5,.04,.33+dx,.92,.3,chairGold,g);box(.17,.06,.05,.37+dx,.72,.3,chairGold,g);}
+    if(variant===1){box(.055,1.6,.055,.42,1.03,.3,chairGold,g);box(.38,.055,.06,.42,1.48,.3,chairGold,g);}
+    if(variant===2){box(.065,2.25,.065,-.45,1.1,.19,chairGold,g);const hood=add(new THREE.TorusGeometry(.26,.06,6,20),mantle,0,2,.005,g);hood.scale.y=1.2;box(.27,.5,.08,0,1.16,.31,statueBlack,g);}
+    if(variant===3){add(new THREE.ConeGeometry(.24,.48,4),statueBurgundy,0,2.32,.01,g);box(.045,.39,.035,0,2.29,.19,chairGold,g);box(.22,.045,.035,0,2.33,.19,chairGold,g);box(.06,2.05,.06,.43,1.07,.17,chairGold,g);add(new THREE.TorusGeometry(.16,.035,6,24,Math.PI*1.6),chairGold,.47,2.12,.17,g);}
   }
   for(const side of [-1,1])for(const [index,z] of [-20.75,-25.65].entries()){
     const niche=new THREE.Group();niche.name='chapel-recessed-niche';architecture.add(niche);
@@ -121,7 +129,7 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     for(const dz of [-1.48,1.48]){box(1.15,3.5,.15,side*7.98,2.9,z+dz,pale,niche);box(.15,3.55,.12,side*7.36,2.9,z+dz,chairGold,niche);}
     arch(side*7.36,4.6,z,1.48,1.48,'yz',pale,.23,niche);arch(side*7.13,4.6,z,1.48,1.48,'yz',chairGold,.065,niche);
     box(.8,.22,2.8,side*7.8,1.1,z,chairGold,niche);
-    statue(side*7.85,z,side,index===(side<0?0:1),1.45);
+    statue(side*7.85,z,side,(side<0?0:2)+index,1.45);
   }
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
     const angel=new THREE.Group();angel.name='chapel-trumpet-angel';angel.position.set(side*7.1,6.8,z);angel.rotation.y=-side*Math.PI/2;architecture.add(angel);
@@ -145,6 +153,16 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const altar=new THREE.Group();altar.name='cathedra-petri';architecture.add(altar);
   box(2.25,.9,.9,0,1.21,-34,cream,altar);box(2.5,.15,1.12,0,1.76,-34,chairGold,altar);
   box(.07,.55,.06,0,1.3,-33.52,chairGold,altar);box(.32,.07,.06,0,1.43,-33.52,chairGold,altar);
+  // Évocation du tombeau sous le sanctuaire : aucun personnage représenté dans le sépulcre.
+  const tomb=new THREE.Group();tomb.name='saint-peter-tomb';tomb.position.set(0,.74,-33.4);architecture.add(tomb);
+  box(2.8,.16,1.6,0,.08,0,statueBlack,tomb);box(2.35,.65,1.25,0,.48,0,statueBlack,tomb);box(2.5,.14,1.4,0,.88,0,pale,tomb);
+  box(1.95,.43,.035,0,.48,.644,statueBurgundy,tomb);
+  for(const x of [-1.15,1.15])box(.06,.7,.04,x,.48,.66,chairGold,tomb);
+  for(const y of [.16,.8])box(2.4,.055,.05,0,y,.66,chairGold,tomb);
+  box(.045,.3,.035,0,.56,.69,chairGold,tomb);box(.2,.045,.035,0,.61,.69,chairGold,tomb);
+  const tombCanvas=document.createElement('canvas');tombCanvas.width=512;tombCanvas.height=96;const tombContext=tombCanvas.getContext('2d');tombContext.fillStyle='#30282a';tombContext.fillRect(0,0,512,96);tombContext.fillStyle='#c5ad72';tombContext.font='35px Georgia';tombContext.textAlign='center';tombContext.fillText('SANCTVS PETRVS',256,62);
+  const tombTexture=new THREE.CanvasTexture(tombCanvas);tombTexture.colorSpace=THREE.SRGBColorSpace;add(new THREE.PlaneGeometry(1.35,.25),new THREE.MeshStandardMaterial({map:tombTexture,roughness:.8}),0,.31,.7,tomb);
+  for(const x of [-1.35,1.35]){add(new THREE.CylinderGeometry(.12,.17,.1,10),chairGold,x,.18,.58,tomb);add(new THREE.SphereGeometry(.055,8,6),new THREE.MeshBasicMaterial({color:'#f7c47b'}),x,.29,.58,tomb);}
   const glory=new THREE.Group();glory.name='cathedra-glory';glory.position.set(0,4.7,-36.4);architecture.add(glory);
   add(new THREE.CircleGeometry(.48,32),new THREE.MeshBasicMaterial({color:'#ffe4ad'}),0,0,.02,glory);
   for(let i=0;i<32;i++){const a=i*Math.PI/16;const ray=box(.045,.6,.07,Math.sin(a)*.95,Math.cos(a)*.95,0,chairGold,glory);ray.rotation.z=-a;}
