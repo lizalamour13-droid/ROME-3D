@@ -327,7 +327,7 @@ for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
 ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
 
 // Maquette extérieure de Saint-Pierre, exposée à l'opposé du mur monumental.
-const displayCase={x:-5.9,z:9.4,halfWidth:1.9,halfDepth:1.95};
+const displayCase={x:0,z:9.4,halfWidth:1.9,halfDepth:1.95};
 const miniature=new THREE.Group();miniature.name='basilica-miniature';
 miniature.position.set(displayCase.x,1.055,displayCase.z);miniature.rotation.y=Math.PI;scene.add(miniature);
 function miniBox(w,h,d,x,y,z,material=cream){
