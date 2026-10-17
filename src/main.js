@@ -687,7 +687,7 @@ label.position.set(displayCase.x,.62,displayCase.z-1.783);label.rotation.y=Math.
 
 const chapel=createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white});
 
-scene.add(new THREE.HemisphereLight('#fff0d8','#918271',2));
+const roomAmbient=new THREE.HemisphereLight('#fff0d8','#918271',2);roomAmbient.name='room-ambient';scene.add(roomAmbient);
 const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-16,right:16,top:18,bottom:-18,near:.5,far:50});sun.shadow.normalBias=.035;sun.target.position.set(-3,0,-5);scene.add(sun,sun.target);
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);
 // Navigation à hauteur d’œil, collisions avec les colonnes et les limites de la salle.
@@ -707,6 +707,6 @@ function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('Ke
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 let currentRoom=1;
 const roomNumber=document.querySelector('footer b');
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);const nextRoom=camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;roomNumber.textContent=nextRoom===2?'02 / 02 · LA CHAIRE':'01 / 02 · LES MARBRES';}renderer.render(scene,camera);});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.24,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);const nextRoom=camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;roomNumber.textContent=nextRoom===2?'02 / 02 · LA CHAIRE':'01 / 02 · LES MARBRES';}renderer.render(scene,camera);});
 // État observable pour les tests navigateur, sans modifier la scène.
 window.room={camera,scene,renderer,allowed,reset,get active(){return active;}};

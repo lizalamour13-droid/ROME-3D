@@ -98,4 +98,10 @@ Le test `node tests/chapel.cjs` utilise les mêmes prérequis que `tests/browser
 
 ## Sanctuaire monumental
 
-La chaire est agrandie de 45 % et reçoit une structure dorée, des panneaux noirs, deux colonnes en or ancien et un fronton monumental. Le fond courbe de l'abside est habillé de bleu nuit très sombre, de 108 petites étoiles dorées instanciées et de contours architecturaux en or ancien. Le reste de la salle conserve sa pierre claire, ses vitraux, ses bancs et ses visiteurs. Les nouveaux éléments du sanctuaire restent à l'intérieur de la zone de l'estrade déjà protégée par collision.
+La chaire est agrandie de 45 % et reçoit une structure dorée, des panneaux noirs, deux colonnes en or ancien et un fronton monumental. Le fond courbe de l'abside est habillé de bleu nuit très sombre, de 108 petites étoiles dorées instanciées et de contours architecturaux en or ancien. Les vitraux, bancs et visiteurs sont conservés ; une ambiance noire éclairée aux bougies remplace désormais la pierre claire de cette seconde salle. Les nouveaux éléments du sanctuaire restent à l'intérieur de la zone de l'estrade déjà protégée par collision.
+
+## Salle noire aux bougies et baldaquin
+
+La seconde salle reçoit des murs et une voûte noirs, un sol sombre et huit appliques murales portant trois bougies chacune. Leurs flammes et leur halo sont animés très légèrement. Quatre lumières chaudes partagées accompagnent les vingt-quatre bougies ; les vitraux sont atténués. Le niveau des lumières générales s'adapte progressivement à l'entrée de la seconde salle et revient à son réglage initial au retour dans la première.
+
+Un baldaquin géométrique inspiré de Bernin encadre le sanctuaire : quatre colonnes torsadées en bronze sombre avec lianes dorées, bases noires, chapiteaux, franges, volutes et croix sommitale. Sa partie supérieure reste ouverte pour préserver la visibilité de la gloire et de la chaire. Les nouveaux éléments restent sur l'estrade protégée ; les allées restent libres. La forme est une interprétation simplifiée, sans prétendre reproduire tous les détails du baldaquin historique.
