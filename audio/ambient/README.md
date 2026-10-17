@@ -1,4 +1,4 @@
-# Ambiances naturelles — CC0
+# Ambiances naturelles — CC0 et domaine public
 
 Enregistrements distribués par Blanket, version source 775f2a767230a9681850d1b1e085be58656f1382 :
 https://github.com/rafaelmardojai/blanket/blob/775f2a767230a9681850d1b1e085be58656f1382/SOUNDS_LICENSING.md
@@ -10,3 +10,7 @@ https://github.com/rafaelmardojai/blanket/blob/775f2a767230a9681850d1b1e085be586
 Ces trois enregistrements sont annoncés CC0 par la source : https://creativecommons.org/publicdomain/zero/1.0/
 Adaptation pour le jeu : extrait de 40 secondes maximum, niveaux équilibrés (+9 dB oiseaux, +15 dB eau, +6 dB vent), fondus d’entrée/sortie et conversion MP3 stéréo 96 kbit/s. Aucun extrait du code de Blanket n’est utilisé.
 Les sons sont locaux, en boucle, avec niveaux faibles adaptés à la position. Le son d’eau provient d’un cours d’eau naturel et accompagne les fontaines stylisées.
+
+## Murmures de conversation
+
+conversation.mp3 : extrait « Coffee Shop » de stephan, domaine public selon la liste de licences de Blanket citée ci-dessus. Source originale : https://soundbible.com/1664-Restaurant-Ambiance.html ; version audio distribuée par Blanket (même révision), data/resources/sounds/coffee-shop.ogg. Extrait de 40 secondes maximum, conversion MP3 96 kbit/s et fondus. Enregistrement de conversations indistinctes ; le volume diminue jusqu’au silence à sept mètres des personnages et reste nul à l’intérieur.
