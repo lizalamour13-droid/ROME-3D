@@ -296,6 +296,62 @@ for(const side of [-1,1])for(const [index,z] of [-6.5,.5,7.5].entries()){
   picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée','Le Colisée','Jardin italien'][artIndex];scene.add(picture);
   box(.15,.08,1.2,side*8.28,2.19,z,gold);
 }
+// Quatre statues entre les tableaux, adossées aux pilastres sans toucher les colonnes.
+const galleryStatues=[];
+function galleryStatue(side,z,pose){
+  const group=new THREE.Group();group.name='gallery-statue';group.userData.pose=pose;
+  group.position.set(side*8.05,0,z);group.rotation.y=-side*Math.PI/2;scene.add(group);
+  galleryStatues.push({x:side*8.05,z,halfWidth:.72,halfDepth:.85});
+  const block=(w,h,d,x,y,z,material)=>{const mesh=new THREE.Mesh(boxGeometry,material);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;};
+  const round=(rt,rb,h,x,y,z,material,n=10)=>{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,n),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);return mesh;};
+  const joint=(point,r,material)=>{const mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(r,0),material);mesh.position.set(...point);mesh.castShadow=true;group.add(mesh);return mesh;};
+  const limb=(a,b,r,material)=>{const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b);const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r*.85,r,start.distanceTo(end),8),material);mesh.position.copy(start).add(end).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),end.sub(start).normalize());mesh.castShadow=true;group.add(mesh);return mesh;};
+  block(1.07,.12,.82,0,.11,0,black);
+  block(.9,.61,.67,0,.475,0,cream);
+  block(.93,.045,.7,0,.74,0,gold);
+  block(1.08,.14,.83,0,.84,0,stone);
+  // Drapé de pierre ivoire et manteau aux plis géométriques.
+  round(.23,.38,1.32,0,1.58,0,white,12);
+  round(.32,.22,.49,0,2.44,0,white,10);
+  round(.1,.12,.16,0,2.75,0,cream,8);
+  const head=joint([0,2.99,.015],.225,white);head.scale.set(.83,1.2,.9);
+  head.rotation.z=[-.12,.1,0,-.15][pose];
+  for(const x of [-.25,-.12,0,.12,.25])block(.035,1.02,.055,x,1.54,.29,cream);
+  const sash=block(.12,.62,.045,.04,2.39,.28,gold);sash.rotation.z=-.38;
+  round(.252,.252,.065,0,2.1,0,gold,12);
+  joint([-.21,2.58,.21],.075,gold);
+  // Les quatre silhouettes ont des bras réellement différents.
+  const poses=[
+    [[[-.28,2.55,0],[-.46,2.29,.12],[-.33,2.25,.38]],[[.28,2.55,0],[.48,2.65,.07],[.49,3.02,.12]]],
+    [[[-.28,2.55,0],[-.43,2.2,.15],[-.06,2.08,.39]],[[.28,2.55,0],[.43,2.2,.15],[.06,2.08,.39]]],
+    [[[-.28,2.55,0],[-.52,2.37,.1],[-.68,2.48,.26]],[[.28,2.55,0],[.52,2.37,.1],[.68,2.48,.26]]],
+    [[[-.28,2.55,0],[-.47,2.62,.12],[-.48,2.93,.19]],[[.28,2.55,0],[.43,2.25,.12],[.29,2.2,.34]]]
+  ];
+  for(const [shoulder,elbow,hand] of poses[pose]){
+    limb(shoulder,elbow,.125,white);limb(elbow,hand,.092,white);
+    const cuff=hand.map((v,i)=>v*.86+elbow[i]*.14);limb(cuff,hand,.098,gold);
+    joint(hand,.09,cream);
+  }
+  if(pose===0||pose===3){
+    const sign=pose===0?-1:1;
+    const book=block(.31,.39,.095,sign*.31,2.25,.39,bronze);book.rotation.z=sign*.12;
+    block(.24,.32,.018,sign*.31,2.25,.449,gold);
+    block(.18,.25,.021,sign*.31,2.25,.46,cream);
+  }
+  if(pose===0||pose===2){
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(.3,.018,6,24),gold);
+    halo.position.set(0,3.04,-.14);group.add(halo);
+  }
+  if(pose===3){
+    limb([-.49,2.91,.2],[-.52,3.54,.2],.012,gold);
+    for(let i=0;i<5;i++)for(const sign of [-1,1]){
+      const leaf=joint([-.52+sign*.065,3.17+i*.067,.2],.06,gold);
+      leaf.scale.set(1.4,.45,.3);leaf.rotation.z=sign*.5;
+    }
+  }
+}
+for(const side of [-1,1])for(const [index,z] of [-3,4].entries())galleryStatue(side,z,index+(side>0?2:0));
+
 // Ornements en or ancien : rosaces des pilastres et feuilles géométriques des chapiteaux.
 for(const side of [-1,1])for(const z of [-10,-3,4,11]){
   const medallion=cylinder(.25,.25,.08,side*8.43,7.1,z,gold,12);medallion.rotation.z=Math.PI/2;
@@ -461,7 +517,7 @@ addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
 addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function allowed(x,z){return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function move(dt){if(!active&&!dragging)return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*3.5*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*3.5*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);renderer.render(scene,camera);});

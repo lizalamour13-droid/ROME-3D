@@ -69,3 +69,7 @@ Le verre transparent ne projette pas d'ombre opaque. Le socle dispose d'une coll
 ## Tableau du panneau droit
 
 Le panneau central du mur droit reçoit un jardin italien avec une allée de cyprès, un bassin et un pavillon. Les six tableaux sont désormais tous différents, à raison de trois par mur latéral.
+
+## Statues entre les tableaux
+
+Quatre statues ivoire ornées d'or ancien occupent les intervalles entre les tableaux (deux par mur, z = -3 et 4). Leurs poses sont différentes : livre et main levée, mains jointes, bras ouverts, palme et livre. Leurs socles sont placés contre les pilastres à x = ±8,05, hors de l'emprise des quatre colonnes. Des collisions rectangulaires tiennent compte des socles et des bras ; le passage devant les statues est vérifié. Aucun tableau n'est déplacé ou masqué.
