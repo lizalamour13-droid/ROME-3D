@@ -2,7 +2,8 @@
 export function setupAmbientAudio({enter,prayerAudio,exterior}){
   const panel=document.querySelector('#ambient-controls');
   const button=document.querySelector('#ambient-toggle'),volume=document.querySelector('#ambient-volume'),feedback=document.querySelector('#ambient-feedback');
-  const tracks=Object.fromEntries(['birds','stream','wind','conversation'].map(name=>{const audio=new Audio(`${import.meta.env.BASE_URL}audio/ambient/${name}.mp3`);audio.loop=true;audio.preload='none';audio.volume=0;return [name,audio];}));
+  const tracks=Object.fromEntries(['birds','stream','wind','conversation','music'].map(name=>{const audio=new Audio(`${import.meta.env.BASE_URL}audio/ambient/${name}.mp3`);audio.loop=true;audio.preload='none';audio.volume=0;return [name,audio];}));
+  const musicEnabled=document.querySelector('#music-enabled');
   let enabled=false,chosen=false,level=.45;
   function label(){button.textContent=enabled?'Couper les ambiances · M':'Activer les ambiances · M';button.setAttribute('aria-pressed',String(enabled));}
   async function play(){
@@ -19,7 +20,7 @@ export function setupAmbientAudio({enter,prayerAudio,exterior}){
     const outside=Math.max(0,Math.min(1,(position.z-14)/5)),chapel=position.z<-17;
     const distance=(x,z)=>Math.hypot(position.x-x,position.z-z);
     const nearFountain=outside?Math.max(...[-15,15].map(x=>1/(1+(distance(x,66)/8)**2))):chapel?0:1/(1+(distance(0,0)/4)**2);
-    const targets={conversation:outside*exterior.conversationGain(position)*.45,birds:outside*.28,stream:nearFountain*.5,wind:chapel?(prayerAudio.paused?.025:.008):.04+outside*.12};
+    const targets={music:musicEnabled.checked?(prayerAudio.paused?.2:.04):0,conversation:outside*exterior.conversationGain(position)*.45,birds:outside*.28,stream:nearFountain*.5,wind:chapel?(prayerAudio.paused?.025:.008):.04+outside*.12};
     for(const [name,audio] of Object.entries(tracks))audio.volume+=((targets[name]*level)-audio.volume)*.08;
   }
   return {tracks,update,get enabled(){return enabled;}};

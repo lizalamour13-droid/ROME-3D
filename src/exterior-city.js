@@ -33,7 +33,7 @@ export function createExteriorCity({parent,mat,cream,stone}){
   batchBox(stone,15,.08,52,0,-2.18,129);for(const x of [-8,8])batchBox(cream,1,.1,52,x,-2.1,129);
   const obstacles=[],walkers=[],seated=[];
   const add=(g,m,x,y,z,p=city)=>{const mesh=new THREE.Mesh(g,m);mesh.position.set(x,y,z);p.add(mesh);return mesh;};
-  const box=(w,h,d,x,y,z,m,p)=>add(unit,m,x,y,z,p).scale.set(w,h,d);
+  const box=(w,h,d,x,y,z,m,p)=>{const mesh=add(unit,m,x,y,z,p);mesh.scale.set(w,h,d);return mesh;};
   const clothes=['#7e3f42','#365873','#6b7753','#b09371','#665d79','#475b60'].map(c=>mat(c));
   function person(index,sitting=false){
     const group=new THREE.Group();group.name=sitting?'square-seated-person':'square-walking-person';city.add(group);
@@ -74,6 +74,26 @@ export function createExteriorCity({parent,mat,cream,stone}){
     const actor=person(i);const route=routes[i%4],start=Math.floor(i/4)%route.length;
     actor.group.position.set(route[start][0],-2,route[start][1]);walkers.push({...actor,route,target:(start+1)%route.length,distance:i*.3});
   }
+  // Familles : enfants accompagnés et poussettes qui suivent leur parent.
+  for(let i=0;i<6;i++){
+    const child=person(i+2);child.group.name='square-child';child.group.scale.setScalar(.62+(i%2)*.07);
+    const route=routes[i%2],start=1+Math.floor(i/2)%3;child.group.position.set(route[start][0]+(i%2?.9:-.9),-2,route[start][1]-.7);
+    walkers.push({...child,route,target:(start+1)%route.length,distance:i*.4,speed:.7});
+  }
+  for(let i=0;i<3;i++){
+    const mother=person(i+3);mother.group.name='square-mother';mother.group.userData.dialogueName=['Lucia et son bébé','Sofia et sa famille','Anna en promenade'][i];mother.group.userData.dialogueRole='family';
+    const skirt=add(new THREE.CylinderGeometry(.18,.3,.55,10),clothes[(i+3)%clothes.length],0,.69,0,mother.group);
+    const stroller=new THREE.Group();stroller.name='square-stroller';stroller.position.z=.95;mother.group.add(stroller);
+    for(const side of [-1,1])for(const z of [-.28,.28]){const wheel=add(new THREE.CylinderGeometry(.16,.16,.07,10),iron,side*.29,.17,z,stroller);wheel.rotation.z=Math.PI/2;}
+    box(.5,.28,.7,0,.5,0,clothes[i],stroller);box(.44,.07,.5,0,.65,.04,cream,stroller);
+    const hood=add(new THREE.SphereGeometry(1,12,8,0,Math.PI*2,0,Math.PI/2),clothes[i],0,.65,-.16,stroller);hood.scale.set(.28,.27,.27);
+    for(const x of [-.25,.25]){const handle=box(.035,.65,.035,x,.82,-.38,iron,stroller);handle.rotation.x=-.35;}
+    box(.53,.04,.04,0,1.12,-.48,iron,stroller);
+    const route=i===1?[[-22,41],[-22,59],[-21,81],[-15,91]]:[[22,42],[22,57],[22,77],[16,91]];
+    const start=i===2?2:0;mother.group.position.set(route[start][0],-2,route[start][1]);walkers.push({...mother,route,target:(start+1)%route.length,distance:i*.8,speed:.5,stroller:true});
+  }
+  walkers[0].group.userData.dialogueName='Marco, guide de la place';walkers[0].group.userData.dialogueRole='guide';
+  seated[0].group.userData.dialogueName='Elena, en visite';seated[0].group.userData.dialogueRole='visitor';
   for(const side of [-1,1])for(const z of [41,53,79,92]){
     const x=side*20;obstacles.push({x,z,hx:.5,hz:.5});
     add(new THREE.CylinderGeometry(.09,.16,3.8,8),iron,x,-.1,z);add(new THREE.CylinderGeometry(.3,.4,.3,10),stone,x,-1.8,z);
@@ -86,11 +106,11 @@ export function createExteriorCity({parent,mat,cream,stone}){
     walkers.forEach((actor,index)=>{
       const [tx,tz]=actor.route[actor.target],dx=tx-actor.group.position.x,dz=tz-actor.group.position.z,length=Math.hypot(dx,dz);
       if(length<.12){actor.target=(actor.target+1)%actor.route.length;return;}
-      const step=Math.min(length,dt*(.65+(index%3)*.09)),nx=actor.group.position.x+dx/length*step,nz=actor.group.position.z+dz/length*step;
-      const clear=(!viewer||Math.hypot(viewer.x-nx,viewer.z-nz)>.95)&&!walkers.some(other=>other!==actor&&Math.hypot(other.group.position.x-nx,other.group.position.z-nz)<.6);
+      const step=Math.min(length,dt*(actor.speed??(.65+(index%3)*.09))),nx=actor.group.position.x+dx/length*step,nz=actor.group.position.z+dz/length*step;
+      const clear=!actor.group.userData.isConversing&&(!viewer||Math.hypot(viewer.x-nx,viewer.z-nz)>(actor.stroller?1.9:.95))&&!walkers.some(other=>other!==actor&&Math.hypot(other.group.position.x-nx,other.group.position.z-nz)<(actor.stroller||other.stroller?1.1:.6));
       if(clear){actor.group.position.x=nx;actor.group.position.z=nz;actor.distance+=step;actor.group.rotation.y=Math.atan2(dx,dz);}
       const phase=actor.distance*10;
-      actor.limbs.forEach(({hip,knee,arm,elbow,side})=>{const a=phase+(side<0?Math.PI:0);hip.rotation.x=clear?Math.sin(a)*.4:0;knee.rotation.x=clear?Math.max(0,-Math.sin(a))*.65:0;arm.rotation.x=clear?-Math.sin(a)*.23:-.07;elbow.rotation.x=-.22+(clear?Math.sin(a)*.06:0);});
+      actor.limbs.forEach(({hip,knee,arm,elbow,side})=>{const a=phase+(side<0?Math.PI:0);hip.rotation.x=clear?Math.sin(a)*.4:0;knee.rotation.x=clear?Math.max(0,-Math.sin(a))*.65:0;arm.rotation.x=actor.stroller?-.9:clear?-Math.sin(a)*.23:-.07;elbow.rotation.x=actor.stroller?-.25:-.22+(clear?Math.sin(a)*.06:0);});
       actor.group.position.y=-2+(clear?Math.abs(Math.sin(phase))*.025:0);
     });
     seated.forEach((actor,i)=>{
@@ -100,7 +120,7 @@ export function createExteriorCity({parent,mat,cream,stone}){
       actor.limbs[1].elbow.rotation.x=-.55+Math.sin(time*.6+i)*.05;
     });
   }
-  function blocked(x,z){return obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz)||walkers.some(a=>Math.hypot(x-a.group.position.x,z-a.group.position.z)<.45);}
+  function blocked(x,z){return obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz)||walkers.some(a=>Math.hypot(x-a.group.position.x,z-a.group.position.z)<(a.stroller?1:.45)||(a.stroller&&Math.hypot(x-a.group.position.x-Math.sin(a.group.rotation.y)*.95,z-a.group.position.z-Math.cos(a.group.rotation.y)*.95)<.65));}
   function conversationGain(position){
     let nearest=Infinity;
     for(const actor of [...walkers,...seated])nearest=Math.min(nearest,Math.hypot(position.x-actor.group.position.x,position.z-actor.group.position.z));

@@ -14,3 +14,7 @@ Les sons sont locaux, en boucle, avec niveaux faibles adaptés à la position. L
 ## Murmures de conversation
 
 conversation.mp3 : extrait « Coffee Shop » de stephan, domaine public selon la liste de licences de Blanket citée ci-dessus. Source originale : https://soundbible.com/1664-Restaurant-Ambiance.html ; version audio distribuée par Blanket (même révision), data/resources/sounds/coffee-shop.ogg. Extrait de 40 secondes maximum, conversion MP3 96 kbit/s et fondus. Enregistrement de conversations indistinctes ; le volume diminue jusqu’au silence à sept mètres des personnages et reste nul à l’intérieur.
+
+## Musique de fond
+
+music.mp3 : courte composition originale en do majeur / la mineur, rendue avec des échantillons de piano acoustique Salamander Grand Piano d’Alexander Holm (Yamaha C5), distribués dans https://github.com/Tonejs/audio/tree/master/salamander . Licence des échantillons : CC BY 3.0, https://creativecommons.org/licenses/by/3.0/ ; attribution Alexander Holm. Source de la licence : salamander/README de ce dépôt. Adaptation : changement de hauteur, arrangement, mixage, fondus et conversion MP3. La musique reste discrète et peut être désactivée indépendamment dans le panneau des ambiances.

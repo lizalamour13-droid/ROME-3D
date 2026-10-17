@@ -165,3 +165,9 @@ Le pavage de la place est désormais gris anthracite/noir, avec petits pavés à
 ## Sanctuaire centré et quatre statues distinctes
 
 Le maître, son pupitre et l’estrade sont centrés sous le baldaquin. L’allée mène au pied des marches et les côtés restent accessibles. Un monument funéraire stylisé évoque le tombeau de saint Pierre près de l’autel, en noir, bordeaux et or, avec une inscription. Les quatre statues des niches sont différentes : Pierre avec clefs/livre, Paul avec épée/manuscrit, pèlerin avec bâton et main levée, évêque avec mitre/crosse. Les robes et manteaux utilisent seulement noir, bordeaux sombre et or ancien, avec visages en pierre naturelle.
+
+## Premières interactions et familles
+
+Approchez d’un personnage proposant un échange : **E** ouvre la discussion, **1/2/3** ou les boutons sélectionnent une question, **E** ferme. Le guide explique la place, une visiteuse partage ses impressions et les familles proposent de petites conversations. Le maître et le prêtre permettent aussi de lancer/arrêter la prière. Ce sont des dialogues écrits à choix, sans service en ligne. La marche est suspendue pendant un échange.
+
+Un prêtre blanc et or, avec mitre et crosse, marche sur le tapis rouge. Six enfants et trois femmes avec poussettes rejoignent la place. Une musique de piano douce démarre avec les ambiances ; décochez « Musique douce » après Échap pour la couper seule. M coupe tous les sons d’ambiance. Crédits et licence du piano dans `public/audio/ambient/README.md`.
