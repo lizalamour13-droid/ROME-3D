@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),path=require('node:path');
  await page.goto(process.env.ROME_TEST_URL||'http://127.0.0.1:5174/ROME-3D/');await page.waitForFunction(()=>window.room?.verticalRoutes);
  await page.evaluate(()=>{room.renderer.setPixelRatio(.4);room.renderer.shadowMap.enabled=false;});
  const layout=await page.evaluate(()=>{const s=room.scene,tomb=s.getObjectByName('saint-peter-tomb'),crypt=s.getObjectByName('saint-peter-crypt');return {tombInCrypt:tomb.parent===crypt,tombY:tomb.position.y,tombZ:tomb.position.z,cryptCandles:s.getObjectsByProperty('name','crypt-candle').length,spiralCandles:s.getObjectsByProperty('name','spiral-candle').length,pitHole:s.getObjectByName('chapel-floor').geometry.parameters.shapes.holes.length,balconies:!!s.getObjectByName('marble-room-upper-balconies'),benches:s.getObjectsByProperty('name','balcony-bench').length,smallStatues:s.getObjectsByProperty('name','balcony-small-statue').length,warmStrips:s.getObjectsByProperty('name','balcony-warm-light-strip').length,aboveTombPrompt:room.interactions.nearby};});
- assert(layout.tombInCrypt&&layout.tombY<-7&&layout.tombZ<-38&&layout.cryptCandles>=6&&layout.spiralCandles>=6&&layout.pitHole===1&&layout.balconies&&layout.benches===2&&layout.smallStatues===2&&layout.warmStrips===2);
+ assert(layout.tombInCrypt&&layout.tombY<-7&&layout.tombZ<-38&&layout.cryptCandles>=6&&layout.spiralCandles>=6&&layout.pitHole===1&&layout.balconies&&layout.benches===4&&layout.smallStatues===0&&layout.warmStrips===2);
  await page.click('#enter');await page.waitForFunction(()=>room.active);
  // Quelques marches franchies au vrai clavier : la hauteur doit changer sans touche spéciale.
  await page.evaluate(()=>{const s=room.verticalRoutes.spirals.gallery;room.camera.position.set(s.x,1.75,s.z-1.15);dispatchEvent(new MouseEvent('mousemove',{movementX:(room.camera.rotation.y+Math.PI/2)/.002,movementY:room.camera.rotation.x/.002}));});
@@ -18,7 +18,7 @@ const assert=require('node:assert/strict'),path=require('node:path');
    const up=room.verticalRoutes.spirals.gallery;room.camera.position.set(up.x,1.75,up.z-1.085);report.up=travel('gallery');
    // Palier, balcon arrière, balcon latéral, puis retour au même escalier.
    function line(x,z){const start=room.camera.position.clone(),steps=Math.ceil(Math.hypot(x-start.x,z-start.z)/.04);for(let i=1;i<=steps;i++)room.walkTo(start.x+(x-start.x)*i/steps,start.z+(z-start.z)*i/steps);return Math.hypot(room.camera.position.x-x,room.camera.position.z-z)<.03;}
-   report.balcony=[line(-5.5,11.55),line(7.3,11.55),line(7.3,-8.2),line(-7.3,-8.2),line(-7.3,-7),line(-7.3,-8.2),line(7.3,-8.2),line(7.3,11.55),line(-5.5,11.55),line(-5.5,10.685)].every(Boolean);
+   report.balcony=[line(-5.5,11.55),line(7.3,11.55),line(7.3,-11.1),line(-7.3,-11.1),line(-7.3,-7),line(-7.3,-11.1),line(7.3,-11.1),line(7.3,11.55),line(-5.5,11.55),line(-5.5,10.685)].every(Boolean);
    report.noFall=!room.navigationAt(4,0,6.4);
    line(-5.5,11.55);line(0,11.55);line(0,12.18);const edge=room.camera.position.clone();room.walkTo(0,12.4);report.noEscapeFromBalcony=room.camera.position.distanceTo(edge)<.001;
    line(0,11.55);line(-5.5,11.55);line(-5.5,10.685);report.downFromBalcony=travel('gallery',true);

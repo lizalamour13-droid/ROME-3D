@@ -44,7 +44,7 @@ export function createInteriorVisitors(scene){
   function point(x,y,z){balconyPath.push(new THREE.Vector3(x,y,z));}
   function helix(s,reverse=false){const radius=(s.inner+s.outer)/2;for(let i=0;i<=240;i++){const t=reverse?1-i/240:i/240,a=s.start+t*s.turns*Math.PI*2*(s.direction??1);point(s.x+Math.cos(a)*radius,s.height*t,s.z+Math.sin(a)*radius);}}
   point(-5.5,0,7.5);helix(SPIRALS.gallery);point(-5.5,6.4,11.55);
-  point(-7.3,6.4,11.55);point(-7.3,6.4,-8.05);point(7.3,6.4,-8.05);point(7.3,6.4,11.55);point(5.5,6.4,11.55);
+  point(-7.3,6.4,11.55);point(-7.3,6.4,-11.1);point(7.3,6.4,-11.1);point(7.3,6.4,11.55);point(5.5,6.4,11.55);
   helix(SPIRALS.galleryRight,true);point(5.5,0,7.5);point(-5.5,0,7.5);
   const lengths=[0];for(let i=1;i<balconyPath.length;i++)lengths.push(lengths.at(-1)+balconyPath[i].distanceTo(balconyPath[i-1]));const total=lengths.at(-1);
   function sample(cursor){let lo=0,hi=lengths.length-1;while(hi-lo>1){const mid=(lo+hi)>>1;if(lengths[mid]<cursor)lo=mid;else hi=mid;}return balconyPath[lo].clone().lerp(balconyPath[hi],(cursor-lengths[lo])/(lengths[hi]-lengths[lo]||1));}

@@ -546,7 +546,7 @@ ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
 // Maquette extérieure de Saint-Pierre, exposée au centre sous verre.
 const displayCase={x:0,z:0,halfWidth:1.9,halfDepth:1.95};
 const miniature=new THREE.Group();miniature.name='basilica-miniature';
-miniature.position.set(displayCase.x,1.055,displayCase.z);miniature.rotation.y=Math.PI;scene.add(miniature);
+miniature.position.set(displayCase.x,1.055,displayCase.z);miniature.rotation.y=0;scene.add(miniature);
 function miniBox(w,h,d,x,y,z,material=cream){
   const mesh=new THREE.Mesh(boxGeometry,material);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;miniature.add(mesh);return mesh;
 }

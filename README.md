@@ -264,3 +264,10 @@ L’escalier de l’orgue a une largeur de passage accrue, une entrée orientée
 La crypte reprend les éléments de la référence dans le style géométrique du jeu : pierre crème, berceau arrondi et arcs transversaux, piliers moulurés, deux niches avec saints en pierre, lanternes à bougie et tombeau clair avec médaillon aux clefs dorées. Le dallage alterne pierre grise et crème. Le nom « SAINT PIERRE », les accents bordeaux, la brume basse et le récit avec apparition sont conservés. L’escalier descend toujours directement dans la pièce ouverte.
 
 `tests/easy-navigation.cjs` vérifie au clavier le trajet entre les deux salles, les allées, les traversées entre les rangées et l’approche de l’escalier, ainsi que le passage près des personnages. `tests/chapel-organ.cjs` vérifie la montée et la descente libres et le balcon complet ; `tests/vertical-routes.cjs` conserve les vérifications de la crypte et du récit.
+
+
+### Première salle : balcons dégagés et maquette retournée
+
+Les balcons suivent tout le périmètre de la salle des marbres : les galeries latérales vont jusqu’au mur du fond et rejoignent une galerie transversale contre ce mur. Les anciennes traverses aux raccords et les barrières latérales des paliers sont retirées ; les protections du vide central et des bords restent en place. Les petites statues du balcon sont retirées. Quatre bancs en bois avec dossier droit très simple sont adossés aux bords extérieurs, deux à gauche et deux à droite, en laissant l’allée libre. Les visiteurs suivent le nouveau tour complet.
+
+La maquette centrale est tournée de 180° sous sa vitrine ; le socle et la vitrine restent en place. Les essais de circulation des balcons et des visiteurs utilisent le nouveau circuit.
