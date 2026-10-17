@@ -4,10 +4,10 @@ import * as THREE from 'three';
 export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white}){
   const chapel=new THREE.Group();chapel.name='chapel';scene.add(chapel);
   const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
-  const chapelBlack=mat('#11151a'),nightFloor=mat('#292a29'),darkStone=mat('#282a2b');
+  const chapelBlack=mat('#11151a'),nightFloor=mat('#d9cdb5',.35),darkStone=mat('#282a2b');
   // Même décor étoilé sur les murs et la voûte, sans panneaux de vitrail.
   const starCanvas=document.createElement('canvas');starCanvas.width=512;starCanvas.height=512;
-  const starContext=starCanvas.getContext('2d');starContext.fillStyle='#101922';starContext.fillRect(0,0,512,512);
+  const starContext=starCanvas.getContext('2d');starContext.fillStyle='#314e79';starContext.fillRect(0,0,512,512);
   for(const [index,[x,y]] of [[52,80],[218,43],[411,102],[133,219],[334,243],[465,351],[53,433],[242,397],[365,471]].entries()){
     starContext.fillStyle=index%2?'#b19a5f':'#9d8958';starContext.beginPath();
     for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=i%2?2.5:6;const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;i?starContext.lineTo(px,py):starContext.moveTo(px,py);}starContext.closePath();starContext.fill();
@@ -15,7 +15,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const starTexture=new THREE.CanvasTexture(starCanvas);starTexture.colorSpace=THREE.SRGBColorSpace;starTexture.wrapS=starTexture.wrapT=THREE.RepeatWrapping;
   const starWallMaterial=new THREE.MeshStandardMaterial({map:starTexture,roughness:.92,metalness:.08});
   function starred(mesh){
-    mesh.material=starWallMaterial;mesh.geometry=mesh.geometry.clone();const uv=mesh.geometry.attributes.uv,normal=mesh.geometry.attributes.normal;
+    mesh.material=cream;mesh.geometry=mesh.geometry.clone();const uv=mesh.geometry.attributes.uv,normal=mesh.geometry.attributes.normal;
     for(let i=0;i<uv.count;i++){
       const nx=Math.abs(normal.getX(i)),ny=Math.abs(normal.getY(i));
       const width=nx>.5?mesh.scale.z:mesh.scale.x,height=ny>.5?mesh.scale.z:mesh.scale.y;
@@ -72,6 +72,52 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
     box(.22,8.5,.44,side*7.67,4.25,z,darkStone);box(.38,.18,.64,side*7.6,8.6,z,gold);
   }
+  // Décor inspiré de la référence : pierre claire, marbre sombre, tentures et anges.
+  const referenceDecor=new THREE.Group();referenceDecor.name='chapel-reference-decor';chapel.add(referenceDecor);
+  const burgundyMarble=mat('#713b40',.36),paleStone=mat('#d5c5ad',.7);
+  const decorateBox=(w,h,d,x,y,z,m)=>{const mesh=box(w,h,d,x,y,z,m);mesh.castShadow=false;referenceDecor.attach(mesh);return mesh;};
+  for(let z=-19;z>=-29;z-=2)for(const x of [-6,-4,-2,2,4,6]){
+    decorateBox(1.88,.018,1.88,x,.025,z,(Math.round(x/2)+Math.round(z))%2?darkStone:burgundyMarble);
+    for(const dx of [-.96,.96])decorateBox(.025,.022,1.94,x+dx,.029,z,chairGold);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.58,.025,5,28),cream);ring.rotation.x=-Math.PI/2;ring.position.set(x,.042,z);referenceDecor.add(ring);
+  }
+  for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
+    const x=side*7.66;
+    decorateBox(.55,2.1,.85,x,1.1,z,darkStone);
+    decorateBox(.54,6,.72,x,5.05,z,paleStone);
+    for(const y of [.18,2.2,5.8,8.15])decorateBox(.7,.12,.95,x,y,z,chairGold);
+    decorateBox(.73,.28,1.02,x,8.5,z,paleStone);
+    // Petits anges en relief, tournés vers l'allée centrale.
+    const angel=new THREE.Group();angel.name='chapel-trumpet-angel';angel.position.set(side*7.12,6.45,z);angel.rotation.y=-side*Math.PI/2;referenceDecor.add(angel);
+    const add=(g,m,x,y,z)=>{const a=new THREE.Mesh(g,m);a.position.set(x,y,z);angel.add(a);return a;};
+    add(new THREE.SphereGeometry(.17,10,7),cream,0,.43,0);
+    add(new THREE.ConeGeometry(.23,.46,10),cream,0,.06,0);
+    for(const sign of [-1,1]){
+      const wing=add(new THREE.SphereGeometry(1,10,7),chairGold,sign*.23,.24,-.1);wing.scale.set(.28,.14,.055);wing.rotation.z=sign*.55;
+      const arm=add(new THREE.BoxGeometry(.09,.1,.3),cream,sign*.14,.24,.15);arm.rotation.y=-sign*.35;
+    }
+    const trumpet=add(new THREE.CylinderGeometry(.105,.035,.45,10),chairGold,0,.32,.37);trumpet.rotation.x=Math.PI/2;
+    add(new THREE.SphereGeometry(.075,8,6),cream,-.09,-.2,.12);add(new THREE.SphereGeometry(.075,8,6),cream,.09,-.2,.12);
+  }
+  for(const side of [-1,1])for(const z of [-20.75,-25.65]){
+    const x=side*7.7;
+    decorateBox(.08,4.5,1.65,x,5.15,z,burgundyMarble);
+    for(const dz of [-.86,.86])decorateBox(.12,4.65,.065,side*7.62,5.15,z+dz,chairGold);
+    for(const y of [2.84,7.47])decorateBox(.12,.075,1.8,side*7.62,y,z,chairGold);
+    decorateBox(.12,1.05,.09,side*7.6,5.2,z,chairGold);decorateBox(.12,.09,.58,side*7.6,5.4,z,chairGold);
+    const archPoints=[];for(let i=0;i<=24;i++){const a=i*Math.PI/24;archPoints.push(new THREE.Vector3(side*7.55,7.5+.9*Math.sin(a),z+.92*Math.cos(a)));}
+    referenceDecor.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(archPoints),28,.075,6,false),chairGold));
+  }
+  // Caissons et nervures soulignent la voûte existante, sans changer son volume.
+  for(const z of [-19.1,-20.9,-24.1,-25.9]){
+    const points=[];for(let i=0;i<=32;i++){const a=i*Math.PI/32;points.push(new THREE.Vector3(7.92*Math.cos(a),8.84+3.06*Math.sin(a),z));}
+    referenceDecor.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),36,.07,6,false),chairGold));
+  }
+  for(let i=1;i<10;i++){
+    const a=i*Math.PI/10,x=7.9*Math.cos(a),y=8.83+3.06*Math.sin(a);
+    decorateBox(.065,.065,10.7,x,y,-22.5,chairGold);
+    for(const z of [-20,-25]){const rosette=new THREE.Mesh(new THREE.OctahedronGeometry(.13),chairGold);rosette.position.set(x,y-.07,z);referenceDecor.add(rosette);}
+  }
   // Estrade de la chaire, laissant une allée devant elle.
   box(7.4,.18,4.8,0,.12,-33.4,gray);box(6.7,.22,4.3,0,.3,-33.55,cream);box(6,.2,3.8,0,.51,-33.7,stone);
   obstacles.push({x:0,z:-33.5,hx:4,hz:2.9});
@@ -94,7 +140,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const arm=box(.17,.78,.2,x-Math.sign(x)*.26,2.5,z+.09,chairBronze);arm.rotation.z=-Math.sign(x)*.55;
   }
   // Fond d'abside bleu nuit, galbé suivant le mur ; le reste reste en pierre claire.
-  const midnight=mat('#101c2c',.94,0);
+  const midnight=cream;
   const backdrop=new THREE.Group();backdrop.name='cathedra-night-backdrop';chapel.add(backdrop);
   for(let i=0;i<28;i++){
     const a=.45+i/28*(Math.PI-.9),b=.45+(i+1)/28*(Math.PI-.9);

@@ -127,3 +127,7 @@ Un tapis rouge bordeaux à liseré doré parcourt l'allée centrale de la second
 Quatre faisceaux dorés translucides accompagnent une statue centrale de saint Pierre sous le baldaquin, avec livre et clefs. Les paillettes passent à 280. Quatre des vingt visiteurs se lèvent, traversent les intervalles entre les rangées puis se rassoient ; les deux marcheurs latéraux sont conservés. Les déplacements s'arrêtent à proximité du joueur.
 
 Les visiteurs debout utilisent désormais des jambes articulées aux hanches et aux genoux, avec balancement opposé des bras et des pas synchronisés sur la distance parcourue. Les quatre visiteurs qui quittent leur chaise utilisent également cette marche. Le maître de cérémonie dispose d’un pupitre noir et or, avec livre et microphone décoratif ; le son reste la prière existante.
+
+## Décor inspiré de la référence visuelle
+
+La seconde salle conserve son plan avec abside elliptique, ses vingt chaises et tous les personnages animés. Ses murs sont désormais en pierre crème, avec pilastres à soubassements noirs, panneaux bordeaux bordés d’or et six petits anges à trompette en hauteur. La voûte existante reçoit un bleu étoilé plus lisible et des nervures dorées ; le dallage latéral alterne marbre sombre et bordeaux avec médaillons clairs. L’éclairage ambiant de cette salle est rehaussé. Le baldaquin, saint Pierre, le tapis, le pupitre et la prière sont conservés.
