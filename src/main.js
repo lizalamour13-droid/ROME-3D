@@ -236,7 +236,7 @@ function paintingTexture(index){
     polygon([[272,337],[331,311],[343,380],[285,399]],'#765845');
     polygon([[280,342],[323,324],[332,374],[290,389]],'#ded0ad');
     ctx.fillStyle='#bbb09a';ctx.fillRect(150,533,211,20);ctx.fillStyle='#a3967c';ctx.fillRect(133,553,247,22);
-  }else{
+  }else if(index===4){
     // Le Colisée : composition originale pour le panneau central du mur gauche.
     ctx.fillStyle='#aebbb7';ctx.fillRect(0,0,512,640);
     polygon([[0,390],[105,340],[220,373],[370,325],[512,380],[512,640],[0,640]],'#92967d');
@@ -257,15 +257,31 @@ function paintingTexture(index){
     polygon([[65,271],[65,235],[155,221],[211,233],[211,255],[156,248]],'#d6bf97');
     polygon([[168,640],[242,500],[290,500],[378,640]],'#ddcbb0');
     for(const x of [27,484])ellipse(x,419,19,75,'#5f7157');
+  }else{
+    // Jardin italien : perspective de cyprès, bassin et pavillon, côté droit.
+    ctx.fillStyle='#b6c0b6';ctx.fillRect(0,0,512,640);
+    polygon([[0,320],[110,273],[247,306],[382,264],[512,301],[512,640],[0,640]],'#858f75');
+    polygon([[0,640],[210,340],[302,340],[512,640]],'#c7b794');
+    for(const side of [-1,1])for(let j=0;j<4;j++){
+      const x=256+side*(63+j*47),y=334+j*50;
+      ctx.fillStyle='#665e48';ctx.fillRect(x-4,y-18,8,63);
+      ellipse(x,y-48,14+j*3,48+j*8,'#4d6854');
+    }
+    ctx.fillStyle='#d7c7a7';ctx.fillRect(206,270,100,68);
+    polygon([[194,273],[256,230],[318,273]],'#9e8a65');
+    for(const x of [217,250,283]){ctx.fillStyle='#696c58';ctx.fillRect(x,287,13,51);}
+    ellipse(256,507,89,33,'#a08f70');ellipse(256,501,76,25,'#829e95');
+    ctx.fillStyle='#cdbb95';ctx.fillRect(248,446,16,51);ellipse(256,445,28,7,'#dfcfaa');
+    ctx.strokeStyle='#c5d2bf';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(254,445);ctx.quadraticCurveTo(232,425,225,493);ctx.stroke();
   }
   // Patine déterministe pour évoquer une toile, sans charger de texture.
   let seed=index+17;for(let i=0;i<9500;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed%512;seed=(seed*1664525+1013904223)>>>0;const y=seed%640;ctx.fillStyle=i%2?'#f1dec00a':'#3b30200a';ctx.fillRect(x,y,2,3);}
   const vignette=ctx.createRadialGradient(256,300,100,256,320,420);vignette.addColorStop(0,'#30261500');vignette.addColorStop(1,'#30261570');ctx.fillStyle=vignette;ctx.fillRect(0,0,512,640);
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);return texture;
 }
-const artworkMaterials=Array.from({length:5},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
-for(const side of [-1,1])for(const [index,z] of (side<0?[-6.5,.5,7.5]:[-6.5,7.5]).entries()){
-  const artIndex=side<0?[0,4,1][index]:index+2;
+const artworkMaterials=Array.from({length:6},(_,i)=>new THREE.MeshStandardMaterial({map:paintingTexture(i),roughness:1}));
+for(const side of [-1,1])for(const [index,z] of [-6.5,.5,7.5].entries()){
+  const artIndex=side<0?[0,4,1][index]:[2,5,3][index];
   // Les cadres sont adossés aux panneaux existants, sous les fenêtres.
   box(.16,3.38,2.72,side*8.48,4.18,z,bronze);
   for(const dy of [-1.64,1.64]){
@@ -277,7 +293,7 @@ for(const side of [-1,1])for(const [index,z] of (side<0?[-6.5,.5,7.5]:[-6.5,7.5]
     box(.27,3.03,.045,side*8.25,4.18,z+dz-Math.sign(dz)*.15,cream);
   }
   const picture=new THREE.Mesh(new THREE.PlaneGeometry(2.42,2.96),artworkMaterials[artIndex]);
-  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée','Le Colisée'][artIndex];scene.add(picture);
+  picture.rotation.y=-side*Math.PI/2;picture.position.set(side*8.3,4.18,z);picture.name='wall-painting';picture.userData.subject=['Saint-Pierre','Le Tibre','Nature morte','Figure drapée','Le Colisée','Jardin italien'][artIndex];scene.add(picture);
   box(.15,.08,1.2,side*8.28,2.19,z,gold);
 }
 // Ornements en or ancien : rosaces des pilastres et feuilles géométriques des chapiteaux.

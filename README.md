@@ -65,3 +65,7 @@ Le panneau central du mur gauche reçoit une cinquième composition originale re
 Au centre de la largeur de la salle, du côté opposé à la porte et aux statues (x = 0 ; z = 9,4), une vitrine présente une interprétation miniature de l'extérieur de Saint-Pierre : façade à portails et fronton, nef et transept, abside, grande coupole nervurée, lanterne, croix et deux petites coupoles. La place ovale comporte un obélisque, deux fontaines et une double colonnade, dont les 80 colonnes sont instanciées. Les proportions sont simplifiées pour rester dans le style du projet, sans prétendre à une reproduction architecturale exacte.
 
 Le verre transparent ne projette pas d'ombre opaque. Le socle dispose d'une collision rectangulaire avec marge pour empêcher de traverser la vitrine ; les passages sur les deux côtés et l'espace entre la vitrine et la fontaine restent ouverts. La capture `artifacts/maquette-saint-pierre.png` montre la vitrine à hauteur de visite.
+
+## Tableau du panneau droit
+
+Le panneau central du mur droit reçoit un jardin italien avec une allée de cyprès, un bassin et un pavillon. Les six tableaux sont désormais tous différents, à raison de trois par mur latéral.
