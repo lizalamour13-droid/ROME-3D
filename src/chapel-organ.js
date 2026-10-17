@@ -7,33 +7,44 @@ export function createChapelOrgan({scene,camera}){
   const stone=material('#d3c7b1'),gold=material('#ad8c4d',.65),wood=material('#342b29'),red=material('#542c36'),ivory=material('#e2d7bc'),pipe=material('#b6ad8b',.7);
   const cube=new THREE.BoxGeometry(1,1,1);
   function box(w,h,d,x,y,z,m,parent=root){const o=new THREE.Mesh(cube,m);o.scale.set(w,h,d);o.position.set(x,y,z);o.receiveShadow=true;parent.add(o);return o;}
-  function tube(points,r,m=gold){const mesh=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,r,6,false),m);root.add(mesh);return mesh;}
-  const stair={x:-6.5,z0:-30,z1:-19.6,width:1.3,height:4.6,steps:32};
-  const run=stair.z1-stair.z0,step=run/stair.steps;
+  function tube(points,r,m=gold){const path=new THREE.CurvePath();for(let i=1;i<points.length;i++)path.add(new THREE.LineCurve3(points[i-1],points[i]));const mesh=new THREE.Mesh(new THREE.TubeGeometry(path,Math.max(32,points.length*2),r,6,false),m);root.add(mesh);return mesh;}
+  const level=6.6;
+  // L’escalier est regroupé à gauche du sanctuaire : il ne traverse plus les niches des statues.
+  const stair={x:-4.65,z:-31.2,inner:.3,outer:1.35,height:level,turns:1.5,steps:72};
+  const span=stair.turns*Math.PI*2,delta=span/stair.steps,wellRadius=stair.outer+.12;
   const steps=new THREE.Group();steps.name='organ-loft-stairs';root.add(steps);
-  for(let i=0;i<stair.steps;i++){
-    const y=stair.height*(i+1)/stair.steps,z=stair.z0+(i+.5)*step;
-    box(stair.width,.14,step+.012,stair.x,y-.07,z,stone,steps);
-    box(stair.width,.025,.035,stair.x,y+.012,z-step/2,gold,steps);
+  const tread=new THREE.Shape();tread.absarc(0,0,stair.outer,0,delta);tread.lineTo(stair.inner*Math.cos(delta),stair.inner*Math.sin(delta));tread.absarc(0,0,stair.inner,delta,0,true);tread.closePath();
+  const treadGeo=new THREE.ExtrudeGeometry(tread,{depth:.12,bevelEnabled:false,curveSegments:5});treadGeo.rotateX(Math.PI/2);
+  const treads=new THREE.InstancedMesh(treadGeo,stone,stair.steps),dummy=new THREE.Object3D();
+  for(let i=0;i<stair.steps;i++){dummy.position.set(stair.x,level*i/stair.steps,stair.z);dummy.rotation.set(0,-i*delta,0);dummy.updateMatrix();treads.setMatrixAt(i,dummy.matrix);}steps.add(treads);
+  for(const radius of [stair.inner,stair.outer]){
+    const points=[];for(let i=0;i<=144;i++){const t=i/144,a=t*span;points.push(new THREE.Vector3(stair.x+Math.cos(a)*radius,level*t+1.02,stair.z+Math.sin(a)*radius));}
+    tube(points,.04);
+    for(let i=1;i<36;i++){const t=i/36,a=t*span;box(.045,.92,.045,stair.x+Math.cos(a)*radius,level*t+.52,stair.z+Math.sin(a)*radius,gold);}
   }
-  for(const side of [-1,1]){
-    const x=stair.x+side*stair.width/2;
-    tube([new THREE.Vector3(x,1.02,stair.z0),new THREE.Vector3(x,5.62,stair.z1)],.045);
-    for(let i=0;i<=16;i++){const t=i/16;box(.045,.95,.045,x,stair.height*t+.5,stair.z0+t*run,gold);}
+  const outer=[new THREE.Vector2(-7.75,-17.2),new THREE.Vector2(7.75,-17.2),new THREE.Vector2(7.75,-28)];
+  for(let i=1;i<=128;i++){const a=i/128*Math.PI;outer.push(new THREE.Vector2(7.75*Math.cos(a),-28-8.6*Math.sin(a)));}outer.push(outer[0].clone());
+  const inner=[new THREE.Vector2(-6.1,-20.4),new THREE.Vector2(6.1,-20.4),new THREE.Vector2(6.1,-28)];
+  for(let i=1;i<=192;i++){const a=i/192*Math.PI,z=-28-7.05*Math.sin(a);let x=6.1*Math.cos(a);if(a>Math.PI/2&&Math.abs(z-stair.z)<wellRadius)x=Math.min(x,stair.x-Math.sqrt(wellRadius**2-(z-stair.z)**2));inner.push(new THREE.Vector2(x,z));}inner.push(inner[0].clone());
+  const outline=new THREE.Shape(outer),hole=new THREE.Path(inner);outline.holes.push(hole);
+  const deck=new THREE.Mesh(new THREE.ExtrudeGeometry(outline,{depth:.2,bevelEnabled:false}),stone);deck.rotation.x=Math.PI/2;deck.position.y=level;deck.name='chapel-complete-balcony';root.add(deck);
+  box(.9,.2,1.02,stair.x-1.47,level-.1,stair.z,stone).name='organ-stair-top-landing';
+  const redRail=red.clone();redRail.side=THREE.DoubleSide;
+  function railing(points,opening=false){
+    const sections=[];let part=[];
+    for(let i=0;i<points.length;i++){const p=points[i],skip=opening&&p.x<stair.x-1&&Math.abs(p.y-stair.z)<.57;if(skip){if(part.length>1)sections.push(part);part=[];}else part.push(p);}if(part.length>1)sections.push(part);
+    for(const section of sections){
+      const vertices=[],indices=[],top=[],bottom=[];let spacing=0;
+      section.forEach((p,i)=>{vertices.push(p.x,level+.2,p.y,p.x,level+.78,p.y);top.push(new THREE.Vector3(p.x,level+1.04,p.y));bottom.push(new THREE.Vector3(p.x,level+.16,p.y));if(i<section.length-1){const k=2*i;indices.push(k,k+1,k+2,k+1,k+3,k+2);}if(i)spacing+=p.distanceTo(section[i-1]);if(spacing>.65||i===0){box(.055,.95,.055,p.x,level+.55,p.y,ivory);spacing=0;}});
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();root.add(new THREE.Mesh(g,redRail));tube(top,.04);tube(bottom,.025);
+    }
   }
-  box(10.45,.2,3.2,-.575,4.5,-18.8,stone).name='organ-loft-deck';
-  box(1.35,.2,2.5,-6.475,4.5,-18.45,stone);
-  box(.08,.8,.7,-5.8,5.02,-20.05,red);
-  for(const z of [-20.4,-17.2]){
-    const x0=z===-20.4?-5.8:-7.15;
-    box(4.65-x0,.65,.09,(4.65+x0)/2,5.02,z,red);
-    for(const y of [4.72,5.4])box(4.65-x0,.045,.13,(4.65+x0)/2,y,z,gold);
-    for(let x=x0+.2;x<4.65;x+=.5){box(.055,.78,.07,x,5.04,z,ivory);const jewel=new THREE.Mesh(new THREE.OctahedronGeometry(.095),gold);jewel.position.set(x,5.02,z-.06);jewel.scale.z=.3;root.add(jewel);}
-  }
-  for(const x of [-7.15,4.65]){const depth=x<0?2.5:3.2,z=x<0?-18.45:-18.8;box(.07,.8,depth,x,5.02,z,red);box(.1,.045,depth,x,5.42,z,gold);}
-  for(const x of [-3,3]){const light=new THREE.PointLight('#ffe0a8',15,9,2);light.position.set(x,7,-19.3);root.add(light);}
+  railing(outer);railing(inner,true);
+  for(const side of [-1,1])tube([new THREE.Vector3(stair.x-1.08,level+1.03,stair.z+side*.51),new THREE.Vector3(stair.x-1.9,level+1.03,stair.z+side*.51)],.04);
+  for(const side of [-1,1])for(const z of [-21.5,-26.7]){box(.035,.012,2.8,side*6.9,level+.008,z,gold);}
+  for(const x of [-3,3]){const light=new THREE.PointLight('#ffe0a8',15,9,2);light.position.set(x,level+2.4,-19.3);root.add(light);}
   // Buffet à cinq tourelles, tuyaux ouverts, bouches, couronnes et rinceaux dorés.
-  const organ=new THREE.Group();organ.name='gilded-pipe-organ';organ.position.set(0,4.6,-17.85);root.add(organ);
+  const organ=new THREE.Group();organ.name='gilded-pipe-organ';organ.position.set(0,level,-17.85);root.add(organ);
   box(6.4,.4,.65,0,.22,0,wood,organ);
   for(const y of [.05,.45])box(6.6,.08,.76,0,y,0,gold,organ);
   let pipeCount=0;
@@ -57,7 +68,7 @@ export function createChapelOrgan({scene,camera}){
     for(const side of [-1,1]){const leaf=new THREE.Mesh(new THREE.OctahedronGeometry(.17),gold);leaf.position.set(x+side*.2,h+.94,-.24);leaf.scale.set(.6,1.5,.3);leaf.rotation.z=-side*.5;organ.add(leaf);}
   }
   box(.065,.65,.065,0,4.93,0,gold,organ);box(.38,.065,.065,0,5.06,0,gold,organ);
-  const console=new THREE.Group();console.name='organ-console';console.position.set(0,4.6,-18.75);root.add(console);
+  const console=new THREE.Group();console.name='organ-console';console.position.set(0,level,-18.75);root.add(console);
   box(1.5,.85,.45,0,.43,0,wood,console);box(1.65,.08,.55,0,.9,0,gold,console);
   for(let row=0;row<2;row++)for(let k=0;k<24;k++){
     box(.051,.027,.16,(k-11.5)*.054,.95+row*.09,-.14+row*.13,ivory,console);
@@ -90,15 +101,25 @@ export function createChapelOrgan({scene,camera}){
   addEventListener('keydown',e=>{if(e.code==='KeyO'&&!e.repeat&&!(e.target instanceof HTMLInputElement)){e.preventDefault();void toggle();}});
   document.addEventListener('visibilitychange',()=>{if(context){if(document.hidden)void context.suspend();else if(playing){next=context.currentTime+.05;void context.resume();}}});
   function update(){
-    const p=camera.position,d=Math.hypot(p.x,p.z+18.75);near=p.y>4.8&&p.y<7.2&&d<3;
+    const p=camera.position,d=Math.hypot(p.x,p.z+18.75);near=Math.abs(p.y-(level+1.75))<.7&&d<3;
     if(near&&!scene.userData.dialogueActive&&!scene.userData.experienceActive){const prompt=document.querySelector('#interaction-prompt');prompt.hidden=false;prompt.textContent=`O · ${playing?'Arrêter':'Jouer de'} l’orgue à tuyaux`;}
     if(context&&playing){const chapel=p.z<-17&&p.y>-1.5;const gain=chapel?Math.min(1,8/Math.max(8,d))*.45:0;const level=Number(document.querySelector('#ambient-volume').value);bus.gain.setTargetAtTime(gain*level*(scene.userData.experienceActive?.12:1),context.currentTime,.45);}
   }
   function surfaceAt(x,z,h){
-    if(x>stair.x-.5&&x<stair.x+.5&&z>stair.z0-.25&&z<stair.z1+.1){const height=THREE.MathUtils.clamp((z-stair.z0)/run,0,1)*stair.height;if(Math.abs(height-h)<.3)return {height};}
-    if(h>4.3&&x>-6.95&&x<4.45&&z>(x<-5.8?-19.55:-20.2)&&z<-17.4){if(Math.abs(x)<.95&&z>-19.02)return null;return {height:4.6};}
-    // Pas de passage au travers ni sous les marches ; l’entrée reste au pied.
-    if(Math.abs(x-stair.x)<.75&&z>stair.z0&&z<stair.z1)return null;
+    if(z>-17.2)return undefined;
+    const dx=x-stair.x,dz=z-stair.z,r=Math.hypot(dx,dz),a=(Math.atan2(dz,dx)+Math.PI*2)%(Math.PI*2),candidates=[];
+    if(r>stair.inner+.14&&r<stair.outer-.12){for(let k=0;k<=2;k++){const angle=a+k*Math.PI*2;if(angle<=span+.001)candidates.push(level*angle/span);}if(a>Math.PI*2-.12)candidates.push(0);}
+    const start=Math.abs(Math.atan2(Math.sin(a),Math.cos(a))),end=Math.abs(Math.atan2(Math.sin(a-span),Math.cos(a-span)));
+    if(start<.2&&r>stair.inner+.14&&r<stair.outer+.55)candidates.push(0);
+    if(end<.25&&r>1.02&&r<2.12)candidates.push(level);
+    const close=candidates.filter(y=>Math.abs(y-h)<.3);if(close.length)return {height:close.sort((a,b)=>Math.abs(a-h)-Math.abs(b-h))[0]};
+    if(h>level-.3){
+      const outside=z>=-28?Math.abs(x)<7.55&&z<-17.4:(x/7.55)**2+((z+28)/8.4)**2<1;
+      const inVoid=z>=-28?Math.abs(x)<6.28&&z<-20.2:(x/6.28)**2+((z+28)/7.23)**2<1;
+      if(outside&&!inVoid&&r>wellRadius+.05){if(Math.abs(x)<3.45&&z>-18.4||Math.abs(x)<.95&&z>-19.02)return null;return {height:level};}
+      return null;
+    }
+    if(r<wellRadius)return null;
     return undefined;
   }
   return {surfaceAt,update,root,stair,get playing(){return playing;},get near(){return near;},get audioState(){if(!context)return null;const samples=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(samples);return {state:context.state,voices:voices.size,gain:bus.gain.value,signal:Math.sqrt(samples.reduce((sum,x)=>sum+x*x,0)/samples.length)};}};

@@ -139,7 +139,7 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     statue(side*7.85,z,side,(side<0?0:2)+index,1.45);
   }
   for(const side of [-1,1])for(const z of [-18.2,-23.3,-28]){
-    const angel=new THREE.Group();angel.name='chapel-trumpet-angel';angel.position.set(side*7.1,6.8,z);angel.rotation.y=-side*Math.PI/2;architecture.add(angel);
+    const angel=new THREE.Group();angel.name='chapel-trumpet-angel';angel.position.set(side*7.5,8.55,z);angel.rotation.y=-side*Math.PI/2;architecture.add(angel);
     add(new THREE.SphereGeometry(.18,10,7),cream,0,.4,0,angel);add(new THREE.ConeGeometry(.25,.48,10),cream,0,.04,0,angel);
     for(const sign of [-1,1]){const wing=add(new THREE.SphereGeometry(1,10,7),chairGold,sign*.25,.25,-.12,angel);wing.scale.set(.3,.15,.06);wing.rotation.z=sign*.5;box(.1,.1,.32,sign*.12,.26,.17,cream,angel);}
     const horn=add(new THREE.CylinderGeometry(.11,.035,.5,10),chairGold,0,.34,.4,angel);horn.rotation.x=Math.PI/2;

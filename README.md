@@ -223,7 +223,7 @@ Les balcons forment un circuit complet autour du vide central. Les sorties des p
 
 Le chemisage de l’escalier souterrain s’arrête au plafond de la crypte. Les dernières marches donnent directement sur la chambre, sans mur circulaire autour du palier inférieur.
 
-Dans la seconde salle, un escalier droit à gauche du maître de cérémonie rejoint une tribune au-dessus de l’entrée. On y monte librement avec ZQSD/flèches et la souris. L’orgue comporte cinq tourelles et 35 tuyaux, un buffet bordeaux et bois sombre, des couronnes et des ornements en or ancien, ainsi qu’une console à deux claviers. À proximité de la console, **O** lance ou arrête une courte composition originale en boucle, synthétisée par harmoniques d’orgue et réverbération de nef avec Web Audio. Le son décroît avec la distance et s’efface hors de la salle ; le réglage de volume des ambiances s’applique. Il est atténué pendant les séquences de messe ou de récit. Aucun téléchargement sonore supplémentaire n’est nécessaire.
+Dans la seconde salle, un escalier hélicoïdal à gauche du maître de cérémonie rejoint une galerie complète, dont la tribune de l’orgue au-dessus de l’entrée. On y monte librement avec ZQSD/flèches et la souris. L’orgue comporte cinq tourelles et 35 tuyaux, un buffet bordeaux et bois sombre, des couronnes et des ornements en or ancien, ainsi qu’une console à deux claviers. À proximité de la console, **O** lance ou arrête une courte composition originale en boucle, synthétisée par harmoniques d’orgue et réverbération de nef avec Web Audio. Le son décroît avec la distance et s’efface hors de la salle ; le réglage de volume des ambiances s’applique. Il est atténué pendant les séquences de messe ou de récit. Aucun téléchargement sonore supplémentaire n’est nécessaire.
 
 Les balcons de la première salle possèdent deux lignes lumineuses chaudes sous corniche, deux petites statues aux poses distinctes et deux bancs placés au fond de la galerie. Les bancs et statues sont exclus de la surface de marche, et le tour reste dégagé.
 
@@ -240,3 +240,12 @@ Les deux promeneurs de cette salle empruntent désormais les allées centrales, 
 Deux visiteurs supplémentaires parcourent un circuit continu dans la première salle : montée par l’escalier gauche, tour des balcons, descente par l’escalier droit et retour au pied. Ils restent espacés et cèdent le passage au joueur lorsqu’il est à leur niveau. Les trajets suivent les mêmes dimensions et hauteurs que les escaliers du joueur.
 
 `tests/balcony-visitors-floor.cjs` simule six minutes de déplacement pour vérifier montée, descente, circulation sur les galeries, absence de saut de position et passage sur les surfaces praticables. Il vérifie également les allées des promeneurs de la seconde salle et l’écart avec l’escalier de l’orgue.
+
+
+### Galerie complète de la seconde salle et nom de saint Pierre
+
+La deuxième salle possède désormais un balcon continu à 6,6 m : galerie de l’entrée devant l’orgue, côtés au-dessus des quatre niches de statues, et galerie courbe autour de l’abside. Un escalier hélicoïdal compact à gauche du sanctuaire remplace l’escalier qui passait devant les statues. Les niches restent dégagées ; les anges sont remontés au-dessus de la galerie. Garde-corps bordeaux et or, ouverture au-dessus de la nef et raccord au palier de l’escalier sont conservés sur tout le circuit. La navigation reste entièrement libre. L’orgue et sa console suivent le nouveau niveau ; la touche O reste disponible près de la console.
+
+La crypte conserve son escalier ouvert et sa brume légère. Une plaque murale « SAINT PIERRE » au-dessus du tombeau, un petit tapis bordeaux, un filet doré autour du sépulcre et deux bougies complètent son décor sans encombrer le passage.
+
+`tests/chapel-organ.cjs` vérifie la montée et la descente au clavier, le tour complet de la galerie, les protections des bords et le fonctionnement sonore de l’orgue au nouveau niveau. Captures : `artifacts/balcon-complet-salle-deux.png`, `artifacts/crypte-saint-pierre.png`.

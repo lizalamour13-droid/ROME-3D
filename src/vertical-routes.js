@@ -119,6 +119,15 @@ export function createVerticalRoutes({scene}){
   for(const x of [-1.7,1.7])box(.09,1.1,.12,x,cy+.55,-41.12,cream,ornaments);
   const medallion=add(new THREE.TorusGeometry(.45,.035,6,32),gold,0,cy+2.03,-41.03,ornaments);
   box(.045,.55,.04,0,cy+2.03,-40.98,gold,ornaments);box(.3,.045,.04,0,cy+2.11,-40.98,gold,ornaments);
+  // Nom lisible au-dessus du tombeau, posé au mur et hors des passages.
+  const nameCanvas=document.createElement('canvas');nameCanvas.width=1024;nameCanvas.height=180;const nameCtx=nameCanvas.getContext('2d');nameCtx.fillStyle='#30262a';nameCtx.fillRect(0,0,1024,180);nameCtx.strokeStyle='#b59a61';nameCtx.lineWidth=8;nameCtx.strokeRect(12,12,1000,156);nameCtx.fillStyle='#e1c995';nameCtx.font='72px Georgia';nameCtx.textAlign='center';nameCtx.fillText('SAINT PIERRE',512,116);
+  const nameTexture=new THREE.CanvasTexture(nameCanvas);nameTexture.colorSpace=THREE.SRGBColorSpace;
+  const namePlaque=add(new THREE.PlaneGeometry(2.6,.45),new THREE.MeshStandardMaterial({map:nameTexture,roughness:.9}),0,cy+2.91,-40.94,crypt);namePlaque.name='crypt-saint-pierre-name';
+  for(const side of [-1,1]){box(.08,.2,.85,side*1.8,cy+2.2,-40.98,gold,ornaments);candle(side*1.8,cy+2.3,-40.55,crypt,'crypt-name-candle',true);}
+  box(1.65,.012,2.3,0,cy+.018,-36.45,burgundy,ornaments);
+  for(const x of [-.86,.86])box(.025,.015,2.35,x,cy+.026,-36.45,gold,ornaments);
+  const tombBorder=add(new THREE.TorusGeometry(2.25,.023,5,64),gold,0,cy+.022,-39.1,ornaments);tombBorder.rotation.x=-Math.PI/2;tombBorder.scale.y=.73;
+  for(const side of [-1,1]){candle(side*2.1,cy+.55,-39.6,crypt,'crypt-tomb-candle',false);box(.4,.5,.4,side*2.1,cy+.25,-39.6,cream,ornaments);}
   // Brume basse locale : sprites diffus, translucides, sans halo ni brouillard global.
   const mistCanvas=document.createElement('canvas');mistCanvas.width=128;mistCanvas.height=128;const mctx=mistCanvas.getContext('2d'),gradient=mctx.createRadialGradient(64,64,2,64,64,64);gradient.addColorStop(0,'#c7c0aeaa');gradient.addColorStop(.5,'#b9b5aa44');gradient.addColorStop(1,'#a9a79f00');mctx.fillStyle=gradient;mctx.fillRect(0,0,128,128);
   const mistTexture=new THREE.CanvasTexture(mistCanvas),mist=new THREE.Group();mist.name='crypt-low-mist';crypt.add(mist);const mistPuffs=[];
