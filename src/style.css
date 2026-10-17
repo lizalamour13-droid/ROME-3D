@@ -11,7 +11,3 @@
 
 .in-experience .intro,.in-experience #pause,.in-experience #interaction-prompt,.in-experience #crosshair,.in-experience #prayer-controls,.in-experience #ambient-controls{display:none}
 #experience-panel{position:absolute;z-index:7;bottom:65px;left:50%;transform:translateX(-50%);width:min(760px,94vw);max-height:45vh;overflow:auto;background:#1b201bf0;border:1px solid #b09452;padding:16px 22px;color:#eee4cf}#experience-panel small{font-size:10px;color:#c9b786}#experience-panel h2{font:25px Georgia;margin:8px 0}#experience-panel p{font-size:14px;line-height:1.6;margin:8px 0 14px}#experience-panel button{background:#343a31;border:1px solid #b0945270;color:#eee4cf;padding:9px;margin:0 8px 8px 0;font-size:12px}#experience-panel button:focus-visible{outline:2px solid #e1c380}
-
-
-
-.on-stairs #crosshair{display:none}

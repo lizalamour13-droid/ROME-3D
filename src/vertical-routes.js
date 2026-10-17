@@ -13,7 +13,7 @@ export const SPIRALS={
 export function createVerticalRoutes({scene}){
   const root=new THREE.Group();root.name='vertical-routes';scene.add(root);
   const mat=(color,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness:.75,metalness});
-  const cream=mat('#c7bda7'),gray=mat('#777b7d'),gold=mat('#aa8c4d',.55),dark=mat('#283c35'),stone=mat('#3c3935'),wax=mat('#d2bd91');
+  const cream=mat('#c7bda7'),gray=mat('#777b7d'),gold=mat('#aa8c4d',.55),dark=mat('#283c35'),balconyBurgundy=mat('#542b35'),stone=mat('#3c3935'),wax=mat('#d2bd91');
   const cube=new THREE.BoxGeometry(1,1,1);
   const add=(geometry,material,x,y,z,parent=root)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.receiveShadow=true;parent.add(mesh);return mesh;};
   const box=(w,h,d,x,y,z,m,parent=root)=>{const mesh=add(cube,m,x,y,z,parent);mesh.scale.set(w,h,d);return mesh;};
@@ -30,7 +30,7 @@ export function createVerticalRoutes({scene}){
   function rail(points,material,r,parent){const mesh=add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),Math.max(8,points.length*2),r,6,false),material,0,0,0,parent);return mesh;}
   function flatRail(x1,z1,x2,z2,y,parent=root){
     const length=Math.hypot(x2-x1,z2-z1),dx=(x2-x1)/length,dz=(z2-z1)/length;
-    const panel=box(length,.61,.075,(x1+x2)/2,y+.47,(z1+z2)/2,dark,parent);panel.rotation.y=-Math.atan2(dz,dx);
+    const panel=box(length,.61,.075,(x1+x2)/2,y+.47,(z1+z2)/2,balconyBurgundy,parent);panel.rotation.y=-Math.atan2(dz,dx);
     for(const dy of [.15,.82,1.06])rail([new THREE.Vector3(x1,y+dy,z1),new THREE.Vector3(x2,y+dy,z2)],gold,dy===1.06?.04:.022,parent);
     for(let d=.18;d<length;d+=.7){const x=x1+dx*d,z=z1+dz*d;box(.07,.95,.07,x,y+.53,z,cream,parent);const jewel=add(new THREE.OctahedronGeometry(.1),gold,x,y+.49,z,parent);jewel.scale.set(.75,1,.45);}
   }
@@ -127,7 +127,7 @@ export function createVerticalRoutes({scene}){
     const puff=new THREE.Sprite(material);const x=-3.6+(i%5)*1.65,z=-40.2+Math.floor(i/5)*2.3;puff.position.set(x,cy+.3+(i%3)*.1,z);puff.scale.set(3.4,.85,1);mist.add(puff);mistPuffs.push({puff,x,z,phase:i*1.73});
   }
   crypt.traverse(object=>object.layers.set(2));
-  // Balcons ouverts en U, au-dessus des tableaux, avec un vide sur toute la salle.
+  // Balcons ouverts en circuit, au-dessus des tableaux, avec un vide sur toute la salle.
   const balcony=new THREE.Group();balcony.name='marble-room-upper-balconies';root.add(balcony);
   const level=6.4;
   for(const side of [-1,1]){
@@ -148,18 +148,40 @@ export function createVerticalRoutes({scene}){
     for(const [start,end] of [[a,Math.PI/2-.45],[Math.PI/2+.45,Math.PI-a]]){
       const points=[];for(let i=0;i<=20;i++){const b=start+(end-start)*i/20;points.push(new THREE.Vector3(stair.x+Math.cos(b)*r,level+1.05,stair.z+Math.sin(b)*r));}rail(points,gold,.045,balcony);
     }
-    for(const side of [-1,1])flatRail(stair.x+side*.78,10.72,stair.x+side*.78,12.38,level,balcony);
+    for(const side of [-1,1])flatRail(stair.x+side*.78,10.72,stair.x+side*.78,11.4,level,balcony);
     // Jonctions continues entre les mains courantes hélicoïdales et le palier.
     const direction=stair.direction??1,outerT=1-Math.ceil(stair.steps*.048)/(stair.steps*2),outerA=stair.start+outerT*stair.turns*TAU*direction;
     rail([new THREE.Vector3(stair.x+Math.cos(outerA)*stair.outer,stair.height*outerT+1.04,stair.z+Math.sin(outerA)*stair.outer),new THREE.Vector3(stair.x+direction*.78,level+1.05,11.35)],gold,.045,balcony);
     rail([new THREE.Vector3(stair.x,level+1.04,stair.z+stair.inner),new THREE.Vector3(stair.x-direction*.78,level+1.05,10.72)],gold,.045,balcony);
+  }
+  // Galerie transversale : le tour complet reste ouvert autour du vide central.
+  const frontDeck=box(16.2,.19,1.55,0,level-.095,-8.225,cream,balcony);frontDeck.name='balcony-front-bridge';
+  flatRail(-6.55,-7.45,6.55,-7.45,level,balcony);
+  flatRail(-8.1,-9,8.1,-9,level,balcony);
+  const decor=new THREE.Group();decor.name='balcony-decorations';balcony.add(decor);
+  // Incrustations affleurantes et moulures contre les murs : aucun obstacle dans l’allée.
+  for(const side of [-1,1]){
+    for(const x of [7.04,7.62])box(.045,.008,19.4,side*x,level+.006,.7,gold,decor);
+    box(.28,.006,19.4,side*7.33,level+.004,.7,balconyBurgundy,decor);
+    for(const z of [-5.5,-1,3.5,7]){
+      box(.06,1.8,1.25,side*8.18,level+1.55,z,balconyBurgundy,decor);
+      for(const edge of [-1,1])box(.09,1.95,.045,side*8.12,level+1.55,z+edge*.65,gold,decor);
+      for(const y of [.58,2.52])box(.09,.055,1.34,side*8.12,level+y,z,gold,decor);
+      const rosette=add(new THREE.TorusGeometry(.17,.027,6,16),gold,side*8.06,level+1.58,z,decor);rosette.rotation.y=Math.PI/2;
+      for(const edge of [-1,1]){const leaf=add(new THREE.OctahedronGeometry(.12),gold,side*8.06,level+1.58+edge*.3,z,decor);leaf.scale.set(.25,1.4,.7);}
+    }
+  }
+  for(const z of [-8.225,11.95]){
+    box(12.7,.006,.22,0,level+.004,z,balconyBurgundy,decor);
+    for(const edge of [-1,1])box(12.7,.008,.035,0,level+.006,z+edge*.2,gold,decor);
   }
   function inCrypt(x,z){return Math.abs(x-CRYPT.centerX)<4.5&&z>-41.1&&z<-30.3;}
   function onBalcony(x,z){
     const sides=Math.abs(x)>6.75&&Math.abs(x)<7.91&&z>-8.8&&z<12.2;
     const rear=Math.abs(x)<7.91&&z>10.55&&z<12.2&&upperStairs.every(stair=>Math.hypot(x-stair.x,z-stair.z)>r+.03);
     const landing=upperStairs.some(stair=>Math.abs(x-stair.x)<.56)&&z>10.72&&z<12.2;
-    return sides||rear||landing;
+    const front=Math.abs(x)<7.91&&z>-8.8&&z<-7.65;
+    return sides||rear||landing||front;
   }
   function candidates(s,x,z,h){
     const dx=x-s.x,dz=z-s.z,radius=Math.hypot(dx,dz),values=[],span=s.turns*TAU;

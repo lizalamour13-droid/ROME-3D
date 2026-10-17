@@ -196,13 +196,13 @@ Sur le côté droit du sanctuaire de la seconde salle, un puits accueille un esc
 
 La crypte et l’escalier enterré sont éclairés uniquement par leurs bougies. Le rendu utilise deux passes avec profondeur conservée pour exclure la lumière ambiante et le soleil de ces surfaces. La prière de la seconde salle s’atténue pendant la descente et reprend progressivement au retour. L’apparition ne crée pas de lumière supplémentaire dans la pièce.
 
-Dans la première salle, deux escaliers hélicoïdaux symétriques encadrent la grande entrée et montent de 6,4 mètres, vers deux balcons latéraux reliés par une galerie arrière. Les tableaux restent sous les balcons, le centre est ouvert, et l’on peut regarder la maquette et les visiteurs depuis le haut. Les garde-corps et les limites de marche empêchent de tomber dans la salle. La même commande ZQSD permet de redescendre.
+Dans la première salle, deux escaliers hélicoïdaux symétriques encadrent la grande entrée et montent de 6,4 mètres, vers deux balcons latéraux reliés par des galeries avant et arrière, formant un tour complet. Les tableaux restent sous les balcons, le centre est ouvert, et l’on peut regarder la maquette et les visiteurs depuis le haut. Les garde-corps et les limites de marche empêchent de tomber dans la salle. La même commande ZQSD permet de redescendre.
 
 La navigation conserve le niveau courant pour distinguer les tours superposés, accepte les petits changements de hauteur des marches et bloque les sauts entre étages. `tests/vertical-routes.cjs` vérifie l’ascension au clavier, les trajets complets aller-retour par le contrôleur du jeu, les balcons, la protection des bords, l’accès à la crypte et l’interaction déplacée du tombeau. `tests/auto-prayer-books.cjs` vérifie aussi l’extinction progressive de la prière en sous-sol et sa reprise au retour. Captures réelles : `artifacts/escalier-spirale-crypte.png`, `artifacts/crypte-aux-bougies.png`, `artifacts/crypte-recit-saint-pierre.png`, `artifacts/balcons-vue-salle.png`, `artifacts/escalier-balcons.png`.
 
 ## Escaliers aux flèches, raccords et crypte décorée
 
-Les deux escaliers de l’entrée se prennent directement avec **↑ ou Z** : le guidage accompagne la courbe des marches et le personnage reste visible. Il n’y a plus de bouton, de dialogue ou de trajet automatique. Relâcher la touche arrête immédiatement la marche ; **↓ ou S** permet de reculer sur les mêmes marches. Les commandes habituelles reprennent à l’arrivée. La souris et les flèches latérales permettent d’orienter la vue pendant la traversée.
+Les deux escaliers de l’entrée utilisent la navigation libre ZQSD/flèches et souris, sans bouton, guidage sur un trajet ou changement de caméra. On peut s’arrêter, reculer, tourner et se décaler sur les marches.
 
 Les paliers supérieurs sont élargis, leurs sols rejoignent les dernières marches, et les mains courantes sont reliées aux garde-corps. La galerie arrière est plus large, pour circuler entre les deux escaliers et les balcons. Les grosses pancartes et les petits supports au milieu des passages ont été supprimés.
 
@@ -210,4 +210,11 @@ L’escalier de la crypte est décalé sur le côté droit du sanctuaire, en deh
 
 La silhouette extérieure conserve ses deux grandes coupoles latérales et quatre petites coupoles de chapelles en retrait, avec tambours, nervures, lanternes et croix.
 
-`tests/manual-stairs.cjs` vérifie les six trajets avec les événements clavier réels et la boucle de déplacement du jeu : ↑ avance, relâcher arrête, ↓ inverse le mouvement, aucun clic ni touche E n’est utilisé pour les escaliers. Le test contrôle aussi les raccords, la traversée du balcon, le dégagement de l’estrade, l’absence de pancartes et la brume locale. `tests/vertical-routes.cjs` conserve les vérifications des surfaces et de l’apparition déplacée. Captures réelles : `artifacts/paliers-balcons-raccordes.png`, `artifacts/escalier-crypte-degage.png`, `artifacts/crypte-brume-ornements.png`.
+`tests/manual-stairs.cjs` vérifie les six trajets par les événements clavier et la boucle de déplacement du jeu, le déplacement latéral sur les marches, l’arrêt au relâchement et l’absence de contrôleur imposé. `tests/vertical-routes.cjs` vérifie aussi le tour complet des balcons, les raccords, la protection des bords et l’interaction du tombeau.
+
+
+### Déplacement libre dans les escaliers
+
+Les escaliers utilisent désormais exactement la même navigation que le reste de la visite : ZQSD/flèches et souris. Aucun bouton, aucun guidage sur un trajet, aucun changement de caméra. Orientez-vous librement pour suivre les marches ; vous pouvez tourner, vous arrêter, reculer ou vous décaler. Les garde-corps et limites de marche empêchent de tomber. Les pancartes d’accès sont supprimées. Le petit cartel de la crypte est fixé au mur, sans pied au sol.
+
+Les balcons forment un circuit complet autour du vide central. Les sorties des paliers restent ouvertes. Les garde-corps bordeaux, filets et rosettes en or ancien, panneaux muraux et incrustations au sol décorent les galeries sans encombrer le passage.

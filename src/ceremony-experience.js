@@ -11,11 +11,8 @@ const mass=[
 ];
 export function createCeremonyExperience({scene,camera,canvas,chapel,prayer,restoreView}){
   const marker=new THREE.Group();marker.name='tomb-interaction';marker.position.set(CRYPT.centerX+2.3,CRYPT.floor,-37.5);marker.userData={dialogueName:'Mémoire de saint Pierre',dialogueRole:'tomb'};scene.add(marker);
-  const bronze=new THREE.MeshStandardMaterial({color:'#9c8450',metalness:.5,roughness:.5});
-  const plinth=new THREE.Mesh(new THREE.CylinderGeometry(.24,.3,.12,12),bronze);plinth.position.y=.06;marker.add(plinth);
-  const post=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,.95,8),bronze);post.position.y=.56;marker.add(post);
   const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=256;const ctx=signCanvas.getContext('2d');ctx.fillStyle='#242824';ctx.fillRect(0,0,512,256);ctx.fillStyle='#e4d2a1';ctx.textAlign='center';ctx.font='32px Georgia';ctx.fillText('MÉMOIRE DE PIERRE',256,90);ctx.font='25px Arial';ctx.fillText('Approchez · E',256,155);
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(.8,.4),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(signCanvas),side:THREE.DoubleSide}));sign.position.set(0,1.17,0);marker.add(sign);marker.traverse(object=>object.layers.set(2));
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(.48,.24),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(signCanvas),side:THREE.DoubleSide}));sign.name='tomb-wall-plaque';sign.position.set(2.1,1.25,0);sign.rotation.y=-Math.PI/2;marker.add(sign);marker.traverse(object=>object.layers.set(2));
   const apparition=new THREE.Group();apparition.name='saint-peter-apparition';apparition.visible=false;scene.add(apparition);
   const ghostMaterials=[];
   function ghost(color){const m=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.18,transparent:true,opacity:0,depthWrite:false,roughness:.75});ghostMaterials.push(m);return m;}

@@ -18,7 +18,7 @@ const assert=require('node:assert/strict'),path=require('node:path');
    const up=room.verticalRoutes.spirals.gallery;room.camera.position.set(up.x,1.75,up.z-1.085);report.up=travel('gallery');
    // Palier, balcon arrière, balcon latéral, puis retour au même escalier.
    function line(x,z){const start=room.camera.position.clone(),steps=Math.ceil(Math.hypot(x-start.x,z-start.z)/.04);for(let i=1;i<=steps;i++)room.walkTo(start.x+(x-start.x)*i/steps,start.z+(z-start.z)*i/steps);return Math.hypot(room.camera.position.x-x,room.camera.position.z-z)<.03;}
-   report.balcony=[line(-5.5,11.55),line(7.3,11.55),line(7.3,-7),line(7.3,11.55),line(-5.5,11.55),line(-5.5,10.685)].every(Boolean);
+   report.balcony=[line(-5.5,11.55),line(7.3,11.55),line(7.3,-8.2),line(-7.3,-8.2),line(-7.3,-7),line(-7.3,-8.2),line(7.3,-8.2),line(7.3,11.55),line(-5.5,11.55),line(-5.5,10.685)].every(Boolean);
    report.noFall=!room.navigationAt(4,0,6.4);
    line(-5.5,11.55);line(0,11.55);line(0,12.18);const edge=room.camera.position.clone();room.walkTo(0,12.4);report.noEscapeFromBalcony=room.camera.position.distanceTo(edge)<.001;
    line(0,11.55);line(-5.5,11.55);line(-5.5,10.685);report.downFromBalcony=travel('gallery',true);

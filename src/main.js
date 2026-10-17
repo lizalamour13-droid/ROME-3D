@@ -3,7 +3,6 @@ import './style.css';
 import {createInteriorVisitors} from './interior-visitors.js';
 import {createCeremonyExperience} from './ceremony-experience.js';
 import {createVerticalRoutes} from './vertical-routes.js';
-import {createStairController} from './stair-travel.js';
 import {createExterior} from './exterior.js';
 import { createChapel } from './chapel.js';
 import {setupInteractions} from './interactions.js';
@@ -657,7 +656,7 @@ const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);
 // Navigation à hauteur d’œil, collisions avec les colonnes et les limites de la salle.
 const keys=new Set();let active=false;let yaw=0,pitch=0;
-function reset(){if(scene.userData.onStairs)stairController.reset();if(scene.userData.experienceActive)experience.stop();camera.position.set(2.8,1.75,10.7);yaw=.15;pitch=.115;camera.rotation.set(pitch,yaw,0);}
+function reset(){if(scene.userData.experienceActive)experience.stop();camera.position.set(2.8,1.75,10.7);yaw=.15;pitch=.115;camera.rotation.set(pitch,yaw,0);}
 reset();
 const enter=document.querySelector('#enter');
 enter.addEventListener('click',async()=>{try{await canvas.requestPointerLock();}catch{status.textContent='La capture de souris est indisponible. Maintenez le clic sur la scène pour regarder ; ZQSD reste disponible.';active=true;document.querySelector('#app').classList.add('visiting');}});
@@ -666,7 +665,7 @@ document.querySelector('#reset').addEventListener('click',reset);
 addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();keys.clear();}if(['KeyZ','KeyW','KeyQ','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){e.preventDefault();keys.add(e.code);}});
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
-addEventListener('mousemove',e=>{if(scene.userData.experienceActive||(!active&&!dragging))return;if(stairController.active){stairController.look(e.movementX,e.movementY);return;}yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
+addEventListener('mousemove',e=>{if(scene.userData.experienceActive||(!active&&!dragging))return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
 function staticAllowed(x,z){if(z>11.8&&Math.abs(x)<2.1||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function navigationAt(x,z,height=camera.position.y-1.75){
   if(height<.3&&(z>11.8&&Math.abs(x)<2.1||z>=20))return exterior.allowed(x,z)?{height:exterior.groundAt(z)}:null;
@@ -678,13 +677,12 @@ function navigationAt(x,z,height=camera.position.y-1.75){
 function allowed(x,z){return !!navigationAt(x,z);}
 function walkTo(x,z){const surface=navigationAt(x,z);if(surface&&Math.abs(surface.height-(camera.position.y-1.75))<=.35){camera.position.set(x,surface.height+1.75,z);}}
 
-function move(dt){if(experience.active||interactions.open||(!active&&!dragging))return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;if(stairController.move(dx,dz,forward,right,dt))return;walkTo(camera.position.x+dx,camera.position.z);walkTo(camera.position.x,camera.position.z+dz);}
+function move(dt){if(experience.active||interactions.open||(!active&&!dragging))return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;walkTo(camera.position.x+dx,camera.position.z);walkTo(camera.position.x,camera.position.z+dz);}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const prayer=setupPrayerAudio();
 const ambience=setupAmbientAudio({enter,prayerAudio:prayer.audio,exterior});
 const visitors=createInteriorVisitors(scene);
 const experience=createCeremonyExperience({scene,camera,canvas,chapel,prayer,restoreView(view){camera.position.copy(view.position);camera.rotation.copy(view.rotation);yaw=view.rotation.y;pitch=view.rotation.x;keys.clear();}});
-const stairController=createStairController({scene,camera,walkTo,onExit(heading){yaw=heading+Math.PI;pitch=.08;camera.rotation.set(pitch,yaw,0);}});
 const interactions=setupInteractions({scene,camera,canvas,onAction:kind=>experience.start(kind)});
 let currentRoom=1;
 const roomNumber=document.querySelector('footer b');
@@ -692,7 +690,7 @@ const roomNumber=document.querySelector('footer b');
 function syncEnvironment(){const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.7,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);scene.background.set(camera.position.z>14?'#b6cbd5':'#c9bda5');const nextRoom=camera.position.y<-1.25&&camera.position.z<-30?4:camera.position.z>17?3:camera.position.z<-17.4?2:camera.position.y>5?5:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===4?'SOUS-SOL · CRYPTE DE SAINT PIERRE':nextRoom===5?'01 / 03 · LES MARBRES · BALCONS':nextRoom===3?'03 / 03 · PLACE SAINT-PIERRE':nextRoom===2?'02 / 03 · LA CHAIRE':'01 / 03 · LES MARBRES';}}
 function renderScene(){
   syncEnvironment();
-  const view=stairController.active?stairController.viewCamera:camera;
+  const view=camera;
   const background=scene.background,mask=view.layers.mask;
   view.layers.set(0);renderer.autoClear=true;renderer.render(scene,view);
   view.layers.set(2);scene.background=null;renderer.autoClear=false;renderer.render(scene,view);
@@ -700,4 +698,4 @@ function renderScene(){
 }
 const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);move(dt);visitors.update(clock.elapsedTime,camera.position);experience.update(clock.elapsedTime);verticalRoutes.update(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position,experience.active);interactions.update();prayer.update(camera.position.z,clock.elapsedTime,THREE.MathUtils.smoothstep(camera.position.y,-4.5,.5));renderScene();});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,stairController,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};
+window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};
