@@ -15,7 +15,10 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   for(let i=0;i<8;i++)box(60,.25,1,0,-.125-i*.25,20+i*.85,cream).name='vatican-steps';
   const plaza=add(new THREE.CircleGeometry(1,96),paving,0,-2.03,66);plaza.rotation.x=-Math.PI/2;plaza.scale.set(47,43,1);plaza.name='saint-peter-square';
   box(63,.15,14,0,-2.12,27,paving);
-  const terrain=add(new THREE.CircleGeometry(125,64),mat('#929775'),0,-2.25,45);terrain.rotation.x=-Math.PI/2;terrain.name='exterior-surrounding-ground';
+  // Le terrain extérieur ne doit pas traverser le puits ni le sous-sol de la basilique.
+  const terrainShape=new THREE.Shape();terrainShape.absarc(0,0,125,0,Math.PI*2,false);
+  const basementHole=new THREE.Path();basementHole.moveTo(-5.4,74.5);basementHole.lineTo(5.4,74.5);basementHole.lineTo(5.4,87);basementHole.lineTo(-5.4,87);basementHole.closePath();terrainShape.holes.push(basementHole);
+  const terrain=add(new THREE.ShapeGeometry(terrainShape,64),mat('#929775'),0,-2.25,45);terrain.rotation.x=-Math.PI/2;terrain.name='exterior-surrounding-ground';
   // Pavés sombres à joints fins : texture locale et motifs de pierre gris clair.
   const pavementCanvas=document.createElement('canvas');pavementCanvas.width=512;pavementCanvas.height=512;
   const pavementContext=pavementCanvas.getContext('2d');pavementContext.fillStyle='#171b1e';pavementContext.fillRect(0,0,512,512);
@@ -166,7 +169,27 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     add(new THREE.SphereGeometry(.29,10,7),warm,0,0,0,g);add(new THREE.SphereGeometry(.18,8,6),shadow,0,0,.14,g);
   }
   cyl(1.35,1.65,3.5,0,47.5,-2,cream,16,domeGroup);cyl(0,1.7,2.2,0,50.3,-2,lead,16,domeGroup);box(.12,2,.12,0,52.1,-2,gold,domeGroup);box(1,.12,.12,0,52.5,-2,gold,domeGroup);
-  for(const x of [-20,20]){cyl(2,2.2,2.5,x,24,-3,cream,16,basilica);const cupola=add(new THREE.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),lead,x,25.25,-3,basilica);cupola.scale.set(2.3,3.6,2.3);cyl(.2,.4,1,x,29.3,-3,gold,8,basilica);}
+  // Deux coupoles latérales dégagées au-dessus de l’attique, puis les chapelles en retrait.
+  function secondaryDome(x,z,r,base,rise,role){
+    const group=new THREE.Group();group.name='basilica-secondary-dome';group.userData.role=role;basilica.add(group);
+    cyl(r*.91,r,3.6,x,base-1.8,z,cream,24,group);
+    for(const y of [base-3.5,base])cyl(r*1.04,r*1.04,.22,x,y,z,warm,24,group);
+    for(let i=0;i<10;i++){
+      const a=i*Math.PI/5,window=new THREE.Group();window.position.set(x+Math.cos(a)*r*.92,base-1.8,z+Math.sin(a)*r*.92);window.rotation.y=Math.PI/2-a;group.add(window);
+      box(.43,1.7,.06,0,0,0,recess,window);for(const dx of [-.29,.29])box(.1,1.9,.13,dx,0,.05,warm,window);
+    }
+    const dome=add(new THREE.SphereGeometry(1,28,16,0,Math.PI*2,0,Math.PI/2),lead,x,base,z,group);dome.scale.set(r,rise,r);
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI/6,points=[];for(let j=0;j<=20;j++){const b=j*Math.PI/40;points.push(new THREE.Vector3(x+(r+.025)*Math.cos(b)*Math.cos(a),base+(rise+.03)*Math.sin(b),z+(r+.025)*Math.cos(b)*Math.sin(a)));}
+      group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),20,.045,5,false),warm));
+    }
+    cyl(.35,.45,1.15,x,base+rise+.5,z,cream,12,group);cyl(0,.48,.65,x,base+rise+1.4,z,lead,12,group);
+    box(.055,.8,.055,x,base+rise+2.05,z,gold,group);box(.38,.055,.055,x,base+rise+2.2,z,gold,group);
+  }
+  for(const side of [-1,1]){
+    secondaryDome(side*18,3,3.3,27.3,7.1,'coupole latérale principale');
+    for(const [z,base] of [[-17,25.8],[-29,25.2]])secondaryDome(side*12.8,z,2.35,base,4.4,'coupole de chapelle');
+  }
   // Verdure en périphérie : l'axe de visite et les monuments restent accessibles.
   const greenery=new THREE.Group();greenery.name='square-greenery';group.add(greenery);
   const leaves=[mat('#496b40'),mat('#68814c'),mat('#38583b')],trunk=mat('#74604b'),flowers=[mat('#a34d50'),mat('#c6a75f')];

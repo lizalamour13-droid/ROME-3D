@@ -4,7 +4,8 @@ const TAU=Math.PI*2;
 export const CRYPT={floor:-8,tomb:{x:0,z:-39.1},view:{x:1.9,z:-36.9}};
 export const SPIRALS={
   crypt:{x:0,z:-34.25,inner:.6,outer:1.9,start:0,turns:2,height:-8,steps:64},
-  gallery:{x:-5.5,z:9.6,inner:.42,outer:1.75,start:-Math.PI/2,turns:1.5,height:6.4,steps:64}
+  gallery:{x:-5.5,z:9.6,inner:.42,outer:1.75,start:-Math.PI/2,turns:1.5,height:6.4,steps:64},
+  galleryRight:{x:5.5,z:9.6,inner:.42,outer:1.75,start:-Math.PI/2,turns:1.5,height:6.4,steps:64,direction:-1}
 };
 
 // Les surfaces de marche et les géométries utilisent les mêmes dimensions.
@@ -35,8 +36,8 @@ export function createVerticalRoutes({scene}){
   }
   function spiral(s,name,underground){
     const group=new THREE.Group();group.name=name;root.add(group);
-    const span=s.turns*TAU,delta=span/s.steps;
-    const tread=new THREE.Shape();tread.absarc(0,0,s.outer,0,delta,false);tread.lineTo(s.inner*Math.cos(delta),s.inner*Math.sin(delta));tread.absarc(0,0,s.inner,delta,0,true);tread.closePath();
+    const span=s.turns*TAU*(s.direction??1),delta=span/s.steps;
+    const tread=new THREE.Shape();tread.absarc(0,0,s.outer,0,delta,delta<0);tread.lineTo(s.inner*Math.cos(delta),s.inner*Math.sin(delta));tread.absarc(0,0,s.inner,delta,0,delta>=0);tread.closePath();
     const geometry=new THREE.ExtrudeGeometry(tread,{depth:.13,bevelEnabled:false,curveSegments:5});geometry.rotateX(Math.PI/2);
     const steps=new THREE.InstancedMesh(geometry,gray,s.steps),dummy=new THREE.Object3D();steps.name=name+'-steps';steps.receiveShadow=true;
     for(let i=0;i<s.steps;i++){dummy.position.set(s.x,s.height*i/s.steps,s.z);dummy.rotation.set(0,-(s.start+i*delta),0);dummy.updateMatrix();steps.setMatrixAt(i,dummy.matrix);}
@@ -82,6 +83,7 @@ export function createVerticalRoutes({scene}){
   }
   spiral(SPIRALS.crypt,'crypt-spiral-stair',true);
   spiral(SPIRALS.gallery,'gallery-spiral-stair',false);
+  spiral(SPIRALS.galleryRight,'gallery-right-spiral-stair',false);
   // Petite chambre enterrée : toutes ses surfaces reçoivent seulement les bougies.
   const cy=CRYPT.floor;
   box(9.6,.2,11.4,0,cy-.1,-35.7,stone,crypt);
@@ -106,32 +108,36 @@ export function createVerticalRoutes({scene}){
     flatRail(side*6.55,-9,side*6.55,10.35,level,balcony);flatRail(side*8.1,-9,side*8.1,11.9,level,balcony);flatRail(side*6.55,-9,side*8.1,-9,level,balcony);
     for(const z of [-7,-1,5]){const brace=box(.8,.45,.35,side*7.7,level-.4,z,cream,balcony);brace.rotation.z=side*.3;}
   }
-  const s=SPIRALS.gallery,r=s.outer+.1,z0=10.35,a=Math.asin((z0-s.z)/r),dx=Math.sqrt(r*r-(z0-s.z)**2);
-  const bridge=new THREE.Shape();bridge.moveTo(-8.1,z0);bridge.lineTo(s.x-dx,z0);bridge.absarc(s.x,s.z,r,Math.PI-a,a,true);bridge.lineTo(8.1,z0);bridge.lineTo(8.1,11.9);bridge.lineTo(-8.1,11.9);bridge.closePath();
+  const upperStairs=[SPIRALS.gallery,SPIRALS.galleryRight],s=SPIRALS.gallery,r=s.outer+.1,z0=10.35,a=Math.asin((z0-s.z)/r),dx=Math.sqrt(r*r-(z0-s.z)**2);
+  const bridge=new THREE.Shape();bridge.moveTo(-8.1,z0);
+  for(const stair of upperStairs){bridge.lineTo(stair.x-dx,z0);bridge.absarc(stair.x,stair.z,r,Math.PI-a,a,true);}
+  bridge.lineTo(8.1,z0);bridge.lineTo(8.1,11.9);bridge.lineTo(-8.1,11.9);bridge.closePath();
   const deck=add(new THREE.ExtrudeGeometry(bridge,{depth:.19,bevelEnabled:false,curveSegments:48}),cream,0,level,0,balcony);deck.rotation.x=Math.PI/2;deck.name='upper-balcony-open-deck';
-  box(1.12,.19,1.18,s.x,level-.095,11.31,cream,balcony);
-  flatRail(-8.1,11.9,8.1,11.9,level,balcony);flatRail(-6.55,z0,s.x-dx,z0,level,balcony);flatRail(s.x+dx,z0,6.55,z0,level,balcony);
-  for(const [start,end] of [[a,Math.PI/2-.32],[Math.PI/2+.32,Math.PI-a]]){
-    const points=[];for(let i=0;i<=20;i++){const b=start+(end-start)*i/20;points.push(new THREE.Vector3(s.x+Math.cos(b)*r,level+1.05,s.z+Math.sin(b)*r));}rail(points,gold,.045,balcony);
+  flatRail(-8.1,11.9,8.1,11.9,level,balcony);
+  for(const [x1,x2] of [[-6.55,s.x-dx],[s.x+dx,SPIRALS.galleryRight.x-dx],[SPIRALS.galleryRight.x+dx,6.55]])flatRail(x1,z0,x2,z0,level,balcony);
+  for(const stair of upperStairs){
+    box(1.12,.19,1.18,stair.x,level-.095,11.31,cream,balcony);
+    for(const [start,end] of [[a,Math.PI/2-.32],[Math.PI/2+.32,Math.PI-a]]){
+      const points=[];for(let i=0;i<=20;i++){const b=start+(end-start)*i/20;points.push(new THREE.Vector3(stair.x+Math.cos(b)*r,level+1.05,stair.z+Math.sin(b)*r));}rail(points,gold,.045,balcony);
+    }
+    for(const side of [-1,1])flatRail(stair.x+side*.57,10.77,stair.x+side*.57,11.88,level,balcony);
   }
-  // Palier au sommet : les deux petites joues laissent le passage vers le balcon.
-  for(const side of [-1,1])flatRail(s.x+side*.57,10.77,s.x+side*.57,11.88,level,balcony);
   function plaque(text,x,y,z,rotation=0){
     const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const c=canvas.getContext('2d');c.fillStyle='#29362e';c.fillRect(0,0,512,128);c.fillStyle='#dcc697';c.font='27px Georgia';c.textAlign='center';c.fillText(text,256,77);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
     box(.05,1,.05,x,.5,z,gold);box(.36,.07,.3,x,.035,z,dark);
     const p=add(new THREE.PlaneGeometry(1.45,.36),new THREE.MeshStandardMaterial({map:texture,side:THREE.DoubleSide}),x,y,z);p.rotation.y=rotation;
   }
-  plaque('BALCONS · ESCALIER',-5.5,1.1,7.75);plaque('CRYPTE DE SAINT PIERRE',2.4,1.15,-33.3,.55);
+  for(const x of [-5.5,5.5])plaque('BALCONS · ESCALIER',x,1.1,7.75);plaque('CRYPTE DE SAINT PIERRE',2.4,1.15,-33.3,.55);
   function inCrypt(x,z){return Math.abs(x)<4.5&&z>-41.1&&z<-30.3;}
   function onBalcony(x,z){
     const sides=Math.abs(x)>6.75&&Math.abs(x)<7.91&&z>-8.8&&z<11.7;
-    const rear=Math.abs(x)<7.91&&z>10.55&&z<11.7&&Math.hypot(x-s.x,z-s.z)>r+.03;
-    const landing=Math.abs(x-s.x)<.38&&z>10.66&&z<11.7;
+    const rear=Math.abs(x)<7.91&&z>10.55&&z<11.7&&upperStairs.every(stair=>Math.hypot(x-stair.x,z-stair.z)>r+.03);
+    const landing=upperStairs.some(stair=>Math.abs(x-stair.x)<.38)&&z>10.66&&z<11.7;
     return sides||rear||landing;
   }
   function candidates(s,x,z,h){
     const dx=x-s.x,dz=z-s.z,radius=Math.hypot(dx,dz),values=[],span=s.turns*TAU;
-    let a=((Math.atan2(dz,dx)-s.start)%TAU+TAU)%TAU;
+    let a=(((Math.atan2(dz,dx)-s.start)*(s.direction??1))%TAU+TAU)%TAU;
     if(radius>s.inner+.15&&radius<s.outer-.14){
       for(let k=0;k<=Math.ceil(s.turns);k++){const t=a+k*TAU;if(t<=span+.001)values.push(s.height*t/span);}
       if(a>TAU-.12)values.push(0);
@@ -144,7 +150,7 @@ export function createVerticalRoutes({scene}){
   }
   function surfaceAt(x,z,h){
     const down=SPIRALS.crypt,up=SPIRALS.gallery,rd=Math.hypot(x-down.x,z-down.z),ru=Math.hypot(x-up.x,z-up.z);
-    const options=[...candidates(down,x,z,h),...candidates(up,x,z,h)];
+    const options=Object.values(SPIRALS).flatMap(stair=>candidates(stair,x,z,h));
     if(h>5.95&&onBalcony(x,z))options.push(level);
     if(h<-7.7&&inCrypt(x,z)){
       const a=Math.abs(Math.atan2(z-down.z,x-down.x));
@@ -155,7 +161,7 @@ export function createVerticalRoutes({scene}){
       if((outsideWell||exit)&&!tombBlocked)options.push(cy);
     }
     if(options.length)return {height:options.sort((a,b)=>Math.abs(a-h)-Math.abs(b-h))[0]};
-    if(rd<down.outer+.24||ru<up.outer+.18||h>.3||h<-.3)return null;
+    if(rd<down.outer+.24||ru<up.outer+.18||Math.hypot(x-SPIRALS.galleryRight.x,z-SPIRALS.galleryRight.z)<SPIRALS.galleryRight.outer+.18||h>.3||h<-.3)return null;
     return undefined;
   }
   function update(time){flames.forEach((f,i)=>f.scale.y=1.9+Math.sin(time*5+i)*.1);lights.forEach((l,i)=>l.intensity=13*(1+.025*Math.sin(time*4+i)));}
