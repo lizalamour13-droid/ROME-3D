@@ -278,3 +278,11 @@ La maquette centrale est tournée de 180° sous sa vitrine ; le socle et la vitr
 Les cinq corps de tuyaux sont abaissés et étagés : centre plus haut, ailes progressivement plus basses. Le buffet est en pierre crème avec fonds en bois sombre, tuyaux argentés, corniches et ornements en or ancien. Les clefs croisées et la tiare décorent le sommet central et le panneau bordeaux de la façade de tribune. La console et la touche O restent à la même place ; le tour du balcon reste libre.
 
 Le buffet reste sous la corniche basse de la coupole, avec une hauteur d’environ 2,8 m au-dessus de la tribune. La console conserve sa taille et son interaction.
+
+### Descente fermée et musique funèbre de la crypte
+
+Le puits de l’escalier possède désormais une paroi complète sur 360°, de la salle supérieure au plafond de la crypte, avec un recouvrement pour supprimer le jour au raccord. La paroi s’arrête sous ce plafond : l’arrivée basse reste ouverte sur la chambre.
+
+La crypte possède sa propre musique lente en do mineur, avec un orgue doux et une réverbération de nef. Le morceau local `public/audio/ambient/crypt-elegy.mp3` dure 56 secondes et remplace progressivement la musique de fond pendant la descente. Il s’efface en remontant, est atténué pendant le récit et respecte le volume, la case Musique douce et la touche M. Les crédits et la provenance de la composition sont dans `public/audio/ambient/README.md`.
+
+`tests/crypt-walls-music.cjs` vérifie la fermeture du puits, la jonction au plafond, la lecture réelle de la piste, le fondu entre les musiques, l’atténuation du récit et les commandes de volume/coupure. `tests/vertical-routes.cjs` vérifie toujours la descente, la sortie ouverte et le récit dans la crypte.

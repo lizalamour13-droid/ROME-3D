@@ -18,3 +18,7 @@ conversation.mp3 : extrait « Coffee Shop » de stephan, domaine public selon la
 ## Musique de fond
 
 music.mp3 : courte composition originale en do majeur / la mineur, rendue avec des échantillons de piano acoustique Salamander Grand Piano d’Alexander Holm (Yamaha C5), distribués dans https://github.com/Tonejs/audio/tree/master/salamander . Licence des échantillons : CC BY 3.0, https://creativecommons.org/licenses/by/3.0/ ; attribution Alexander Holm. Source de la licence : salamander/README de ce dépôt. Adaptation : changement de hauteur, arrangement, mixage, fondus et conversion MP3. La musique reste discrète et peut être désactivée indépendamment dans le panneau des ambiances.
+
+## Crypte · Élégie
+
+crypt-elegy.mp3 : composition originale créée pour ROME-3D, en do mineur, tempo lent, sonorités d’orgue doux et réverbération de nef. Synthèse additive, sans échantillon tiers, voix ni percussion. Durée : 56 secondes, MP3 stéréo 96 kbit/s. Elle remplace progressivement la musique générale pendant la descente et s’efface à la remontée. Les commandes Musique douce, volume et M s’appliquent ; le récit de saint Pierre atténue la musique.

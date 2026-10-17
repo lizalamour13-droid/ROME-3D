@@ -2,7 +2,7 @@
 export function setupAmbientAudio({enter,prayerAudio,exterior}){
   const panel=document.querySelector('#ambient-controls');
   const button=document.querySelector('#ambient-toggle'),volume=document.querySelector('#ambient-volume'),feedback=document.querySelector('#ambient-feedback');
-  const tracks=Object.fromEntries(['birds','stream','wind','conversation','music'].map(name=>{const audio=new Audio(`${import.meta.env.BASE_URL}audio/ambient/${name}.mp3`);audio.loop=true;audio.preload='none';audio.volume=0;return [name,audio];}));
+  const tracks=Object.fromEntries(['birds','stream','wind','conversation','music','crypt-elegy'].map(name=>{const audio=new Audio(`${import.meta.env.BASE_URL}audio/ambient/${name}.mp3`);audio.loop=true;audio.preload='none';audio.volume=0;return [name,audio];}));
   const musicEnabled=document.querySelector('#music-enabled');
   let enabled=false,chosen=false,level=.45;
   function label(){button.textContent=enabled?'Couper les ambiances · M':'Activer les ambiances · M';button.setAttribute('aria-pressed',String(enabled));}
@@ -17,12 +17,13 @@ export function setupAmbientAudio({enter,prayerAudio,exterior}){
   document.addEventListener('visibilitychange',()=>{if(document.hidden)Object.values(tracks).forEach(a=>a.pause());else if(enabled)void play();});
   function update(position,experienceActive=false){
     if(!enabled||document.hidden)return;
-    const underground=position.y<-1.5&&position.z<-30?.15:1;
+    const depth=position.z<-29.5?Math.max(0,Math.min(1,(.25-position.y)/5.75)):0;
+    const cryptMix=depth*depth*(3-2*depth),underground=1-.85*cryptMix;
     const outside=Math.max(0,Math.min(1,(position.z-14)/5)),chapel=position.z<-17;
     const distance=(x,z)=>Math.hypot(position.x-x,position.z-z);
     const nearFountain=outside?Math.max(...[-15,15].map(x=>1/(1+(distance(x,66)/8)**2))):0;
-    const targets={music:musicEnabled.checked?(prayerAudio.paused?.2:.04):0,conversation:outside*exterior.conversationGain(position)*.45,birds:outside*.28,stream:nearFountain*.5,wind:chapel?(prayerAudio.paused?.025:.008):.04+outside*.12};
-    for(const [name,audio] of Object.entries(tracks))audio.volume+=((targets[name]*level*underground*(experienceActive?.08:1))-audio.volume)*.08;
+    const targets={music:musicEnabled.checked?(prayerAudio.paused?.2:.04)*(1-cryptMix):0,'crypt-elegy':musicEnabled.checked?.28*cryptMix:0,conversation:outside*exterior.conversationGain(position)*.45,birds:outside*.28,stream:nearFountain*.5,wind:chapel?(prayerAudio.paused?.025:.008):.04+outside*.12};
+    for(const [name,audio] of Object.entries(tracks))audio.volume+=((targets[name]*level*(name==='crypt-elegy'?1:underground)*(experienceActive?.08:1))-audio.volume)*.08;
   }
   return {tracks,update,get enabled(){return enabled;}};
 }

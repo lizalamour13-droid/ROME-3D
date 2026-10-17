@@ -64,11 +64,11 @@ export function createVerticalRoutes({scene}){
       }
     }
     if(underground){
-      const lining=dark.clone();lining.side=THREE.DoubleSide;
-      // Le chemisage s’arrête au plafond : toute la partie basse est ouverte sur la crypte.
-      const radius=s.outer+.19;
-      const wall=add(new THREE.CylinderGeometry(radius,radius,4.65,64,1,true,.34,TAU-.68),lining,s.x,-2.325,s.z,group);wall.rotation.y=Math.PI/2-s.start;wall.name='crypt-upper-shaft-lining';
-      const upperLintel=add(new THREE.CylinderGeometry(radius,radius,4.65,8,1,true,-.34,.68),lining,s.x,-2.325,s.z,group);upperLintel.rotation.y=Math.PI/2-s.start;
+      const lining=mat('#aa9e88');lining.side=THREE.DoubleSide;
+      // Paroi circulaire complète, avec recouvrement du plafond de la crypte.
+      // La chambre reste ouverte sous ce plafond : aucun mur autour du palier inférieur.
+      const radius=s.outer+.28;
+      const wall=add(new THREE.CylinderGeometry(radius,radius,4.85,96,1,true),lining,s.x,-2.375,s.z,group);wall.name='crypt-upper-shaft-lining';
       for(let i=0;i<8;i++){
         const a=.7+i*Math.PI/2,y=-8*a/(TAU*2)+1.35;
         const c=candle(s.x+Math.cos(a+s.start)*(radius-.14),y,s.z+Math.sin(a+s.start)*(radius-.14),group,'spiral-candle',i%3===0);c.rotation.y=Math.PI/2-a;
