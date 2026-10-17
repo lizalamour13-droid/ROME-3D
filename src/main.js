@@ -702,4 +702,4 @@ function renderScene(){
 }
 const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);move(dt);visitors.update(clock.elapsedTime,camera.position);experience.update(clock.elapsedTime);verticalRoutes.update(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position,experience.active);interactions.update();organ.update();prayer.update(camera.position.z,clock.elapsedTime,THREE.MathUtils.smoothstep(camera.position.y,-4.5,.5));renderScene();});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,organ,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};
+window.room={camera,scene,renderer,renderScene,allowed,reset,walkTo,navigationAt,verticalRoutes,organ,chapel,stepMovement:move,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};

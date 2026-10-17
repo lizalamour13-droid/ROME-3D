@@ -13,12 +13,17 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const hole=new THREE.Path();hole.absarc(SPIRALS.crypt.x,SPIRALS.crypt.z,SPIRALS.crypt.outer+.1,0,Math.PI*2,true);shape.holes.push(hole);
   const floor=add(new THREE.ShapeGeometry(shape,64),pale,0,0,0);floor.rotation.x=Math.PI/2;floor.material=pale.clone();floor.material.side=THREE.DoubleSide;floor.name='chapel-floor';
   box(4.2,.22,3.2,0,-.12,-15.5,cream);
-  // Retour au dallage précédent et à son tapis bordeaux.
+  // Dallage noir profond et marbre rouge, avec incrustations d’or ancien.
+  const floorBlack=mat('#191d1e',.42);
+  const floorInlays=new THREE.Group();floorInlays.name='chapel-black-gold-floor';architecture.add(floorInlays);
   for(let z=-19;z>=-29;z-=2)for(const x of [-6,-4,-2,2,4,6]){
-    box(1.88,.018,1.88,x,.025,z,(Math.round(x/2)+Math.round(z))%2?marble:red);
+    box(1.88,.018,1.88,x,.025,z,(Math.round(x/2)+Math.round(z))%2?floorBlack:red);
     for(const dx of [-.96,.96])box(.025,.022,1.94,x+dx,.029,z,chairGold);
-    const ring=add(new THREE.TorusGeometry(.58,.025,5,28),cream,x,.042,z);ring.rotation.x=-Math.PI/2;
+    const ring=add(new THREE.TorusGeometry(.58,.025,5,28),chairGold,x,.042,z,floorInlays);ring.rotation.x=-Math.PI/2;
+    const diamond=box(.34,.008,.34,x,.041,z,floorBlack,floorInlays);diamond.rotation.y=Math.PI/4;
+    const inner=add(new THREE.TorusGeometry(.23,.015,4,4),chairGold,x,.049,z,floorInlays);inner.rotation.x=-Math.PI/2;
   }
+  for(const side of [-1,1]){box(.25,.018,12.85,side*1.42,.035,-24.175,floorBlack,floorInlays);for(const offset of [-.14,.14])box(.025,.022,12.85,side*1.42+offset,.04,-24.175,chairGold,floorInlays);}
   box(2.4,.024,12.85,0,.051,-24.175,mat('#741e32',1)).name='chapel-red-carpet';
   for(const x of [-1.13,1.13])box(.035,.005,12.63,x,.066,-24.175,chairGold);
   // Les chaises et personnages restent à leurs coordonnées d'origine.

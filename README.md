@@ -230,3 +230,13 @@ Les balcons de la première salle possèdent deux lignes lumineuses chaudes sous
 Validation : `tests/chapel-organ.cjs` vérifie l’aller-retour au clavier jusqu’à la tribune, la touche O seulement à proximité, le signal audio réellement produit et l’ouverture du bas de l’escalier de la crypte. `tests/vertical-routes.cjs` vérifie les escaliers existants, le tour des balcons, les nouveaux décors et le récit du tombeau.
 
 Les quatre colonnes noires torsadées du baldaquin reposent désormais sur des socles continus jusqu’au dallage : plinthes noires, filets d’or et dés de pierre claire.
+
+### Sol noir et or et visiteurs aux balcons
+
+Le dallage de la deuxième salle reçoit un marbre noir plus profond, des rosaces et bordures en or ancien, ainsi que des bandes noires et dorées de chaque côté du tapis bordeaux. Le tapis et les chaises sont conservés.
+
+Les deux promeneurs de cette salle empruntent désormais les allées centrales, à distance de l’escalier de l’orgue. Les personnes qui se lèvent sortent de leur rangée puis avancent vers ces allées, au lieu de rejoindre le bord gauche occupé par l’escalier. La présence du joueur à l’étage n’immobilise plus les visiteurs au rez-de-chaussée.
+
+Deux visiteurs supplémentaires parcourent un circuit continu dans la première salle : montée par l’escalier gauche, tour des balcons, descente par l’escalier droit et retour au pied. Ils restent espacés et cèdent le passage au joueur lorsqu’il est à leur niveau. Les trajets suivent les mêmes dimensions et hauteurs que les escaliers du joueur.
+
+`tests/balcony-visitors-floor.cjs` simule six minutes de déplacement pour vérifier montée, descente, circulation sur les galeries, absence de saut de position et passage sur les surfaces praticables. Il vérifie également les allées des promeneurs de la seconde salle et l’écart avec l’escalier de l’orgue.

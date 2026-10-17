@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {SPIRALS} from './vertical-routes.js';
 
 // Petit public de musée : les trajets restent à distance des œuvres et des colonnes.
 export function createInteriorVisitors(scene){
@@ -38,6 +39,16 @@ export function createInteriorVisitors(scene){
   });
   const route=[[.75,-18.5],[.75,-9],[5,-9],[5,3.5],[-5,3.5],[-5,-9],[-.75,-9],[-.75,-18.5]];
   const walkers=[0,4].map((target,i)=>{const actor=person(i+5);actor.group.name='inter-room-visitor';actor.group.position.set(...[route[target][0],0,route[target][1]]);return {...actor,target:(target+1)%route.length,distance:0};});
+  // Deux visiteurs suivent le même circuit, espacés : montée à gauche, galerie, descente à droite.
+  const balconyPath=[];
+  function point(x,y,z){balconyPath.push(new THREE.Vector3(x,y,z));}
+  function helix(s,reverse=false){const radius=(s.inner+s.outer)/2;for(let i=0;i<=240;i++){const t=reverse?1-i/240:i/240,a=s.start+t*s.turns*Math.PI*2*(s.direction??1);point(s.x+Math.cos(a)*radius,s.height*t,s.z+Math.sin(a)*radius);}}
+  point(-5.5,0,7.5);helix(SPIRALS.gallery);point(-5.5,6.4,11.55);
+  point(-7.3,6.4,11.55);point(-7.3,6.4,-8.05);point(7.3,6.4,-8.05);point(7.3,6.4,11.55);point(5.5,6.4,11.55);
+  helix(SPIRALS.galleryRight,true);point(5.5,0,7.5);point(-5.5,0,7.5);
+  const lengths=[0];for(let i=1;i<balconyPath.length;i++)lengths.push(lengths.at(-1)+balconyPath[i].distanceTo(balconyPath[i-1]));const total=lengths.at(-1);
+  function sample(cursor){let lo=0,hi=lengths.length-1;while(hi-lo>1){const mid=(lo+hi)>>1;if(lengths[mid]<cursor)lo=mid;else hi=mid;}return balconyPath[lo].clone().lerp(balconyPath[hi],(cursor-lengths[lo])/(lengths[hi]-lengths[lo]||1));}
+  const balconyVisitors=[.04,.53].map((fraction,i)=>{const actor=person(i+7);actor.group.name='balcony-walking-visitor';actor.group.userData.interest='balcons';const cursor=fraction*total;actor.group.position.copy(sample(cursor));return {...actor,cursor,distance:0};});
   let previous=null;
   function update(time,viewer){
     const dt=previous===null?0:Math.max(0,Math.min(.1,time-previous));previous=time;
@@ -45,11 +56,20 @@ export function createInteriorVisitors(scene){
     for(const actor of walkers){
       const [x,z]=route[actor.target],dx=x-actor.group.position.x,dz=z-actor.group.position.z,d=Math.hypot(dx,dz),step=Math.min(d,dt*.55);
       const nx=actor.group.position.x+dx/(d||1)*step,nz=actor.group.position.z+dz/(d||1)*step;
-      const clear=(!viewer||Math.hypot(nx-viewer.x,nz-viewer.z)>.85)&&!walkers.some(a=>a!==actor&&Math.hypot(nx-a.group.position.x,nz-a.group.position.z)<.65);
+      const clear=(!viewer||Math.abs(viewer.y-1.75)>.8||Math.hypot(nx-viewer.x,nz-viewer.z)>.85)&&!walkers.some(a=>a!==actor&&Math.hypot(nx-a.group.position.x,nz-a.group.position.z)<.65);
       if(clear){actor.group.position.set(nx,0,nz);actor.distance+=step;if(d<.06)actor.target=(actor.target+1)%route.length;}
       actor.group.rotation.y=Math.atan2(dx,dz);
       actor.limbs.forEach(({leg,arm,side})=>{const swing=clear?Math.sin(actor.distance*10+side*Math.PI/2):0;leg.rotation.x=swing*.35;arm.rotation.x=-swing*.26;});
     }
+    for(const actor of balconyVisitors){
+      const cursor=(actor.cursor+dt*.48)%total,next=sample(cursor),nearViewer=viewer&&Math.abs(next.y-(viewer.y-1.75))<1.8&&Math.hypot(next.x-viewer.x,next.z-viewer.z)<.65;
+      const nearOther=balconyVisitors.some(other=>other!==actor&&next.distanceTo(other.group.position)<.7);
+      const clear=!nearViewer&&!nearOther;
+      if(clear){actor.distance+=next.distanceTo(actor.group.position);actor.cursor=cursor;actor.group.position.copy(next);}
+      const tangent=sample((actor.cursor+.05)%total).sub(actor.group.position);actor.group.rotation.y=Math.atan2(tangent.x,tangent.z);
+      actor.limbs.forEach(({leg,arm,side})=>{const swing=clear?Math.sin(actor.distance*10+side*Math.PI/2):0;leg.rotation.x=swing*.34;arm.rotation.x=-swing*.25;});
+    }
+
   }
-  return {update,blocked(x,z){return [...watchers,...walkers].some(a=>Math.hypot(x-a.group.position.x,z-a.group.position.z)<.43);}};
+  return {update,balconyVisitors,blocked(x,z,height=0){return [...watchers,...walkers,...balconyVisitors].some(a=>Math.abs(a.group.position.y-height)<1.5&&Math.hypot(x-a.group.position.x,z-a.group.position.z)<.43);}};
 }

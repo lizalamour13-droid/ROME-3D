@@ -125,21 +125,22 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     person.group.position.y=moving?Math.abs(Math.sin(phase))*.025:0;
   }
   for(const [index,side] of [-1,1].entries()){
-    const person=standingPerson(side*6.6,-20.1-index*4,'walking-visitor',index+1);
+    const person=standingPerson(side*1.55,-20.1-index*4,'walking-visitor',index+1);
     walkers.push({...person,distance:index*.4,direction:1});
   }
 
   const priest=standingPerson(0,-22,'walking-priest',1);priest.group.name='walking-priest';let priestDirection=1,priestDistance=0;
   function animate(time,viewerPosition){
     const delta=Math.min(Math.max(time-animationTime,0),.1);animationTime=time;
+    const viewerOnFloor=viewerPosition&&Math.abs(viewerPosition.y-1.75)<1.8;
     const nextPriestZ=priest.group.position.z+priestDirection*delta*.42;
-    const priestClear=ceremonyPhase===null&&!priest.group.userData.isConversing&&(!viewerPosition||Math.hypot(viewerPosition.x,viewerPosition.z-nextPriestZ)>1.15);
+    const priestClear=ceremonyPhase===null&&!priest.group.userData.isConversing&&(!viewerOnFloor||Math.hypot(viewerPosition.x,viewerPosition.z-nextPriestZ)>1.15);
     if(priestClear){priest.group.position.z=nextPriestZ;priestDistance+=delta*.42;}
     if(priest.group.position.z>-19.7)priestDirection=-1;if(priest.group.position.z<-28.1)priestDirection=1;
     priest.group.rotation.y=priestDirection<0?Math.PI:0;walkingPose(priest,priestDistance,priestClear);priest.limbs[0].arm.rotation.x=-.05;priest.limbs[0].arm.rotation.z=-.3;
     walkers.forEach((walker,index)=>{
       const nextZ=walker.group.position.z+walker.direction*delta*.32;
-      const clear=ceremonyPhase===null&&(!viewerPosition||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95);
+      const clear=ceremonyPhase===null&&(!viewerOnFloor||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95);
       if(clear){walker.distance+=Math.abs(nextZ-walker.group.position.z);walker.group.position.z=nextZ;}
       if(walker.group.position.z>-19.6)walker.direction=-1;
       if(walker.group.position.z<-28.6)walker.direction=1;
@@ -157,8 +158,8 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       const rise=THREE.MathUtils.smoothstep(t,3,5)*(1-THREE.MathUtils.smoothstep(t,33,35));
       const travel=THREE.MathUtils.smoothstep(t,7,16)*(1-THREE.MathUtils.smoothstep(t,23,32));
       const forward=THREE.MathUtils.smoothstep(t,5,7)*(1-THREE.MathUtils.smoothstep(t,32,33));
-      const nextX=actor.x+actor.side*2.05*travel,nextZ=actor.z-1.25*forward;
-      if(viewerPosition&&Math.hypot(viewerPosition.x-nextX,viewerPosition.z-nextZ)<.95)return;
+      const nextX=actor.x+actor.side*(Math.abs(actor.x)-1.55)*travel,nextZ=actor.z-1.25*forward;
+      if(viewerOnFloor&&Math.hypot(viewerPosition.x-nextX,viewerPosition.z-nextZ)<.95)return;
       actor.clock=t;
       const dx=nextX-actor.group.position.x,dz=nextZ-actor.group.position.z,distance=Math.hypot(dx,dz);
       actor.distance+=distance;
@@ -200,7 +201,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const book=prayerBook(person,'visitor-prayer-book',0,.865,.29);book.rotation.x=-.2;
     if(index===1||index===4||index===11||index===14){
       const walking=standingPerson(x,z,'walking-standing-visitor',index);walking.group.visible=false;
-      const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z,rx:mesh.rotation.x}))};
+      const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:-Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z,rx:mesh.rotation.x}))};
       risingVisitors.push(actor);
     }else seatedMotion.push(person);
   }
