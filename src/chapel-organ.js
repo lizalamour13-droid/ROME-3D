@@ -10,17 +10,17 @@ export function createChapelOrgan({scene,camera}){
   function tube(points,r,m=gold){const path=new THREE.CurvePath();for(let i=1;i<points.length;i++)path.add(new THREE.LineCurve3(points[i-1],points[i]));const mesh=new THREE.Mesh(new THREE.TubeGeometry(path,Math.max(32,points.length*2),r,6,false),m);root.add(mesh);return mesh;}
   const level=6.6;
   // L’escalier est regroupé à gauche du sanctuaire : il ne traverse plus les niches des statues.
-  const stair={x:-4.65,z:-31.2,inner:.3,outer:1.35,height:level,turns:1.5,steps:72};
+  const stair={x:-4.65,z:-31.2,inner:.3,outer:1.35,height:level,start:Math.PI,turns:2,steps:96};
   const span=stair.turns*Math.PI*2,delta=span/stair.steps,wellRadius=stair.outer+.12;
   const steps=new THREE.Group();steps.name='organ-loft-stairs';root.add(steps);
   const tread=new THREE.Shape();tread.absarc(0,0,stair.outer,0,delta);tread.lineTo(stair.inner*Math.cos(delta),stair.inner*Math.sin(delta));tread.absarc(0,0,stair.inner,delta,0,true);tread.closePath();
   const treadGeo=new THREE.ExtrudeGeometry(tread,{depth:.12,bevelEnabled:false,curveSegments:5});treadGeo.rotateX(Math.PI/2);
   const treads=new THREE.InstancedMesh(treadGeo,stone,stair.steps),dummy=new THREE.Object3D();
-  for(let i=0;i<stair.steps;i++){dummy.position.set(stair.x,level*i/stair.steps,stair.z);dummy.rotation.set(0,-i*delta,0);dummy.updateMatrix();treads.setMatrixAt(i,dummy.matrix);}steps.add(treads);
+  for(let i=0;i<stair.steps;i++){dummy.position.set(stair.x,level*i/stair.steps,stair.z);dummy.rotation.set(0,-(stair.start+i*delta),0);dummy.updateMatrix();treads.setMatrixAt(i,dummy.matrix);}steps.add(treads);
   for(const radius of [stair.inner,stair.outer]){
-    const points=[];for(let i=0;i<=144;i++){const t=i/144,a=t*span;points.push(new THREE.Vector3(stair.x+Math.cos(a)*radius,level*t+1.02,stair.z+Math.sin(a)*radius));}
-    tube(points,.04);
-    for(let i=1;i<36;i++){const t=i/36,a=t*span;box(.045,.92,.045,stair.x+Math.cos(a)*radius,level*t+.52,stair.z+Math.sin(a)*radius,gold);}
+    const points=[];for(let i=0;i<=144;i++){const t=i/144,a=stair.start+t*span;points.push(new THREE.Vector3(stair.x+Math.cos(a)*radius,level*t+1.02,stair.z+Math.sin(a)*radius));}
+    const handrail=tube(radius===stair.outer?points.slice(6,-6):points,.04);handrail.name=radius===stair.outer?'organ-stair-outer-handrail':'organ-stair-inner-handrail';
+    for(let i=1;i<36;i++){const t=i/36,a=stair.start+t*span;if(radius===stair.outer&&(t<.045||t>.955))continue;box(.045,.92,.045,stair.x+Math.cos(a)*radius,level*t+.52,stair.z+Math.sin(a)*radius,gold);}
   }
   const outer=[new THREE.Vector2(-7.75,-17.2),new THREE.Vector2(7.75,-17.2),new THREE.Vector2(7.75,-28)];
   for(let i=1;i<=128;i++){const a=i/128*Math.PI;outer.push(new THREE.Vector2(7.75*Math.cos(a),-28-8.6*Math.sin(a)));}outer.push(outer[0].clone());
@@ -107,7 +107,7 @@ export function createChapelOrgan({scene,camera}){
   }
   function surfaceAt(x,z,h){
     if(z>-17.2)return undefined;
-    const dx=x-stair.x,dz=z-stair.z,r=Math.hypot(dx,dz),a=(Math.atan2(dz,dx)+Math.PI*2)%(Math.PI*2),candidates=[];
+    const dx=x-stair.x,dz=z-stair.z,r=Math.hypot(dx,dz),a=((Math.atan2(dz,dx)-stair.start)%(Math.PI*2)+Math.PI*2)%(Math.PI*2),candidates=[];
     if(r>stair.inner+.14&&r<stair.outer-.12){for(let k=0;k<=2;k++){const angle=a+k*Math.PI*2;if(angle<=span+.001)candidates.push(level*angle/span);}if(a>Math.PI*2-.12)candidates.push(0);}
     const start=Math.abs(Math.atan2(Math.sin(a),Math.cos(a))),end=Math.abs(Math.atan2(Math.sin(a-span),Math.cos(a-span)));
     if(start<.2&&r>stair.inner+.14&&r<stair.outer+.55)candidates.push(0);

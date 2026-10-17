@@ -249,3 +249,8 @@ La deuxième salle possède désormais un balcon continu à 6,6 m : galerie de l
 La crypte conserve son escalier ouvert et sa brume légère. Une plaque murale « SAINT PIERRE » au-dessus du tombeau, un petit tapis bordeaux, un filet doré autour du sépulcre et deux bougies complètent son décor sans encombrer le passage.
 
 `tests/chapel-organ.cjs` vérifie la montée et la descente au clavier, le tour complet de la galerie, les protections des bords et le fonctionnement sonore de l’orgue au nouveau niveau. Captures : `artifacts/balcon-complet-salle-deux.png`, `artifacts/crypte-saint-pierre.png`.
+
+
+### Ouverture de l’escalier de la deuxième salle
+
+L’entrée basse de l’escalier de l’orgue est tournée vers l’allée gauche, du côté opposé aux colonnes du baldaquin. Deux tours gardent la sortie haute orientée vers le même palier du balcon. La rampe extérieure et ses montants s’interrompent aux deux extrémités pour laisser de véritables ouvertures. L’accès depuis l’allée gauche, l’ascension, le tour du balcon et la descente sont vérifiés dans `tests/chapel-organ.cjs`.
