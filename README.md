@@ -37,3 +37,7 @@ Adresse prévue : https://lizalamour13-droid.github.io/ROME-3D/
 Dans GitHub : **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: gh-pages → / (root) → Save**. La branche `gh-pages` contient la version compilée, prête à servir. Attendre la réussite du déploiement Pages avant d'ouvrir l'adresse.
 
 `vite.config.js` fixe le chemin `/ROME-3D/` pour les ressources sur GitHub Pages. La publication ne change ni les graphismes ni les commandes de la salle. Pour une prochaine mise à jour, reconstruire avec `npm ci` puis `npm run build` et publier le contenu de `dist/` à la racine de `gh-pages`, avec un fichier `.nojekyll`.
+
+## Embellissement de la salle
+
+Deux niches cintrées avec statues géométriques en pierre claire encadrent désormais une porte monumentale à panneaux bronze et or ancien. Des cadres en marbre rouge brun, un fronton et des médaillons complètent le mur du fond. La salle, la palette, les quatre colonnes et les commandes de visite sont conservées ; la porte est décorative et fermée.

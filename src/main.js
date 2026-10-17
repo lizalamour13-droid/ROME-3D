@@ -32,6 +32,76 @@ box(9,11,.3,0,5.5,-14.7,stone);box(9,.2,2,0,0,-13.8,cream);box(9,.3,2,0,11,-13.8
 function arch(cx,cy,z,r,thickness,depth,material){const shape=new THREE.Shape();shape.absarc(0,0,r+thickness,0,Math.PI,false);shape.lineTo(-r,0);shape.absarc(0,0,r,Math.PI,0,true);shape.closePath();const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,curveSegments:24}),material);mesh.position.set(cx,cy,z);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);}
 arch(0,6,-13.45,3.8,.75,1,cream);arch(0,6,-12.38,4.57,.12,.08,gold);
 for(const x of [-4.18,4.18]){box(.76,6,1.1,x,3,-12.95,cream);box(.94,.26,1.3,x,6,-12.9,stone);box(.95,.4,1.3,x,.2,-12.9,gray);}
+// Décor du mur monumental : deux niches en marbre et une porte à caissons.
+// Ces ornements restent derrière la limite de visite : aucun passage ajouté.
+const nicheShadow=mat('#68665b');
+const bronze=mat('#665441',.66,.22);
+const bronzePanel=mat('#79664d',.7,.16);
+function statue(x,z){
+  box(1.38,.22,.9,x,.24,z,gray);
+  box(1.12,.84,.7,x,.77,z,cream);
+  box(1.38,.16,.92,x,1.27,z,stone);
+  cylinder(.32,.49,1.52,x,2.12,z,white,8);
+  cylinder(.42,.31,.64,x,3.13,z,white,8);
+  cylinder(.14,.17,.19,x,3.54,z,white,8);
+  const head=new THREE.Mesh(new THREE.IcosahedronGeometry(.27,0),white);
+  head.position.set(x,3.87,z);head.scale.set(.83,1.18,.9);
+  head.castShadow=true;scene.add(head);
+  for(const side of [-1,1]){
+    const arm=cylinder(.13,.17,.97,x+side*.39,3,z,white,6);
+    arm.rotation.z=side*.15;
+  }
+  // Plis verticaux et tablette : quelques formes seulement, sans visage détaillé.
+  for(const dx of [-.22,0,.22])box(.06,1.25,.07,x+dx,2.1,z+.31,cream);
+  const tablet=box(.33,.43,.12,x+.35,2.75,z+.2,stone);
+  tablet.rotation.z=-.12;
+}
+for(const x of [-6.7,6.7]){
+  const recess=new THREE.Shape();
+  recess.moveTo(-.91,0);recess.lineTo(.91,0);recess.lineTo(.91,4.1);
+  recess.absarc(0,4.1,.91,0,Math.PI,false);recess.closePath();
+  const backing=new THREE.Mesh(new THREE.ShapeGeometry(recess,24),nicheShadow);
+  backing.position.set(x,.35,-12.61);scene.add(backing);
+  arch(x,4.45,-12.58,.94,.22,.19,cream);
+  arch(x,4.45,-12.37,1.18,.045,.04,gold);
+  for(const dx of [-1.05,1.05]){
+    box(.23,4.1,.25,x+dx,2.4,-12.46,cream);
+    box(.32,.17,.35,x+dx,4.44,-12.4,stone);
+  }
+  statue(x,-12.12);
+  box(2.5,.22,.46,x,5.82,-12.39,cream);
+  box(2.16,1.65,.1,x,7.35,-12.6,red);
+  for(const dx of [-1.15,1.15])box(.13,1.94,.15,x+dx,7.35,-12.49,cream);
+  for(const y of [6.38,8.32])box(2.43,.13,.15,x,y,-12.49,cream);
+  const boss=cylinder(.23,.23,.08,x,7.35,-12.43,gold,8);
+  boss.rotation.x=Math.PI/2;
+}
+// Porte fermée, conservée dans la niche existante sous l'arche.
+box(4.5,5.8,.18,0,2.96,-14.42,bronze);
+for(const x of [-2.42,2.42]){
+  box(.34,6.12,.48,x,3.09,-14.28,cream);
+  box(.07,5.74,.06,x,3.09,-14.01,gold);
+  box(.54,.3,.64,x,.19,-14.2,gray);
+}
+box(5.3,.34,.58,0,6.19,-14.23,cream);
+box(5.36,.08,.63,0,6.4,-14.21,gold);
+for(const x of [-1.1,1.1])for(const y of [1.13,2.99,4.85]){
+  box(1.78,1.52,.12,x,y,-14.27,bronzePanel);
+  for(const dx of [-.9,.9])box(.055,1.57,.06,x+dx,y,-14.18,gold);
+  for(const dy of [-.78,.78])box(1.85,.055,.06,x,y+dy,-14.18,gold);
+  box(1.45,1.19,.05,x,y,-14.17,bronze);
+}
+box(.07,5.73,.09,0,2.96,-14.14,gold);
+for(const x of [-.16,.16]){
+  const handle=cylinder(.065,.065,.3,x,2.85,-14.04,gold,8);
+  handle.rotation.x=.12;
+}
+// Fronton triangulaire et médaillon sobre, sans texture ni sculpture importée.
+const pediment=new THREE.Shape();
+pediment.moveTo(-2.66,0);pediment.lineTo(2.66,0);pediment.lineTo(0,1.15);pediment.closePath();
+const crown=new THREE.Mesh(new THREE.ExtrudeGeometry(pediment,{depth:.22,bevelEnabled:false}),cream);
+crown.position.set(0,6.47,-14.38);crown.castShadow=true;scene.add(crown);
+const seal=cylinder(.39,.39,.07,0,6.92,-14.1,gold,12);seal.rotation.x=Math.PI/2;
 // Quatre colonnes monumentales à fûts sobres et chapiteaux géométriques.
 const columns=[];
 for(const x of [-5.8,5.8])for(const z of [-6,5]){columns.push({x,z});box(1.95,.35,1.95,x,.2,z,gray);box(1.7,.25,1.7,x,.5,z,cream);cylinder(.9,.9,.25,x,.75,z,stone);cylinder(.64,.8,7.6,x,4.65,z,stone,16);cylinder(.78,.65,.24,x,8.55,z,gray);cylinder(.91,.77,.35,x,8.83,z,cream);box(1.85,.3,1.85,x,9.12,z,cream);box(1.9,.09,1.9,x,9.32,z,gold);}
