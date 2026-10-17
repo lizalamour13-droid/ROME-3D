@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 const TAU=Math.PI*2;
-export const CRYPT={floor:-8,tomb:{x:0,z:-39.1},view:{x:1.9,z:-36.9}};
+export const CRYPT={floor:-8,centerX:4.3,tomb:{x:4.3,z:-39.1},view:{x:6.2,z:-36.9}};
 export const SPIRALS={
-  crypt:{x:0,z:-34.25,inner:.6,outer:1.9,start:0,turns:2,height:-8,steps:64},
+  crypt:{x:4.3,z:-33.1,inner:.35,outer:1.4,start:Math.PI,turns:2,height:-8,steps:64},
   gallery:{x:-5.5,z:9.6,inner:.42,outer:1.75,start:-Math.PI/2,turns:1.5,height:6.4,steps:64},
   galleryRight:{x:5.5,z:9.6,inner:.42,outer:1.75,start:-Math.PI/2,turns:1.5,height:6.4,steps:64,direction:-1}
 };
@@ -17,7 +17,7 @@ export function createVerticalRoutes({scene}){
   const cube=new THREE.BoxGeometry(1,1,1);
   const add=(geometry,material,x,y,z,parent=root)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.receiveShadow=true;parent.add(mesh);return mesh;};
   const box=(w,h,d,x,y,z,m,parent=root)=>{const mesh=add(cube,m,x,y,z,parent);mesh.scale.set(w,h,d);return mesh;};
-  const crypt=new THREE.Group();crypt.name='saint-peter-crypt';root.add(crypt);
+  const crypt=new THREE.Group();crypt.name='saint-peter-crypt';crypt.position.x=CRYPT.centerX;root.add(crypt);
   const flames=[],lights=[];
   function candle(x,y,z,parent,name,illuminate=true){
     const group=new THREE.Group();group.name=name;group.position.set(x,y,z);parent.add(group);
@@ -66,18 +66,18 @@ export function createVerticalRoutes({scene}){
       const lining=dark.clone();lining.side=THREE.DoubleSide;
       // Le puits laisse une ouverture sous l’arche du palier inférieur.
       const radius=s.outer+.19;
-      const wall=add(new THREE.CylinderGeometry(radius,radius,8,64,1,true,.34,TAU-.68),lining,s.x,-4,s.z,group);wall.rotation.y=Math.PI/2;
-      const upperLintel=add(new THREE.CylinderGeometry(radius,radius,5.15,8,1,true,-.34,.68),lining,s.x,-2.575,s.z,group);upperLintel.rotation.y=Math.PI/2;
+      const wall=add(new THREE.CylinderGeometry(radius,radius,8,64,1,true,.34,TAU-.68),lining,s.x,-4,s.z,group);wall.rotation.y=Math.PI/2-s.start;
+      const upperLintel=add(new THREE.CylinderGeometry(radius,radius,5.15,8,1,true,-.34,.68),lining,s.x,-2.575,s.z,group);upperLintel.rotation.y=Math.PI/2-s.start;
       for(let i=0;i<8;i++){
         const a=.7+i*Math.PI/2,y=-8*a/(TAU*2)+1.35;
-        const c=candle(s.x+Math.cos(a)*(radius-.14),y,s.z+Math.sin(a)*(radius-.14),group,'spiral-candle',i%3===0);c.rotation.y=Math.PI/2-a;
+        const c=candle(s.x+Math.cos(a+s.start)*(radius-.14),y,s.z+Math.sin(a+s.start)*(radius-.14),group,'spiral-candle',i%3===0);c.rotation.y=Math.PI/2-a;
       }
       group.traverse(object=>object.layers.set(2));
       // Couronnement au niveau de la salle ; passage ouvert du côté droit.
       const guard=new THREE.Group();guard.name='crypt-stairwell-guard';root.add(guard);
-      const points=[];for(let i=0;i<=72;i++){const a=.36+i/72*(TAU-.72);points.push(new THREE.Vector3(s.x+Math.cos(a)*(radius+.02),1.05,s.z+Math.sin(a)*(radius+.02)));}
+      const points=[];for(let i=0;i<=72;i++){const a=s.start+.36+i/72*(TAU-.72);points.push(new THREE.Vector3(s.x+Math.cos(a)*(radius+.02),1.05,s.z+Math.sin(a)*(radius+.02)));}
       rail(points,gold,.05,guard);
-      for(let i=0;i<34;i++){const a=.4+i/33*(TAU-.8),x=s.x+Math.cos(a)*radius,z=s.z+Math.sin(a)*radius;box(.065,1,.065,x,.52,z,cream,guard);}
+      for(let i=0;i<34;i++){const a=s.start+.4+i/33*(TAU-.8),x=s.x+Math.cos(a)*radius,z=s.z+Math.sin(a)*radius;box(.065,1,.065,x,.52,z,cream,guard);}
     }
     return group;
   }
@@ -89,7 +89,7 @@ export function createVerticalRoutes({scene}){
   box(9.6,.2,11.4,0,cy-.1,-35.7,stone,crypt);
   for(const x of [-4.8,4.8])box(.3,3.25,11.4,x,cy+1.625,-35.7,stone,crypt);
   for(const z of [-41.4,-30])box(9.6,3.25,.3,0,cy+1.625,z,stone,crypt);
-  const ceiling=new THREE.Shape();ceiling.moveTo(-4.8,-41.4);ceiling.lineTo(4.8,-41.4);ceiling.lineTo(4.8,-30);ceiling.lineTo(-4.8,-30);ceiling.closePath();const opening=new THREE.Path();opening.absarc(0,SPIRALS.crypt.z,2.14,0,TAU,true);ceiling.holes.push(opening);
+  const ceiling=new THREE.Shape();ceiling.moveTo(-4.8,-41.4);ceiling.lineTo(4.8,-41.4);ceiling.lineTo(4.8,-30);ceiling.lineTo(-4.8,-30);ceiling.closePath();const opening=new THREE.Path();opening.absarc(0,SPIRALS.crypt.z,SPIRALS.crypt.outer+.24,0,TAU,true);ceiling.holes.push(opening);
   const ceilingMesh=add(new THREE.ShapeGeometry(ceiling,64),stone,0,cy+3.25,0,crypt);ceilingMesh.rotation.x=Math.PI/2;ceilingMesh.material=stone.clone();ceilingMesh.material.side=THREE.DoubleSide;ceilingMesh.name='crypt-ceiling-with-stairwell';
   for(const x of [-4.64,4.64])for(const z of [-32,-36.2,-39.8]){
     box(.18,2.9,.35,x,cy+1.45,z,cream,crypt);candle(x-Math.sign(x)*.19,cy+1.8,z,crypt,'crypt-candle',z!==-32);
@@ -98,41 +98,67 @@ export function createVerticalRoutes({scene}){
   for(const x of [-3,-1.5,0,1.5,3])box(.018,.012,10.8,x,cy+.009,-35.7,gray,crypt);
   for(let z=-40.5;z<-30;z+=1.5)box(9,.012,.018,0,cy+.009,z,gray,crypt);
   box(3.25,.12,2.1,0,cy+.06,CRYPT.tomb.z,cream,crypt);
-  const tomb=scene.getObjectByName('saint-peter-tomb');crypt.add(tomb);tomb.position.set(CRYPT.tomb.x,cy+.12,CRYPT.tomb.z);
+  const tomb=scene.getObjectByName('saint-peter-tomb');crypt.add(tomb);tomb.position.set(CRYPT.tomb.x-CRYPT.centerX,cy+.12,CRYPT.tomb.z);
+  // Moulures et reliefs sobres autour du tombeau, sans source lumineuse supplémentaire.
+  const ornaments=new THREE.Group();ornaments.name='crypt-ornaments';crypt.add(ornaments);
+  const burgundy=mat('#4d2b34');
+  for(const side of [-1,1]){
+    for(const y of [cy+.24,cy+3.02])box(.12,.07,11,side*4.62,y,-35.7,gold,ornaments);
+    for(const z of [-33,-36,-39]){
+      const relief=new THREE.Group();relief.position.set(side*4.48,cy+1.1,z);relief.rotation.y=-side*Math.PI/2;ornaments.add(relief);
+      box(.035,1.1,.04,0,.3,0,gold,relief);
+      for(let i=0;i<4;i++)for(const sign of [-1,1]){const leaf=add(new THREE.OctahedronGeometry(.12),gold,sign*(.1+i*.015),i*.2,0,relief);leaf.scale.set(.55,1.5,.3);leaf.rotation.z=-sign*.55;}
+    }
+  }
+  for(const x of [-2.65,2.65]){
+    box(1.35,1.9,.06,x,cy+1.65,-41.21,burgundy,ornaments);
+    for(const dx of [-.7,.7])box(.055,2,.08,x+dx,cy+1.65,-41.15,gold,ornaments);
+    for(const y of [cy+.65,cy+2.65])box(1.45,.055,.08,x,y,-41.15,gold,ornaments);
+  }
+  const archPoints=[];for(let i=0;i<=32;i++){const a=i*Math.PI/32;archPoints.push(new THREE.Vector3(1.7*Math.cos(a),cy+1.05+1.8*Math.sin(a),-41.12));}rail(archPoints,gold,.045,ornaments);
+  for(const x of [-1.7,1.7])box(.09,1.1,.12,x,cy+.55,-41.12,cream,ornaments);
+  const medallion=add(new THREE.TorusGeometry(.45,.035,6,32),gold,0,cy+2.03,-41.03,ornaments);
+  box(.045,.55,.04,0,cy+2.03,-40.98,gold,ornaments);box(.3,.045,.04,0,cy+2.11,-40.98,gold,ornaments);
+  // Brume basse locale : sprites diffus, translucides, sans halo ni brouillard global.
+  const mistCanvas=document.createElement('canvas');mistCanvas.width=128;mistCanvas.height=128;const mctx=mistCanvas.getContext('2d'),gradient=mctx.createRadialGradient(64,64,2,64,64,64);gradient.addColorStop(0,'#c7c0aeaa');gradient.addColorStop(.5,'#b9b5aa44');gradient.addColorStop(1,'#a9a79f00');mctx.fillStyle=gradient;mctx.fillRect(0,0,128,128);
+  const mistTexture=new THREE.CanvasTexture(mistCanvas),mist=new THREE.Group();mist.name='crypt-low-mist';crypt.add(mist);const mistPuffs=[];
+  for(let i=0;i<18;i++){
+    const material=new THREE.SpriteMaterial({map:mistTexture,color:'#b9b1a1',transparent:true,opacity:.22,depthWrite:false});
+    const puff=new THREE.Sprite(material);const x=-3.6+(i%5)*1.65,z=-40.2+Math.floor(i/5)*2.3;puff.position.set(x,cy+.3+(i%3)*.1,z);puff.scale.set(3.4,.85,1);mist.add(puff);mistPuffs.push({puff,x,z,phase:i*1.73});
+  }
   crypt.traverse(object=>object.layers.set(2));
   // Balcons ouverts en U, au-dessus des tableaux, avec un vide sur toute la salle.
   const balcony=new THREE.Group();balcony.name='marble-room-upper-balconies';root.add(balcony);
   const level=6.4;
   for(const side of [-1,1]){
-    box(1.55,.19,20.9,side*7.325,level-.095,1.45,cream,balcony);
-    flatRail(side*6.55,-9,side*6.55,10.35,level,balcony);flatRail(side*8.1,-9,side*8.1,11.9,level,balcony);flatRail(side*6.55,-9,side*8.1,-9,level,balcony);
+    box(1.55,.19,21.4,side*7.325,level-.095,1.7,cream,balcony);
+    flatRail(side*6.55,-9,side*6.55,10.35,level,balcony);flatRail(side*8.1,-9,side*8.1,12.4,level,balcony);flatRail(side*6.55,-9,side*8.1,-9,level,balcony);
     for(const z of [-7,-1,5]){const brace=box(.8,.45,.35,side*7.7,level-.4,z,cream,balcony);brace.rotation.z=side*.3;}
   }
   const upperStairs=[SPIRALS.gallery,SPIRALS.galleryRight],s=SPIRALS.gallery,r=s.outer+.1,z0=10.35,a=Math.asin((z0-s.z)/r),dx=Math.sqrt(r*r-(z0-s.z)**2);
   const bridge=new THREE.Shape();bridge.moveTo(-8.1,z0);
   for(const stair of upperStairs){bridge.lineTo(stair.x-dx,z0);bridge.absarc(stair.x,stair.z,r,Math.PI-a,a,true);}
-  bridge.lineTo(8.1,z0);bridge.lineTo(8.1,11.9);bridge.lineTo(-8.1,11.9);bridge.closePath();
+  bridge.lineTo(8.1,z0);bridge.lineTo(8.1,12.4);bridge.lineTo(-8.1,12.4);bridge.closePath();
   const deck=add(new THREE.ExtrudeGeometry(bridge,{depth:.19,bevelEnabled:false,curveSegments:48}),cream,0,level,0,balcony);deck.rotation.x=Math.PI/2;deck.name='upper-balcony-open-deck';
-  flatRail(-8.1,11.9,8.1,11.9,level,balcony);
+  flatRail(-8.1,12.4,8.1,12.4,level,balcony);
   for(const [x1,x2] of [[-6.55,s.x-dx],[s.x+dx,SPIRALS.galleryRight.x-dx],[SPIRALS.galleryRight.x+dx,6.55]])flatRail(x1,z0,x2,z0,level,balcony);
   for(const stair of upperStairs){
-    box(1.12,.19,1.18,stair.x,level-.095,11.31,cream,balcony);
-    for(const [start,end] of [[a,Math.PI/2-.32],[Math.PI/2+.32,Math.PI-a]]){
+    const landing=box(1.5,.19,1.68,stair.x,level-.095,11.56,cream,balcony);landing.name='stair-balcony-landing';
+    for(const side of [-1,1])box(.04,.018,1.66,stair.x+side*.75,level+.01,11.56,gold,balcony);
+    for(const [start,end] of [[a,Math.PI/2-.45],[Math.PI/2+.45,Math.PI-a]]){
       const points=[];for(let i=0;i<=20;i++){const b=start+(end-start)*i/20;points.push(new THREE.Vector3(stair.x+Math.cos(b)*r,level+1.05,stair.z+Math.sin(b)*r));}rail(points,gold,.045,balcony);
     }
-    for(const side of [-1,1])flatRail(stair.x+side*.57,10.77,stair.x+side*.57,11.88,level,balcony);
+    for(const side of [-1,1])flatRail(stair.x+side*.78,10.72,stair.x+side*.78,12.38,level,balcony);
+    // Jonctions continues entre les mains courantes hélicoïdales et le palier.
+    const direction=stair.direction??1,outerT=1-Math.ceil(stair.steps*.048)/(stair.steps*2),outerA=stair.start+outerT*stair.turns*TAU*direction;
+    rail([new THREE.Vector3(stair.x+Math.cos(outerA)*stair.outer,stair.height*outerT+1.04,stair.z+Math.sin(outerA)*stair.outer),new THREE.Vector3(stair.x+direction*.78,level+1.05,11.35)],gold,.045,balcony);
+    rail([new THREE.Vector3(stair.x,level+1.04,stair.z+stair.inner),new THREE.Vector3(stair.x-direction*.78,level+1.05,10.72)],gold,.045,balcony);
   }
-  function plaque(text,x,y,z,rotation=0){
-    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const c=canvas.getContext('2d');c.fillStyle='#29362e';c.fillRect(0,0,512,128);c.fillStyle='#dcc697';c.font='27px Georgia';c.textAlign='center';c.fillText(text,256,77);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-    box(.05,1,.05,x,.5,z,gold);box(.36,.07,.3,x,.035,z,dark);
-    const p=add(new THREE.PlaneGeometry(1.45,.36),new THREE.MeshStandardMaterial({map:texture,side:THREE.DoubleSide}),x,y,z);p.rotation.y=rotation;
-  }
-  for(const x of [-5.5,5.5])plaque('BALCONS · ESCALIER',x,1.1,7.75);plaque('CRYPTE DE SAINT PIERRE',2.4,1.15,-33.3,.55);
-  function inCrypt(x,z){return Math.abs(x)<4.5&&z>-41.1&&z<-30.3;}
+  function inCrypt(x,z){return Math.abs(x-CRYPT.centerX)<4.5&&z>-41.1&&z<-30.3;}
   function onBalcony(x,z){
-    const sides=Math.abs(x)>6.75&&Math.abs(x)<7.91&&z>-8.8&&z<11.7;
-    const rear=Math.abs(x)<7.91&&z>10.55&&z<11.7&&upperStairs.every(stair=>Math.hypot(x-stair.x,z-stair.z)>r+.03);
-    const landing=upperStairs.some(stair=>Math.abs(x-stair.x)<.38)&&z>10.66&&z<11.7;
+    const sides=Math.abs(x)>6.75&&Math.abs(x)<7.91&&z>-8.8&&z<12.2;
+    const rear=Math.abs(x)<7.91&&z>10.55&&z<12.2&&upperStairs.every(stair=>Math.hypot(x-stair.x,z-stair.z)>r+.03);
+    const landing=upperStairs.some(stair=>Math.abs(x-stair.x)<.56)&&z>10.72&&z<12.2;
     return sides||rear||landing;
   }
   function candidates(s,x,z,h){
@@ -153,17 +179,17 @@ export function createVerticalRoutes({scene}){
     const options=Object.values(SPIRALS).flatMap(stair=>candidates(stair,x,z,h));
     if(h>5.95&&onBalcony(x,z))options.push(level);
     if(h<-7.7&&inCrypt(x,z)){
-      const a=Math.abs(Math.atan2(z-down.z,x-down.x));
+      const a=Math.abs(Math.atan2(Math.sin(Math.atan2(z-down.z,x-down.x)-down.start),Math.cos(Math.atan2(z-down.z,x-down.x)-down.start)));
       // Le mur du puits ne s’ouvre que sur le palier inférieur, à droite.
       const outsideWell=rd>down.outer+.32;
       const exit=a<.29&&rd>down.inner+.15;
-      const tombBlocked=Math.abs(x)<1.75&&Math.abs(z-CRYPT.tomb.z)<1.28;
+      const tombBlocked=Math.abs(x-CRYPT.tomb.x)<1.75&&Math.abs(z-CRYPT.tomb.z)<1.28;
       if((outsideWell||exit)&&!tombBlocked)options.push(cy);
     }
     if(options.length)return {height:options.sort((a,b)=>Math.abs(a-h)-Math.abs(b-h))[0]};
     if(rd<down.outer+.24||ru<up.outer+.18||Math.hypot(x-SPIRALS.galleryRight.x,z-SPIRALS.galleryRight.z)<SPIRALS.galleryRight.outer+.18||h>.3||h<-.3)return null;
     return undefined;
   }
-  function update(time){flames.forEach((f,i)=>f.scale.y=1.9+Math.sin(time*5+i)*.1);lights.forEach((l,i)=>l.intensity=13*(1+.025*Math.sin(time*4+i)));}
+  function update(time){mistPuffs.forEach(({puff,x,z,phase})=>{puff.position.x=x+Math.sin(time*.13+phase)*.28;puff.position.z=z+Math.cos(time*.1+phase)*.22;puff.material.opacity=.2+.025*Math.sin(time*.2+phase);});flames.forEach((f,i)=>f.scale.y=1.9+Math.sin(time*5+i)*.1);lights.forEach((l,i)=>l.intensity=13*(1+.025*Math.sin(time*4+i)));}
   return {surfaceAt,update,crypt,onBalcony,spirals:SPIRALS};
 }

@@ -10,7 +10,7 @@ const mass=[
   ['Bénédiction et envoi','Que le Seigneur vous bénisse et vous garde. Qu’il vous accorde sa paix. Au nom du Père, et du Fils, et du Saint-Esprit. Amen. Allez dans la paix du Christ.','mass-blessing',18]
 ];
 export function createCeremonyExperience({scene,camera,canvas,chapel,prayer,restoreView}){
-  const marker=new THREE.Group();marker.name='tomb-interaction';marker.position.set(2.3,CRYPT.floor,-37.5);marker.userData={dialogueName:'Mémoire de saint Pierre',dialogueRole:'tomb'};scene.add(marker);
+  const marker=new THREE.Group();marker.name='tomb-interaction';marker.position.set(CRYPT.centerX+2.3,CRYPT.floor,-37.5);marker.userData={dialogueName:'Mémoire de saint Pierre',dialogueRole:'tomb'};scene.add(marker);
   const bronze=new THREE.MeshStandardMaterial({color:'#9c8450',metalness:.5,roughness:.5});
   const plinth=new THREE.Mesh(new THREE.CylinderGeometry(.24,.3,.12,12),bronze);plinth.position.y=.06;marker.add(plinth);
   const post=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,.95,8),bronze);post.position.y=.56;marker.add(post);

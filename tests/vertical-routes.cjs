@@ -20,26 +20,26 @@ const assert=require('node:assert/strict'),path=require('node:path');
    function line(x,z){const start=room.camera.position.clone(),steps=Math.ceil(Math.hypot(x-start.x,z-start.z)/.04);for(let i=1;i<=steps;i++)room.walkTo(start.x+(x-start.x)*i/steps,start.z+(z-start.z)*i/steps);return Math.hypot(room.camera.position.x-x,room.camera.position.z-z)<.03;}
    report.balcony=[line(-5.5,11.55),line(7.3,11.55),line(7.3,-7),line(7.3,11.55),line(-5.5,11.55),line(-5.5,10.685)].every(Boolean);
    report.noFall=!room.navigationAt(4,0,6.4);
-   line(-5.5,11.55);line(0,11.55);line(0,11.68);const edge=room.camera.position.clone();room.walkTo(0,11.85);report.noEscapeFromBalcony=room.camera.position.distanceTo(edge)<.001;
+   line(-5.5,11.55);line(0,11.55);line(0,12.18);const edge=room.camera.position.clone();room.walkTo(0,12.4);report.noEscapeFromBalcony=room.camera.position.distanceTo(edge)<.001;
    line(0,11.55);line(-5.5,11.55);line(-5.5,10.685);report.downFromBalcony=travel('gallery',true);
-   const down=room.verticalRoutes.spirals.crypt;room.camera.position.set(3.4,1.75,-33.5);report.approach=[line(3.4,-34.2),line(1.25,-34.25)].every(Boolean);report.down=travel('crypt');
-   report.cryptExit=[line(2.7,-34.25),line(3,-37),line(2.3,-37.5)].every(Boolean);report.cryptY=room.camera.position.y;
-   report.tombBlocked=!room.allowed(0,-39.1);report.wellBlocked=!room.navigationAt(-2.1,-34.25,-8);
-   report.returnToStairs=[line(3,-37),line(2.7,-34.25),line(1.25,-34.25)].every(Boolean);report.backUp=travel('crypt',true);return report;
+   const down=room.verticalRoutes.spirals.crypt;room.camera.position.set(1.9,1.75,-32.9);report.approach=[line(1.9,-33.1),line(3.425,-33.1)].every(Boolean);report.down=travel('crypt');
+   report.cryptExit=[line(1.9,-33.1),line(1.3,-37),line(6.4,-37.5)].every(Boolean);report.cryptY=room.camera.position.y;
+   report.tombBlocked=!room.allowed(4.3,-39.1);report.wellBlocked=!room.navigationAt(5.8,-33.1,-8);
+   report.returnToStairs=[line(1.3,-37),line(1.9,-33.1),line(3.425,-33.1)].every(Boolean);report.backUp=travel('crypt',true);return report;
  });
  for(const key of ['up','downFromBalcony','down','backUp']){assert.equal(paths[key].blocked,0,`${key}: ${JSON.stringify(paths)}`);assert(paths[key].maxJump<.2);}
  assert(Math.abs(paths.up.end-6.4)<.01&&Math.abs(paths.down.end+8)<.01&&Math.abs(paths.backUp.end)<.01);for(const key of ['balcony','noFall','noEscapeFromBalcony','approach','cryptExit','tombBlocked','wellBlocked','returnToStairs'])assert(paths[key],`${key}: ${JSON.stringify(paths)}`);assert.equal(paths.cryptY,-6.25);
  // Dialogue impossible depuis le sanctuaire ; le cartel fonctionne dans la crypte.
- await page.evaluate(()=>{room.camera.position.set(2.3,1.75,-36.3);room.interactions.update();});assert.notEqual(await page.evaluate(()=>room.interactions.nearby),'Mémoire de saint Pierre');
- await page.evaluate(()=>{room.camera.position.set(2.3,-6.25,-37.5);room.interactions.update();});await page.keyboard.press('KeyE');await page.waitForFunction(()=>room.interactions.open);await page.keyboard.press('Digit1');await page.waitForFunction(()=>room.experience.kind==='tomb');
+ await page.evaluate(()=>{room.camera.position.set(6.4,1.75,-36.3);room.interactions.update();});assert.notEqual(await page.evaluate(()=>room.interactions.nearby),'Mémoire de saint Pierre');
+ await page.evaluate(()=>{room.camera.position.set(6.4,-6.25,-37.5);room.interactions.update();});await page.keyboard.press('KeyE');await page.waitForFunction(()=>room.interactions.open);await page.keyboard.press('Digit1');await page.waitForFunction(()=>room.experience.kind==='tomb');
  // La boucle arrêtée reste pilotable pour vérifier l’émergence au nouveau niveau.
  await page.evaluate(()=>{for(let t=0;t<4;t+=.05)room.experience.update(1000+t);room.verticalRoutes.update(2);room.renderScene();});assert(await page.evaluate(()=>{const p=room.scene.getObjectByName('saint-peter-apparition');return p.visible&&p.position.y>-7.3&&p.position.y<-6.8;}));
  await page.waitForFunction(()=>room.experience.audio.currentTime>.1,null,{timeout:30000});
  await page.setViewportSize({width:1000,height:750});await page.waitForFunction(()=>room.renderer.domElement.width===Math.floor(innerWidth*room.renderer.getPixelRatio()));await page.evaluate(()=>{room.renderer.setPixelRatio(.8);room.renderScene();});await page.screenshot({path:path.join(__dirname,'../artifacts/crypte-recit-saint-pierre.png')});
  await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>room.experience.active),false);assert.equal(await page.evaluate(()=>room.camera.position.y),-6.25);
  async function capture(name,view){await page.evaluate(v=>{room.camera.position.set(...v.slice(0,3));room.camera.lookAt(...v.slice(3));document.querySelector('#app').classList.add('visiting');document.querySelector('#pause').hidden=true;room.interactions.update();room.renderScene();},view);await page.screenshot({path:path.join(__dirname,'../artifacts/'+name+'.png')});}
- await capture('crypte-aux-bougies',[3.4,-6.25,-35.7,0,-6.7,-39.1]);
- await capture('escalier-spirale-crypte',[0,5.2,-32.1,0,-4,-34.25]);
+ await capture('crypte-aux-bougies',[7.5,-6.25,-36.1,4.1,-6.7,-39.1]);
+ await capture('escalier-spirale-crypte',[2.2,4.5,-30.5,4.1,-4,-33.1]);
  await capture('balcons-vue-salle',[0,8.15,10.7,0,1.6,0]);
  await capture('escalier-balcons',[-2,3.6,11.5,-5.5,3.2,9.6]);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({layout,paths,keyboard:'ascension réelle',tomb:'dialogue et apparition dans la crypte seulement',errors}));

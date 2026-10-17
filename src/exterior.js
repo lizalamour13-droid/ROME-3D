@@ -17,7 +17,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   box(63,.15,14,0,-2.12,27,paving);
   // Le terrain extérieur ne doit pas traverser le puits ni le sous-sol de la basilique.
   const terrainShape=new THREE.Shape();terrainShape.absarc(0,0,125,0,Math.PI*2,false);
-  const basementHole=new THREE.Path();basementHole.moveTo(-5.4,74.5);basementHole.lineTo(5.4,74.5);basementHole.lineTo(5.4,87);basementHole.lineTo(-5.4,87);basementHole.closePath();terrainShape.holes.push(basementHole);
+  const basementHole=new THREE.Path();basementHole.moveTo(-1.4,74.5);basementHole.lineTo(9.5,74.5);basementHole.lineTo(9.5,87);basementHole.lineTo(-1.4,87);basementHole.closePath();terrainShape.holes.push(basementHole);
   const terrain=add(new THREE.ShapeGeometry(terrainShape,64),mat('#929775'),0,-2.25,45);terrain.rotation.x=-Math.PI/2;terrain.name='exterior-surrounding-ground';
   // Pavés sombres à joints fins : texture locale et motifs de pierre gris clair.
   const pavementCanvas=document.createElement('canvas');pavementCanvas.width=512;pavementCanvas.height=512;
