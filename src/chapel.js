@@ -49,6 +49,10 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   // Dallage sobre et allée centrale : la zone arrondie reste en marbre crème.
   for(let z=-18;z>=-30;z-=2){box(2.6,.022,1.94,0,.015,z,darkStone);for(const side of [-1,1])box(.065,.03,1.97,side*1.39,.02,z,black);}
   for(const z of [-18.7,-30.2])box(14.8,.025,.12,0,.025,z,stone);
+  // Tapis de l'allée centrale : velours bordeaux, liseré doré discret.
+  const carpet=box(2.4,.024,12.85,0,.051,-24.175,mat('#741e32',1,0));carpet.name='chapel-red-carpet';carpet.castShadow=false;
+  for(const x of [-1.13,1.13]){const trim=box(.035,.005,12.63,x,.066,-24.175,chairGold);trim.castShadow=false;}
+  for(const z of [-17.91,-30.44]){const trim=box(2.27,.005,.035,0,.066,z,chairGold);trim.castShadow=false;}
   // Voûte en berceau au-dessus de la nef, prolongée par une demi-coupole.
   const vaultMaterial=starWallMaterial.clone();vaultMaterial.side=THREE.DoubleSide;
   const vaultPositions=[],vaultIndices=[],vaultUV=[];

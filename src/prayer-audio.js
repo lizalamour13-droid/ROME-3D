@@ -1,11 +1,11 @@
-// Fichier local : voix synthétique française, aucun service ni microphone utilisé.
+// Fichier local : voix neuronale synthétique, récitation latine, aucun service ni microphone utilisé.
 export function setupPrayerAudio(){
-  const audio=new Audio(`${import.meta.env.BASE_URL}audio/priere.mp3`);
+  const audio=new Audio(`${import.meta.env.BASE_URL}audio/pater-noster-latin.mp3`);
   audio.loop=true;audio.preload='none';audio.volume=.45;
   const panel=document.querySelector('#prayer-controls'),button=document.querySelector('#prayer-toggle');
   const volume=document.querySelector('#prayer-volume'),feedback=document.querySelector('#audio-feedback');
   let enabled=false,inChapel=false;
-  function updateButton(){button.textContent=enabled?'Couper la prière · P':'Écouter la prière · P';button.setAttribute('aria-pressed',String(enabled));}
+  function updateButton(){button.textContent=enabled?'Couper la prière · P':'Écouter la prière latine · P';button.setAttribute('aria-pressed',String(enabled));}
   async function play(){
     try{await audio.play();feedback.hidden=true;}catch{
       enabled=false;updateButton();feedback.textContent='La lecture n’a pas démarré. Cliquez à nouveau sur « Écouter la prière ».';feedback.hidden=false;
