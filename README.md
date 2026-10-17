@@ -77,3 +77,7 @@ Quatre statues ivoire ornées d'or ancien occupent les intervalles entre les tab
 ## Dégagement des colonnes
 
 Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pleins entre les moulures concaves. Leurs chapiteaux rejoignent le plafond sans entrer dans les creux ; les colliers, feuilles et volutes utilisent l'or ancien existant. Cette implantation éloigne les colonnes des statues et conserve les dimensions de la salle. Les tests vérifient les collisions, l'écartement des statues et l'absence de recouvrement entre les chapiteaux et les moulures creusées.
+
+## Chérubins en bas-relief
+
+Chaque colonne reçoit un petit chérubin tourné vers le centre de la salle, à 3,55 m de haut : visage et ailes en pierre ivoire, bordure des ailes et auréole en or ancien. Les ailes sont de vraies formes courbes extrudées, avec des plumes en relief. La faible saillie reste dans la marge de collision des colonnes ; aucun déplacement ni éclairage n'est modifié.

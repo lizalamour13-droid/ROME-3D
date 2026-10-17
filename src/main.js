@@ -383,6 +383,48 @@ for(const c of columns){
   }
 }
 
+// Petits chérubins sculptés en bas-relief, tournés vers le centre de la salle.
+// Leur saillie reste à l'intérieur de la marge de collision des colonnes.
+const cherubHeadGeometry=new THREE.SphereGeometry(1,12,8);
+function cherubRelief(column){
+  const towardCenter=new THREE.Vector3(-column.x,0,-column.z).normalize();
+  const relief=new THREE.Group();relief.name='column-cherub';
+  relief.position.set(column.x+towardCenter.x*.72,3.55,column.z+towardCenter.z*.72);
+  relief.rotation.y=Math.atan2(towardCenter.x,towardCenter.z);scene.add(relief);
+  const oval=(x,y,z,sx,sy,sz,material)=>{const mesh=new THREE.Mesh(cherubHeadGeometry,material);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;relief.add(mesh);return mesh;};
+  // Petit support de pierre, tête joufflue et boucles en relief.
+  oval(0,0,-.025,.25,.39,.09,cream);
+  oval(0,.11,.105,.17,.19,.105,white);
+  oval(0,.075,.216,.029,.032,.023,cream);
+  for(const x of [-.065,.065])oval(x,.142,.204,.012,.009,.006,stone);
+  oval(0,.035,.204,.028,.009,.007,stone);
+  for(let i=0;i<7;i++){
+    const angle=i/6*Math.PI;
+    oval(Math.cos(angle)*.147,.17+Math.sin(angle)*.105,.12,.049,.045,.04,cream);
+  }
+  oval(0,-.15,.07,.13,.12,.07,white);
+  for(const side of [-1,1]){
+    oval(side*.052,-.14,.15,.048,.036,.03,cream);
+    // Ailes courbes : dorure fine sur le bord, plumes ivoire sur la face.
+    const wing=new THREE.Shape();wing.moveTo(.11,-.07);
+    wing.bezierCurveTo(.19,.13,.35,.36,.58,.43);
+    wing.quadraticCurveTo(.61,.2,.48,.04);
+    wing.quadraticCurveTo(.35,-.13,.11,-.07);wing.closePath();
+    const geometry=new THREE.ExtrudeGeometry(wing,{depth:.045,bevelEnabled:true,bevelSegments:1,steps:1,bevelSize:.008,bevelThickness:.008,curveSegments:10});
+    const border=new THREE.Mesh(geometry,gold);border.scale.x=side;border.position.z=.015;border.castShadow=true;relief.add(border);
+    const face=new THREE.Mesh(geometry,white);face.scale.set(side*.88,.86,.55);face.position.set(side*.025,.012,.065);face.castShadow=true;relief.add(face);
+    for(let i=0;i<3;i++){
+      const feather=oval(side*(.26+i*.085),.025+i*.075,.116,.031,.105,.014,cream);
+      feather.rotation.z=-side*.48;
+    }
+  }
+  const halo=new THREE.Mesh(new THREE.TorusGeometry(.225,.012,5,24),gold);
+  halo.position.set(0,.135,.005);relief.add(halo);
+  const pendant=new THREE.Mesh(new THREE.OctahedronGeometry(.055),gold);
+  pendant.scale.set(.7,1.5,.4);pendant.position.set(0,-.35,.07);relief.add(pendant);
+}
+columns.forEach(cherubRelief);
+
 // Accents de marbre noir : socles, soubassements et filets, sans assombrir les murs.
 for(const side of [-1,1]){
   box(.34,.13,25.8,side*8.6,1.02,0,black);
