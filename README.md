@@ -80,6 +80,4 @@ Les quatre colonnes sont replacées à x = ±3, z = ±6, sous les croisements pl
 
 ## Chérubins en bas-relief
 
-Chaque colonne reçoit une fresque continue d’anges aux six poses différentes, limitée à une seule bande (six anges par colonne, 24 au total), avec de petits rinceaux et motifs végétaux entre les figures. Des bordures noires, des perles dorées et des traits d'or ancien encadrent la composition sur un fond pierre beige. Le décor est peint sur une texture Canvas locale qui fait tout le tour du fût ; les anciens anges en relief sont retirés. Quatre bandes cylindriques partagent la même texture, sans téléchargement externe. La navigation reste inchangée.
-
-Le décor est volontairement allégé : une seule frise de 1,10 m de hauteur par colonne, centrée à 3,55 m, sans répétition verticale. Le reste du fût conserve sa pierre sobre.
+Chaque colonne est entourée d'un ruban de fresque qui descend en spirale sur deux tours espacés. Les anges aux six poses différentes alternent avec des motifs végétaux noirs et or. Le ruban mesure 72 cm de largeur et laisse de grandes plages de pierre visible entre les passages, sans répétition couvrant tout le fût. Les bordures noires et or suivent la spirale, sans anneaux horizontaux supplémentaires. La géométrie épouse le rétrécissement de la colonne. Les quatre rubans partagent une géométrie et une texture Canvas locale. La circulation est conservée.

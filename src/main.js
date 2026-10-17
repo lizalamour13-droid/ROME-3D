@@ -447,16 +447,33 @@ for(const y of [15,605]){fresco.fillStyle=frescoInk;fresco.fillRect(0,y,3072,20)
 for(const y of [7,41,594,632]){fresco.fillStyle=frescoGold;fresco.fillRect(0,y,3072,4);}
 for(let x=12;x<3072;x+=32)for(const y of [25,615])frescoEllipse(x,y,3,3,frescoGold);
 const friezeTexture=new THREE.CanvasTexture(friezeCanvas);friezeTexture.colorSpace=THREE.SRGBColorSpace;
-friezeTexture.repeat.set(1,1);
+friezeTexture.wrapS=THREE.RepeatWrapping;friezeTexture.repeat.set(1,1);
 friezeTexture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),4);
 const friezeMaterial=new THREE.MeshStandardMaterial({map:friezeTexture,roughness:1});
 const cherubFrieze=new THREE.Group();cherubFrieze.name='column-cherub-frieze';
-cherubFrieze.userData={angelsPerColumn:6,totalAngels:24,poses:6,maxRelief:.025,fullHeight:false,style:'painted',motifs:true};scene.add(cherubFrieze);
-const paintedBandGeometry=new THREE.CylinderGeometry(.751,.769,1.1,64,1,true);
+cherubFrieze.userData={angelsPerColumn:18,totalAngels:72,poses:6,maxRelief:.025,fullHeight:false,style:'painted',motifs:true,spiral:true,turns:2};scene.add(cherubFrieze);
+// Ruban hélicoïdal : deux tours espacés, descendant sous les chapiteaux.
+// Chaque rive épouse le rayon décroissant du fût ; aucune bande horizontale ne reste.
+const ribbonPositions=[],ribbonUVs=[],ribbonIndices=[];
+const ribbonSteps=192,ribbonWidth=.72;
+for(let i=0;i<=ribbonSteps;i++){
+  const t=i/ribbonSteps,angle=t*Math.PI*4,centerY=10.35-t*8.8;
+  for(const edge of [-1,1]){
+    const y=centerY+edge*ribbonWidth/2;
+    const radius=.8-(y-.85)*.16/10.1+.004;
+    ribbonPositions.push(Math.sin(angle)*radius,y,Math.cos(angle)*radius);
+    ribbonUVs.push(t*3,(edge+1)/2);
+  }
+  if(i<ribbonSteps){const k=i*2;ribbonIndices.push(k,k+2,k+1,k+2,k+3,k+1);}
+}
+const paintedBandGeometry=new THREE.BufferGeometry();
+paintedBandGeometry.setAttribute('position',new THREE.Float32BufferAttribute(ribbonPositions,3));
+paintedBandGeometry.setAttribute('uv',new THREE.Float32BufferAttribute(ribbonUVs,2));
+paintedBandGeometry.setIndex(ribbonIndices);paintedBandGeometry.computeVertexNormals();
 columns.forEach((column,index)=>{
   const band=new THREE.Mesh(paintedBandGeometry,friezeMaterial);
-  band.name='painted-column-band';band.position.set(column.x,3.55,column.z);band.rotation.y=index*Math.PI/6;band.receiveShadow=true;cherubFrieze.add(band);
-  ring(.772,.008,3.01,gold,column.x,column.z);ring(.754,.008,4.09,gold,column.x,column.z);
+  band.name='painted-column-band';band.position.set(column.x,0,column.z);
+  band.rotation.y=index*Math.PI/3;band.receiveShadow=true;cherubFrieze.add(band);
 });
 
 // Accents de marbre noir : socles, soubassements et filets, sans assombrir les murs.
