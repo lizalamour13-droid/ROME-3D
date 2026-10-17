@@ -21,12 +21,12 @@ export function setupPrayerAudio(){
   document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.pause();gain=0;audio.volume=0;previousTime=null;}else if(enabled&&inChapel&&unlocked)void play();});
   audio.addEventListener('error',()=>{unlocked=false;feedback.textContent='Le fichier de prière n’a pas pu être chargé. Réessayez après avoir actualisé la page.';feedback.hidden=false;});
   label();
-  return {audio,setDucked(value){ducked=value;},setInChapel(value){inChapel=value;panel.hidden=!value;if(value&&enabled&&unlocked)void play();},update(z,time){
+  return {audio,setDucked(value){ducked=value;},setInChapel(value){inChapel=value;panel.hidden=!value;if(value&&enabled&&unlocked)void play();},update(z,time,presenceScale=1){
     const dt=previousTime===null?0:Math.max(0,Math.min(1,time-previousTime));previousTime=time;
     if(document.hidden)return;
     const presence=Math.max(0,Math.min(1,(-13-z)/5));
     const audible=enabled&&unlocked&&(inChapel||!audio.paused);
-    const target=audible&&!ducked?level*presence:0;
+    const target=audible&&!ducked?level*presence*presenceScale:0;
     gain+=(target-gain)*(1-Math.exp(-dt/(enabled?1.1:.35)));
     if(gain<.0008&&target===0){gain=0;if(!pending)audio.pause();}
     audio.volume=Math.max(0,Math.min(1,gain));

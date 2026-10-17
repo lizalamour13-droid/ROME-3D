@@ -164,7 +164,7 @@ Le pavage de la place est désormais gris anthracite/noir, avec petits pavés à
 
 ## Sanctuaire centré et quatre statues distinctes
 
-Le maître, son pupitre et l’estrade sont centrés sous le baldaquin. L’allée mène au pied des marches et les côtés restent accessibles. Un monument funéraire stylisé évoque le tombeau de saint Pierre près de l’autel, en noir, bordeaux et or, avec une inscription. Les quatre statues des niches sont différentes : Pierre avec clefs/livre, Paul avec épée/manuscrit, pèlerin avec bâton et main levée, évêque avec mitre/crosse. Les robes et manteaux utilisent seulement noir, bordeaux sombre et or ancien, avec visages en pierre naturelle.
+Le maître, son pupitre et l’estrade sont centrés sous le baldaquin. L’allée mène au pied des marches et les côtés restent accessibles. Un monument funéraire stylisé évoque le tombeau de saint Pierre dans la crypte sous le sanctuaire, en noir, bordeaux et or, avec une inscription. Les quatre statues des niches sont différentes : Pierre avec clefs/livre, Paul avec épée/manuscrit, pèlerin avec bâton et main levée, évêque avec mitre/crosse. Les robes et manteaux utilisent seulement noir, bordeaux sombre et or ancien, avec visages en pierre naturelle.
 
 ## Premières interactions et familles
 
@@ -186,6 +186,16 @@ La place accueille désormais huit promeneurs adultes, trois enfants, deux paren
 
 Dans la seconde salle, approchez du Père Matteo et appuyez sur **E**, puis **3**, pour prendre une place assise et assister à une **courte reconstitution de messe** : accueil, lecture, intentions, Notre Père latin et bénédiction. Il s’agit d’une évocation guidée, pas d’une messe intégrale ou d’une célébration en direct. Les étapes se succèdent avec voix locales et sous-titres ; les boutons permettent de continuer, couper la voix ou reprendre la visite. **Échap** quitte et restitue le point de vue initial.
 
-Le petit cartel « Mémoire de Pierre », à droite devant l’estrade, propose **E**, puis **1** : une apparition symbolique se lève au-dessus du monument funéraire et raconte brièvement les origines de Pierre et de la basilique. La narration précise les éléments relevant de la tradition chrétienne. La prière et les ambiances s’atténuent pendant ces séquences. Tous les fichiers audio sont locaux, avec textes et crédits dans `public/audio/experiences/README.md`.
+Le petit cartel « Mémoire de Pierre », dans la crypte sous le sanctuaire, propose **E**, puis **1** : une apparition symbolique se lève au-dessus du monument funéraire et raconte brièvement les origines de Pierre et de la basilique. La narration précise les éléments relevant de la tradition chrétienne. La prière et les ambiances s’atténuent pendant ces séquences. Tous les fichiers audio sont locaux, avec textes et crédits dans `public/audio/experiences/README.md`.
 
 Validation : `tests/visitors-experiences.cjs` vérifie les dialogues réels au clavier, les pistes audio, la succession des étapes, la caméra assise, la sortie, l’apparition, les passages entre salles et la nouvelle disposition.
+
+## Escaliers, crypte et balcons
+
+Sous le baldaquin de la seconde salle, l’ancien emplacement du tombeau accueille un puits avec un escalier hélicoïdal de deux tours : marches grises, panneaux vert sombre et filets/ornements or ancien inspirés de la référence. Contournez l’estrade par la droite et abordez le palier à droite du puits. Descendez avec **ZQSD et la souris**, sans téléportation. Le tombeau se trouve désormais huit mètres plus bas dans une chambre sombre ; le cartel propose toujours **E**, puis **1**, pour l’apparition symbolique et le récit vocal. On peut ensuite remonter par le même escalier.
+
+La crypte et l’escalier enterré sont éclairés uniquement par leurs bougies. Le rendu utilise deux passes avec profondeur conservée pour exclure la lumière ambiante et le soleil de ces surfaces. La prière de la seconde salle s’atténue pendant la descente et reprend progressivement au retour. L’apparition ne crée pas de lumière supplémentaire dans la pièce.
+
+Dans la première salle, un escalier hélicoïdal dans l’angle du fond à gauche monte de 6,4 mètres, vers deux balcons latéraux reliés par une galerie arrière. Les tableaux restent sous les balcons, le centre est ouvert, et l’on peut regarder la maquette et les visiteurs depuis le haut. Les garde-corps et les limites de marche empêchent de tomber dans la salle. La même commande ZQSD permet de redescendre.
+
+La navigation conserve le niveau courant pour distinguer les tours superposés, accepte les petits changements de hauteur des marches et bloque les sauts entre étages. `tests/vertical-routes.cjs` vérifie l’ascension au clavier, les trajets complets aller-retour par le contrôleur du jeu, les balcons, la protection des bords, l’accès à la crypte et l’interaction déplacée du tombeau. `tests/auto-prayer-books.cjs` vérifie aussi l’extinction progressive de la prière en sous-sol et sa reprise au retour. Captures réelles : `artifacts/escalier-spirale-crypte.png`, `artifacts/crypte-aux-bougies.png`, `artifacts/crypte-recit-saint-pierre.png`, `artifacts/balcons-vue-salle.png`, `artifacts/escalier-balcons.png`.

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {SPIRALS} from './vertical-routes.js';
 
 // Architecture géométrique de la référence ; emprise et circulation conservées.
 export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze}){
@@ -9,7 +10,8 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   const path=(points,r,m,parent=architecture)=>{const a=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,r,6,false),m);parent.add(a);return a;};
   const arch=(x,y,z,rx,ry,plane='xy',m=cream,r=.13,parent)=>{const points=[];for(let i=0;i<=32;i++){const a=i*Math.PI/32;points.push(new THREE.Vector3(x+(plane==='xy'?rx*Math.cos(a):0),y+ry*Math.sin(a),z+(plane==='yz'?rx*Math.cos(a):0)));}return path(points,r,m,parent);};
   const shape=new THREE.Shape();shape.moveTo(-8,-17);shape.lineTo(8,-17);shape.lineTo(8,-28);shape.absellipse(0,-28,8,9,0,Math.PI,true);shape.lineTo(-8,-17);shape.closePath();
-  const floor=add(new THREE.ShapeGeometry(shape,40),pale,0,0,0);floor.rotation.x=Math.PI/2;floor.material=pale.clone();floor.material.side=THREE.DoubleSide;floor.name='chapel-floor';
+  const hole=new THREE.Path();hole.absarc(SPIRALS.crypt.x,SPIRALS.crypt.z,SPIRALS.crypt.outer+.1,0,Math.PI*2,true);shape.holes.push(hole);
+  const floor=add(new THREE.ShapeGeometry(shape,64),pale,0,0,0);floor.rotation.x=Math.PI/2;floor.material=pale.clone();floor.material.side=THREE.DoubleSide;floor.name='chapel-floor';
   box(4.2,.22,3.2,0,-.12,-15.5,cream);
   // Retour au dallage précédent et à son tapis bordeaux.
   for(let z=-19;z>=-29;z-=2)for(const x of [-6,-4,-2,2,4,6]){
@@ -149,10 +151,10 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
     for(const y of [6.76,7.7,8.64])box(.96,.04,.1,0,y,.13,chairGold,g);
   }
   // Sanctuaire dégagé, escalier et petit autel à la place du grand siège rectangulaire.
-  for(let i=0;i<4;i++)box(7.5-i*.4,.18,4.7-i*.5,0,.1+i*.18,-33.5-i*.12,i%2?cream:pale);
+  box(2.9,.15,.72,0,.075,-36.63,pale);
   const altar=new THREE.Group();altar.name='cathedra-petri';architecture.add(altar);
-  box(2.25,.9,.9,0,1.21,-34,cream,altar);box(2.5,.15,1.12,0,1.76,-34,chairGold,altar);
-  box(.07,.55,.06,0,1.3,-33.52,chairGold,altar);box(.32,.07,.06,0,1.43,-33.52,chairGold,altar);
+  box(2.25,.9,.55,0,.6,-36.63,cream,altar);box(2.5,.15,.65,0,1.13,-36.63,chairGold,altar);
+  box(.07,.55,.06,0,.65,-36.32,chairGold,altar);box(.32,.07,.06,0,.78,-36.32,chairGold,altar);
   // Évocation du tombeau sous le sanctuaire : aucun personnage représenté dans le sépulcre.
   const tomb=new THREE.Group();tomb.name='saint-peter-tomb';tomb.position.set(0,.74,-33.4);architecture.add(tomb);
   box(2.8,.16,1.6,0,.08,0,statueBlack,tomb);box(2.35,.65,1.25,0,.48,0,statueBlack,tomb);box(2.5,.14,1.4,0,.88,0,pale,tomb);

@@ -5,7 +5,7 @@ import {buildChapelArchitecture} from './chapel-architecture.js';
 export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold,white}){
   const chapel=new THREE.Group();chapel.name='chapel';scene.add(chapel);
   const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
-  const obstacles=[{x:0,z:-33.5,hx:4,hz:2.9}];
+  const obstacles=[{x:0,z:-36.63,hx:1.6,hz:.58},...[-2.65,2.65].flatMap(x=>[-31.35,-34.85].map(z=>({x,z,hx:.58,hz:.58})))];
   const {flames,candleLights,floatingCandles}=buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze});
   // Livrets ouverts partagés : pages imprimées et couverture bordeaux sobre.
   const pageCanvas=document.createElement('canvas');pageCanvas.width=256;pageCanvas.height=320;const pageContext=pageCanvas.getContext('2d');pageContext.fillStyle='#eee3cb';pageContext.fillRect(0,0,256,320);pageContext.fillStyle='#625747';pageContext.textAlign='center';pageContext.font='bold 23px Georgia';pageContext.fillText('PATER NOSTER',128,48);pageContext.font='17px Georgia';
