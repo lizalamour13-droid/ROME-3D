@@ -15,6 +15,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   for(let i=0;i<8;i++)box(60,.25,1,0,-.125-i*.25,20+i*.85,cream).name='vatican-steps';
   const plaza=add(new THREE.CircleGeometry(1,96),paving,0,-2.03,66);plaza.rotation.x=-Math.PI/2;plaza.scale.set(47,43,1);plaza.name='saint-peter-square';
   box(63,.15,14,0,-2.12,27,paving);
+  const terrain=add(new THREE.CircleGeometry(125,64),mat('#929775'),0,-2.25,45);terrain.rotation.x=-Math.PI/2;terrain.name='exterior-surrounding-ground';
   // Rayons de pierre et anneaux du pavage, matériaux sobres.
   for(let i=0;i<24;i++){
     const a=i*Math.PI/12,points=[];for(const r of [5,39])points.push(new THREE.Vector3(Math.sin(a)*r,-1.99,66+Math.cos(a)*r*.9));
@@ -24,11 +25,21 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   const obelisk=new THREE.Group();obelisk.name='vatican-obelisk';group.add(obelisk);
   box(3,.8,3,0,-1.6,66,gray,obelisk);box(1.8,1.7,1.8,0,-.4,66,stone,obelisk);cyl(.25,.67,14,0,7.4,66,stone,4,obelisk);
   cyl(0,.35,1,0,14.9,66,stone,4,obelisk);box(.09,1,.09,0,15.9,66,gold,obelisk);box(.55,.09,.09,0,16.1,66,gold,obelisk);
+  const waterJets=[];
+  const jetMaterial=new THREE.MeshStandardMaterial({color:'#a8d6de',transparent:true,opacity:.7,roughness:.2,depthWrite:false});
   for(const x of [-15,15]){
     const fountain=new THREE.Group();fountain.name='square-fountain';group.add(fountain);
     cyl(2.5,2.7,.4,x,-1.7,66,cream,32,fountain);cyl(2.3,2.3,.07,x,-1.46,66,water,32,fountain);
     cyl(.35,.6,2.8,x,-.1,66,stone,16,fountain);cyl(1.5,.45,.35,x,1.3,66,cream,24,fountain);cyl(1.3,1.3,.04,x,1.5,66,water,24,fountain);
-    cyl(.08,.15,1.2,x,2.1,66,water,10,fountain);
+    cyl(.08,.15,1.9,x,2.45,66,jetMaterial,10,fountain);
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI/6,points=[];
+      for(let j=0;j<=20;j++){const t=j/20;points.push(new THREE.Vector3(x+Math.cos(a)*2.05*t,1.55+2.1*t-5.05*t*t,66+Math.sin(a)*2.05*t));}
+      const jet=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),24,.035,5,false),jetMaterial);jet.name='fountain-water-jet';fountain.add(jet);
+    }
+    for(let i=0;i<12;i++){const drop=add(new THREE.SphereGeometry(.065,6,4),jetMaterial,x,0,66,fountain);waterJets.push({mesh:drop,x,phase:i/12*Math.PI*2,offset:i/12});}
+    const rim=add(new THREE.TorusGeometry(2.5,.11,6,40),cream,x,-1.42,66,fountain);rim.rotation.x=Math.PI/2;
+
   }
   // Deux bras elliptiques à doubles rangs de colonnes, instanciées.
   const columns=new THREE.InstancedMesh(new THREE.CylinderGeometry(.34,.43,6,10),cream,192);columns.name='exterior-colonnades';const dummy=new THREE.Object3D();let index=0;
@@ -117,13 +128,52 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   }
   cyl(1.35,1.65,3.5,0,47.5,-2,cream,16,domeGroup);cyl(0,1.7,2.2,0,50.3,-2,lead,16,domeGroup);box(.12,2,.12,0,52.1,-2,gold,domeGroup);box(1,.12,.12,0,52.5,-2,gold,domeGroup);
   for(const x of [-20,20]){cyl(2,2.2,2.5,x,24,-3,cream,16,basilica);const cupola=add(new THREE.SphereGeometry(1,20,12,0,Math.PI*2,0,Math.PI/2),lead,x,25.25,-3,basilica);cupola.scale.set(2.3,3.6,2.3);cyl(.2,.4,1,x,29.3,-3,gold,8,basilica);}
+  // Verdure en périphérie : l'axe de visite et les monuments restent accessibles.
+  const greenery=new THREE.Group();greenery.name='square-greenery';group.add(greenery);
+  const leaves=[mat('#496b40'),mat('#68814c'),mat('#38583b')],trunk=mat('#74604b'),flowers=[mat('#a34d50'),mat('#c6a75f')];
+  const planters=[];
+  for(const side of [-1,1])for(const z of [38,49,83,94]){
+    const x=side*(z===38||z===94?23:31);planters.push({x,z});
+    box(2.2,.9,2.2,x,-1.55,z,stone,greenery);box(2.4,.16,2.4,x,-1.04,z,cream,greenery);
+    for(let i=0;i<5;i++){
+      const a=i*Math.PI*.4;const bush=add(new THREE.IcosahedronGeometry(.75,1),leaves[i%3],x+Math.cos(a)*.45,-.55,z+Math.sin(a)*.45,greenery);bush.scale.y=.8;
+      add(new THREE.IcosahedronGeometry(.16,0),flowers[i%2],x+Math.cos(a)*.8,-.1,z+Math.sin(a)*.8,greenery);
+    }
+  }
+  // Pins parasols derrière les colonnades, silhouettes méditerranéennes sobres.
+  for(const side of [-1,1])for(const z of [35,48,63,79,94]){
+    const x=side*(z===35||z===94?36:48);
+    cyl(.35,.55,7,x,1.4,z,trunk,10,greenery);
+    for(let i=0;i<5;i++){const a=i*Math.PI*.4;const canopy=add(new THREE.IcosahedronGeometry(2.4,1),leaves[i%3],x+Math.cos(a)*1.5,5.2+(i%2)*.4,z+Math.sin(a)*1.5,greenery);canopy.scale.y=.55;}
+  }
+  // Oiseaux articulés : trajectoires elliptiques et battements d'ailes.
+  const flock=new THREE.Group();flock.name='square-flying-birds';group.add(flock);const birds=[];
+  const feather=mat('#e0ded3'),wingTip=mat('#696e70');
+  for(let i=0;i<10;i++){
+    const bird=new THREE.Group();bird.name='flying-bird';flock.add(bird);
+    const body=add(new THREE.SphereGeometry(.16,8,6),feather,0,0,0,bird);body.scale.set(.75,.8,1.65);
+    add(new THREE.SphereGeometry(.11,8,6),feather,0,.1,.23,bird);const beak=add(new THREE.ConeGeometry(.045,.14,5),stone,0,.09,.37,bird);beak.rotation.x=Math.PI/2;
+    const wings=[];
+    for(const side of [-1,1]){const pivot=new THREE.Group();pivot.position.x=side*.08;bird.add(pivot);const wing=box(.47,.045,.22,side*.22,0,0,feather,pivot);const tip=box(.2,.04,.16,side*.52,0,-.05,wingTip,pivot);wings.push({pivot,side});}
+    birds.push({group:bird,wings,phase:i*Math.PI*.2});
+  }
+  function animate(time){
+    birds.forEach((bird,i)=>{
+      const a=time*(.11+i*.004)+bird.phase,rx=17+(i%3)*5,rz=13+(i%2)*7;
+      bird.group.position.set(Math.cos(a)*rx,9+(i%4)*1.5+Math.sin(a*2)*1.2,65+Math.sin(a)*rz);
+      bird.group.rotation.y=Math.atan2(-rx*Math.sin(a),rz*Math.cos(a));bird.group.rotation.z=Math.sin(a)*.12;
+      bird.wings.forEach(({pivot,side})=>pivot.rotation.z=side*Math.sin(time*7+i)*.65);
+    });
+    waterJets.forEach(({mesh,x,phase,offset})=>{const t=(time*.65+offset)%1;mesh.position.set(x+Math.cos(phase)*2.05*t,1.55+2.1*t-5.05*t*t,66+Math.sin(phase)*2.05*t);});
+  }
   const groundAt=z=>z<20?0:z<26.8?-.25*Math.min(8,Math.floor((z-20)/.85)+1):-2;
   function allowed(x,z){
     if(z<20)return Math.abs(x-5.5)<1.18&&z>11.8;
     if(z<34)return Math.abs(x)<28;
     if((x/40)**2+((z-66)/39)**2>1||z<27)return false;
+    if(planters.some(p=>Math.abs(x-p.x)<1.45&&Math.abs(z-p.z)<1.45))return false;
     if(Math.hypot(x,z-66)<2.1||[-15,15].some(fx=>Math.hypot(x-fx,z-66)<3))return false;
     return true;
   }
-  return {allowed,groundAt};
+  return {allowed,groundAt,animate};
 }
