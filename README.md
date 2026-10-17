@@ -125,3 +125,5 @@ Un tapis rouge bordeaux à liseré doré parcourt l'allée centrale de la second
 ## Lumière et saint Pierre
 
 Quatre faisceaux dorés translucides accompagnent une statue centrale de saint Pierre sous le baldaquin, avec livre et clefs. Les paillettes passent à 280. Quatre des vingt visiteurs se lèvent, traversent les intervalles entre les rangées puis se rassoient ; les deux marcheurs latéraux sont conservés. Les déplacements s'arrêtent à proximité du joueur.
+
+Les visiteurs debout utilisent désormais des jambes articulées aux hanches et aux genoux, avec balancement opposé des bras et des pas synchronisés sur la distance parcourue. Les quatre visiteurs qui quittent leur chaise utilisent également cette marche. Le maître de cérémonie dispose d’un pupitre noir et or, avec livre et microphone décoratif ; le son reste la prière existante.

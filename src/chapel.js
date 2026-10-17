@@ -271,11 +271,14 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const limbs=[];
     for(const side of [-1,1]){
       const leg=new THREE.Group();leg.position.set(side*.11,.63,0);group.add(leg);
-      const calf=new THREE.Mesh(new THREE.BoxGeometry(.11,.38,.13),robe);calf.position.y=-.2;leg.add(calf);
-      const shoe=new THREE.Mesh(new THREE.BoxGeometry(.14,.09,.23),black);shoe.position.set(0,-.45,.05);leg.add(shoe);
+      leg.position.y=.79;
+      const thigh=new THREE.Mesh(new THREE.BoxGeometry(.115,.34,.14),robe);thigh.position.y=-.17;leg.add(thigh);
+      const knee=new THREE.Group();knee.name='walking-knee';knee.position.y=-.34;leg.add(knee);
+      const calf=new THREE.Mesh(new THREE.BoxGeometry(.105,.33,.12),robe);calf.position.y=-.165;knee.add(calf);
+      const shoe=new THREE.Mesh(new THREE.BoxGeometry(.14,.1,.25),black);shoe.position.set(0,-.38,.055);knee.add(shoe);
       const arm=new THREE.Group();arm.position.set(side*.24,1.41,0);group.add(arm);
       const sleeve=new THREE.Mesh(new THREE.BoxGeometry(.105,.42,.13),robe);sleeve.position.y=-.2;arm.add(sleeve);
-      const hand=new THREE.Mesh(new THREE.SphereGeometry(.06,8,5),skin);hand.position.y=-.44;arm.add(hand);limbs.push({leg,arm,side});
+      const hand=new THREE.Mesh(new THREE.SphereGeometry(.06,8,5),skin);hand.position.y=-.44;arm.add(hand);limbs.push({leg,knee,arm,side});
     }
     if(role==='master-of-ceremonies'){
       part(.4,.28,.035,0,1.29,.144,cream);
@@ -290,9 +293,32 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   }
   const ceremonyMaster=standingPerson(1.65,-30.05,'master-of-ceremonies',0);
   obstacles.push({x:1.65,z:-30.05,hx:.48,hz:.48});
+  const lectern=new THREE.Group();lectern.name='ceremony-lectern';lectern.position.set(1.65,0,-29.38);chapel.add(lectern);
+  const deskPart=(w,h,d,x,y,z,m)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);lectern.add(mesh);return mesh;};
+  deskPart(.86,.12,.65,0,.08,0,chairBronze);
+  deskPart(.62,1.13,.28,0,.69,0,chairBronze);
+  for(const x of [-.29,.29])deskPart(.045,1.12,.31,x,.69,0,chairGold);
+  const desktop=deskPart(.95,.09,.65,0,1.31,0,chairGold);desktop.rotation.x=.18;
+  const pages=deskPart(.43,.025,.33,0,1.38,-.05,cream);pages.rotation.x=.18;
+  deskPart(.035,.31,.035,0,.89,.155,chairGold);deskPart(.18,.035,.035,0,.95,.155,chairGold);
+  const microphone=new THREE.Group();microphone.name='ceremony-microphone';lectern.add(microphone);
+  const neck=new THREE.CatmullRomCurve3([new THREE.Vector3(.3,1.36,0),new THREE.Vector3(.3,1.65,0),new THREE.Vector3(.13,1.78,-.22)]);
+  microphone.add(new THREE.Mesh(new THREE.TubeGeometry(neck,16,.018,6,false),black));
+  const micHead=new THREE.Mesh(new THREE.SphereGeometry(.055,10,7),gray);micHead.scale.set(1,1,1.65);micHead.position.set(.13,1.78,-.22);microphone.add(micHead);
+  obstacles.push({x:1.65,z:-29.38,hx:.65,hz:.53});
+  function walkingPose(person,distance,moving){
+    const phase=distance*11;
+    person.limbs.forEach(({leg,knee,arm,side})=>{
+      const cycle=phase+(side<0?Math.PI:0);
+      leg.rotation.x=moving?Math.sin(cycle)*.42:0;
+      knee.rotation.x=moving?Math.max(0,-Math.sin(cycle))*.72:0;
+      arm.rotation.x=moving?-Math.sin(cycle)*.28:0;
+    });
+    person.group.position.y=moving?Math.abs(Math.sin(phase))*.025:0;
+  }
   for(const [index,side] of [-1,1].entries()){
     const person=standingPerson(side*6.6,-20.1-index*4,'walking-visitor',index+1);
-    walkers.push({...person,phase:index*.5,direction:1});
+    walkers.push({...person,distance:index*.4,direction:1});
   }
 
   function animate(time,viewerPosition){
@@ -300,23 +326,30 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     walkers.forEach((walker,index)=>{
       const nextZ=walker.group.position.z+walker.direction*delta*.32;
       const clear=!viewerPosition||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95;
-      if(clear)walker.group.position.z=nextZ;
+      if(clear){walker.distance+=Math.abs(nextZ-walker.group.position.z);walker.group.position.z=nextZ;}
       if(walker.group.position.z>-19.6)walker.direction=-1;
       if(walker.group.position.z<-28.6)walker.direction=1;
       walker.group.rotation.y=walker.direction<0?Math.PI:0;
-      walker.limbs.forEach(({leg,arm,side})=>{const stride=clear?Math.sin(time*3.1+index)*.18*side:0;leg.rotation.x=stride;arm.rotation.x=-stride*.8;});
+      walkingPose(walker,walker.distance,clear);
     });
     ceremonyMaster.limbs[1].arm.rotation.x=-1.05+Math.sin(time*.7)*.12;
     ceremonyMaster.head.rotation.x=.045+.025*Math.sin(time*.6);
     seatedMotion.forEach((person,index)=>person.rotation.x=Math.sin(time*.55+index)*.006);
     risingVisitors.forEach((actor,index)=>{
       // Se lever, sortir de la rangée, traverser son intervalle puis revenir s’asseoir.
-      const t=(time+index*9)%38;
+      const t=(actor.clock+delta)%38;
       const rise=THREE.MathUtils.smoothstep(t,3,5)*(1-THREE.MathUtils.smoothstep(t,33,35));
       const travel=THREE.MathUtils.smoothstep(t,7,16)*(1-THREE.MathUtils.smoothstep(t,23,32));
       const forward=THREE.MathUtils.smoothstep(t,5,7)*(1-THREE.MathUtils.smoothstep(t,32,33));
       const nextX=actor.x+actor.side*2.05*travel,nextZ=actor.z-1.25*forward;
       if(viewerPosition&&Math.hypot(viewerPosition.x-nextX,viewerPosition.z-nextZ)<.95)return;
+      actor.clock=t;
+      const dx=nextX-actor.group.position.x,dz=nextZ-actor.group.position.z,distance=Math.hypot(dx,dz);
+      actor.distance+=distance;
+      actor.walking.group.visible=rise>.99;actor.group.children.forEach(mesh=>mesh.visible=rise<=.99);
+      actor.walking.group.position.set(nextX,0,nextZ);
+      if(distance>.0001)actor.walking.group.rotation.y=Math.atan2(dx,dz);
+      walkingPose(actor.walking,actor.distance,distance>.0001);
       actor.group.position.set(nextX,0,nextZ);actor.group.userData.posture=rise>.95?'debout':'assis';
       actor.parts.forEach(({mesh,y,z})=>{
         const targetY=y===.19?.10:y===.44?.34:y===.72?.63:y===.47?.76:y+.28;
@@ -349,7 +382,8 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     }
     if(index%3===1){const book=localBox(.23,.025,.2,0,.86,.3,cream);book.rotation.x=-.2;}
     if(index===1||index===4||index===11||index===14){
-      const actor={group:person,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z}))};
+      const walking=standingPerson(x,z,'walking-standing-visitor',index);walking.group.visible=false;
+      const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z}))};
       risingVisitors.push(actor);
     }else seatedMotion.push(person);
   }
