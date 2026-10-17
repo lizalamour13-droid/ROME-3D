@@ -53,7 +53,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const tooth=box(.17,.18,.22,x,8.91,z,chairGold);tooth.rotation.y=Math.atan2(-Math.cos(a),Math.sin(a));tooth.castShadow=false;mouldings.attach(tooth);
   }
   // Personnages debout : maître de cérémonie et deux marcheurs dans les allées.
-  const walkers=[],seatedMotion=[],risingVisitors=[];let animationTime=0;
+  const walkers=[],seatedMotion=[],risingVisitors=[];let animationTime=0,ceremonyPhase=null,priestBefore=null;
   function standingPerson(x,z,role,index){
     const group=new THREE.Group();group.name=role;group.position.set(x,0,z);chapel.add(group);
     const skin=mat(index%2?'#a58265':'#c2a083'),robe=role==='walking-priest'?cream:mat('#63323e'),hair=mat('#514638');
@@ -133,23 +133,25 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   function animate(time,viewerPosition){
     const delta=Math.min(Math.max(time-animationTime,0),.1);animationTime=time;
     const nextPriestZ=priest.group.position.z+priestDirection*delta*.42;
-    const priestClear=!priest.group.userData.isConversing&&(!viewerPosition||Math.hypot(viewerPosition.x,viewerPosition.z-nextPriestZ)>1.15);
+    const priestClear=ceremonyPhase===null&&!priest.group.userData.isConversing&&(!viewerPosition||Math.hypot(viewerPosition.x,viewerPosition.z-nextPriestZ)>1.15);
     if(priestClear){priest.group.position.z=nextPriestZ;priestDistance+=delta*.42;}
     if(priest.group.position.z>-19.7)priestDirection=-1;if(priest.group.position.z<-28.1)priestDirection=1;
     priest.group.rotation.y=priestDirection<0?Math.PI:0;walkingPose(priest,priestDistance,priestClear);priest.limbs[0].arm.rotation.x=-.05;priest.limbs[0].arm.rotation.z=-.3;
     walkers.forEach((walker,index)=>{
       const nextZ=walker.group.position.z+walker.direction*delta*.32;
-      const clear=!viewerPosition||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95;
+      const clear=ceremonyPhase===null&&(!viewerPosition||Math.hypot(viewerPosition.x-walker.group.position.x,viewerPosition.z-nextZ)>.95);
       if(clear){walker.distance+=Math.abs(nextZ-walker.group.position.z);walker.group.position.z=nextZ;}
       if(walker.group.position.z>-19.6)walker.direction=-1;
       if(walker.group.position.z<-28.6)walker.direction=1;
       walker.group.rotation.y=walker.direction<0?Math.PI:0;
       walkingPose(walker,walker.distance,clear);
     });
-    ceremonyMaster.limbs[1].arm.rotation.x=-1.05+Math.sin(time*.7)*.12;
+    ceremonyMaster.limbs[1].arm.rotation.x=(ceremonyPhase===4?-1.65:-1.05)+Math.sin(time*.7)*.12;
+    if(ceremonyPhase!==null){priest.group.position.set(0,0,-28.5);priest.group.rotation.y=0;priest.limbs[1].arm.rotation.x=ceremonyPhase===4?-1.6:-.5;}
     ceremonyMaster.head.rotation.x=.045+.025*Math.sin(time*.6);
     seatedMotion.forEach((person,index)=>person.rotation.x=Math.sin(time*.55+index)*.006);
     risingVisitors.forEach((actor,index)=>{
+      if(ceremonyPhase!==null)return;
       // Se lever, sortir de la rangée, traverser son intervalle puis revenir s’asseoir.
       const t=(actor.clock+delta)%38;
       const rise=THREE.MathUtils.smoothstep(t,3,5)*(1-THREE.MathUtils.smoothstep(t,33,35));
@@ -198,7 +200,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const book=prayerBook(person,'visitor-prayer-book',0,.865,.29);book.rotation.x=-.2;
     if(index===1||index===4||index===11||index===14){
       const walking=standingPerson(x,z,'walking-standing-visitor',index);walking.group.visible=false;
-      const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z}))};
+      const actor={group:person,walking,clock:risingVisitors.length*9,distance:0,x,z,side:Math.sign(x),parts:person.children.map(mesh=>({mesh,y:mesh.position.y,z:mesh.position.z,rx:mesh.rotation.x}))};
       risingVisitors.push(actor);
     }else seatedMotion.push(person);
   }
@@ -233,5 +235,11 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
     const inside=z>=-28?Math.abs(x)<7.35:(x/7.35)**2+((z+28)/8.3)**2<1;
     return inside&&z>-36.3&&Math.hypot(x-priest.group.position.x,z-priest.group.position.z)>.5&&!(Math.abs(x)>6.95&&[-20.75,-25.65].some(nz=>Math.abs(z-nz)<1.6))&&![...walkers,...risingVisitors].some(w=>Math.hypot(x-w.group.position.x,z-w.group.position.z)<.52)&&!obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz);
   }
-  return {allowed,animate};
+  return {allowed,animate,setCeremony(phase){
+    if(phase!==null&&ceremonyPhase===null){priestBefore=priest.group.position.clone();}
+    ceremonyPhase=phase;
+    const seat=chapel.children.find(p=>p.name==='seated-visitor'&&Math.abs(p.position.x-2.7)<.01&&p.position.z===-23);if(seat)seat.visible=phase===null;
+    if(phase===null&&priestBefore){priest.group.position.copy(priestBefore);priestBefore=null;}
+    for(const actor of risingVisitors){actor.group.position.set(actor.x,0,actor.z);actor.group.children.forEach(mesh=>mesh.visible=true);actor.walking.group.visible=false;actor.clock=0;actor.parts.forEach(({mesh,y,z,rx})=>{mesh.position.y=y;mesh.position.z=z;mesh.rotation.x=rx;});actor.group.rotation.set(0,Math.PI,0);}
+  }};
 }

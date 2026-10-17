@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
+import {createInteriorVisitors} from './interior-visitors.js';
+import {createCeremonyExperience} from './ceremony-experience.js';
 import {createExterior} from './exterior.js';
 import { createChapel } from './chapel.js';
 import {setupInteractions} from './interactions.js';
@@ -29,7 +31,7 @@ box(18,.3,26,0,-.16,0,cream);
 for(let x=-8;x<=8;x+=2)for(let z=-12;z<=12;z+=2){box(1.94,.018,1.94,x,.008,z,((x+z)/2)%2===0?cream:white);if(x>-7&&x<7){const tile=box(.72,.025,.72,x,.024,z,red);tile.rotation.y=Math.PI/4;const inset=box(.37,.028,.37,x,.029,z,black);inset.rotation.y=Math.PI/4;}}
 for(const x of [-7,7]){box(.19,.04,25.7,x,.035,0,black);box(.14,.04,25.7,x+Math.sign(x)*.28,.035,0,red);}
 for(const z of [-10,10])box(13.8,.04,.2,0,.035,z,black);
-box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(6.2,12,.5,-5.9,6,13,wall);box(1.2,12,.5,3.4,6,13,wall);box(2,12,.5,8,6,13,wall);box(5.6,5.6,.5,0,9.2,13,wall);box(3,6.3,.5,5.5,8.85,13,wall);
+box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(6.2,12,.5,-5.9,6,13,wall);box(6.2,12,.5,5.9,6,13,wall);box(5.6,5.6,.5,0,9.2,13,wall);
 // Mur du fond et arche ouverte sur une niche peu profonde, dans la même salle.
 box(4.4,12,.7,-6.8,6,-13,wall);box(4.4,12,.7,6.8,6,-13,wall);box(9.2,1.4,.7,0,11.3,-13,wall);
 for(const x of [-3.45,3.45])box(2.1,11,.3,x,5.5,-14.7,stone);box(4.8,4.5,.3,0,8.75,-14.7,stone);box(9,.2,2,0,0,-13.8,cream);box(9,.3,2,0,11,-13.8,cream);
@@ -175,58 +177,12 @@ for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
 // Fenêtres claires en hauteur, avec encadrements et meneaux simples.
 const glazing=new THREE.MeshBasicMaterial({color:'#fff2cf'});
 for(const side of [-1,1])for(const z of [-6.5,.5,7.5]){box(.09,1.65,2.6,side*8.72,8,z,glazing);box(.16,.09,2.8,side*8.58,8,z,stone);box(.16,1.8,.1,side*8.58,8,z,stone);}
-// Fontaine centrale à deux vasques : pierre crème, lèvres dorées et eau discrète.
+// Anneaux partagés par les ornements des colonnes et du plafond.
 function ring(radius,tube,y,material,x=0,z=0){
   const mesh=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,6,40),material);
   mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);
   mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;
 }
-function basin(profile,material){
-  const mesh=new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r,y])=>new THREE.Vector2(r,y)),40),material);
-  mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;
-}
-cylinder(2.16,2.24,.16,0,.13,0,gray,32);
-cylinder(2.04,2.16,.14,0,.28,0,cream,32);
-basin([[0,.32],[1.84,.32],[2.02,.45],[2.09,.7],[1.91,.7],[1.84,.43],[0,.43]],cream);
-ring(2.015,.055,.7,gold);
-ring(2.12,.035,.25,gold);
-const waterMaterial=new THREE.MeshStandardMaterial({color:'#809a94',roughness:.25,metalness:.18,transparent:true,opacity:.86});
-function waterDisk(radius,y){const mesh=new THREE.Mesh(new THREE.CircleGeometry(radius,40),waterMaterial);mesh.rotation.x=-Math.PI/2;mesh.position.y=y;scene.add(mesh);return mesh;}
-waterDisk(1.86,.49);
-cylinder(.38,.56,.45,0,.68,0,stone);
-cylinder(.23,.36,1.1,0,1.4,0,cream);
-ring(.31,.05,1.85,gold);
-basin([[.16,1.82],[.65,1.94],[1.02,2.22],[1.08,2.4],[.96,2.4],[.88,2.24],[.2,2.06]],cream);
-ring(1.02,.045,2.4,gold);
-waterDisk(.94,2.29);
-cylinder(.13,.2,.7,0,2.66,0,stone);
-basin([[.1,2.94],[.43,3.06],[.58,3.27],[.5,3.29],[.43,3.15],[.1,3.05]],cream);
-ring(.55,.035,3.28,gold);
-waterDisk(.47,3.18);
-const finial=new THREE.Mesh(new THREE.OctahedronGeometry(.16),gold);finial.position.y=3.53;scene.add(finial);
-const streamMaterial=new THREE.MeshStandardMaterial({color:'#a9c0b7',transparent:true,opacity:.62,roughness:.2});
-for(let i=0;i<8;i++){
-  const angle=i*Math.PI/4;
-  const points=[[.94,2.3],[1.17,2.22],[1.38,1.55],[1.48,.52]].map(([r,y])=>new THREE.Vector3(Math.cos(angle)*r,y,Math.sin(angle)*r));
-  const stream=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),14,.016,4,false),streamMaterial);
-  scene.add(stream);
-}
-const drops=new THREE.InstancedMesh(new THREE.SphereGeometry(.035,6,4),streamMaterial,32);
-drops.name='fountain-drops';drops.instanceMatrix.setUsage(THREE.DynamicDrawUsage);drops.frustumCulled=false;scene.add(drops);
-const dropDummy=new THREE.Object3D();
-function animateFountain(time){
-  for(let i=0;i<32;i++){
-    const angle=(i%8)*Math.PI/4;
-    const t=(time*.45+Math.floor(i/8)*.25)%1;
-    const radius=.95+.53*t;
-    dropDummy.position.set(Math.cos(angle)*radius,2.3-1.78*t*t,Math.sin(angle)*radius);
-    dropDummy.scale.set(1,1.5,1);dropDummy.updateMatrix();drops.setMatrixAt(i,dropDummy.matrix);
-  }
-  drops.instanceMatrix.needsUpdate=true;
-}
-animateFountain(0);
-for(let i=0;i<3;i++)ring(.15+i*.15,.008,.5,streamMaterial,1.48,0);
-
 // Tableaux originaux dessinés localement : paysages et architecture en tons sourds.
 // Aucune image distante et aucune reproduction d'œuvre revendiquée.
 function paintingTexture(index){
@@ -562,7 +518,7 @@ for(const c of columns){
   cylinder(.82,.82,.11,c.x,.94,c.z,black,16);
   ring(.82,.025,1.01,gold,c.x,c.z);
 }
-ring(2.13,.045,.34,black);
+
 for(const x of [-4.18,4.18])box(.22,5.3,.05,x,3.03,-12.37,black);
 for(const x of [-6.7,6.7]){
   for(const dx of [-1.24,1.24])box(.07,2.07,.09,x+dx,7.35,-12.43,black);
@@ -585,8 +541,8 @@ for(const x of [-6,0,6])for(const z of [-9,-3,3,9]){
 }
 ceilingPetals.instanceMatrix.needsUpdate=true;scene.add(ceilingPetals);
 
-// Maquette extérieure de Saint-Pierre, exposée à l'opposé du mur monumental.
-const displayCase={x:0,z:9.4,halfWidth:1.9,halfDepth:1.95};
+// Maquette extérieure de Saint-Pierre, exposée au centre sous verre.
+const displayCase={x:0,z:0,halfWidth:1.9,halfDepth:1.95};
 const miniature=new THREE.Group();miniature.name='basilica-miniature';
 miniature.position.set(displayCase.x,1.055,displayCase.z);miniature.rotation.y=Math.PI;scene.add(miniature);
 function miniBox(w,h,d,x,y,z,material=cream){
@@ -595,7 +551,7 @@ function miniBox(w,h,d,x,y,z,material=cream){
 function miniCylinder(rt,rb,h,x,y,z,material=cream,n=12){
   const mesh=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,n),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;miniature.add(mesh);return mesh;
 }
-// Socle de musée et plateau sombre, maintenus hors du passage central.
+// Socle de musée et plateau sombre.
 box(3.85,.16,3.95,displayCase.x,.12,displayCase.z,black);
 box(3.45,.7,3.55,displayCase.x,.55,displayCase.z,stone);
 box(3.82,.12,3.92,displayCase.x,.96,displayCase.z,black);
@@ -697,7 +653,7 @@ const sun=new THREE.DirectionalLight('#fff1d7',3.1);sun.position.set(6,11,7);sun
 const fill=new THREE.PointLight('#ffe3b4',65,23,2);fill.position.set(0,8,-10);scene.add(fill);
 // Navigation à hauteur d’œil, collisions avec les colonnes et les limites de la salle.
 const keys=new Set();let active=false;let yaw=0,pitch=0;
-function reset(){camera.position.set(2.8,1.75,10.7);yaw=.15;pitch=.115;camera.rotation.set(pitch,yaw,0);}
+function reset(){if(scene.userData.experienceActive)experience.stop();camera.position.set(2.8,1.75,10.7);yaw=.15;pitch=.115;camera.rotation.set(pitch,yaw,0);}
 reset();
 const enter=document.querySelector('#enter');
 enter.addEventListener('click',async()=>{try{await canvas.requestPointerLock();}catch{status.textContent='La capture de souris est indisponible. Maintenez le clic sur la scène pour regarder ; ZQSD reste disponible.';active=true;document.querySelector('#app').classList.add('visiting');}});
@@ -706,15 +662,18 @@ document.querySelector('#reset').addEventListener('click',reset);
 addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();keys.clear();}if(['KeyZ','KeyW','KeyQ','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){e.preventDefault();keys.add(e.code);}});
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
-addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){if(z>11.8&&(Math.abs(x)<2.1||Math.abs(x-5.5)<1.18)||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
-function move(dt){if(interactions.open||(!active&&!dragging))return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
+addEventListener('mousemove',e=>{if(scene.userData.experienceActive||(!active&&!dragging))return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
+function staticAllowed(x,z){if(z>11.8&&Math.abs(x)<2.1||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function allowed(x,z){return staticAllowed(x,z)&&!visitors.blocked(x,z);}
+function move(dt){if(experience.active||interactions.open||(!active&&!dragging))return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const prayer=setupPrayerAudio();
 const ambience=setupAmbientAudio({enter,prayerAudio:prayer.audio,exterior});
-const interactions=setupInteractions({scene,camera,canvas});
+const visitors=createInteriorVisitors(scene);
+const experience=createCeremonyExperience({scene,camera,canvas,chapel,prayer,restoreView(view){camera.position.copy(view.position);camera.rotation.copy(view.rotation);yaw=view.rotation.y;pitch=view.rotation.x;keys.clear();}});
+const interactions=setupInteractions({scene,camera,canvas,onAction:kind=>experience.start(kind)});
 let currentRoom=1;
 const roomNumber=document.querySelector('footer b');
-const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));animateFountain(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position);interactions.update();prayer.update(camera.position.z,clock.elapsedTime);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.7,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);camera.position.y=1.75+(camera.position.z>13?exterior.groundAt(camera.position.z):0);scene.background.set(camera.position.z>14?'#b6cbd5':'#c9bda5');const nextRoom=camera.position.z>17?3:camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===3?'03 / 03 · PLACE SAINT-PIERRE':nextRoom===2?'02 / 03 · LA CHAIRE':'01 / 03 · LES MARBRES';}renderer.render(scene,camera);});
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{move(Math.min(clock.getDelta(),.05));visitors.update(clock.elapsedTime,camera.position);experience.update(clock.elapsedTime);chapel.animate(clock.elapsedTime,camera.position);exterior.animate(clock.elapsedTime,camera.position);ambience.update(camera.position,experience.active);interactions.update();prayer.update(camera.position.z,clock.elapsedTime);const night=1-THREE.MathUtils.smoothstep(camera.position.z,-18,-14.8);roomAmbient.intensity=THREE.MathUtils.lerp(2,.7,night);sun.intensity=THREE.MathUtils.lerp(3.1,.04,night);fill.intensity=THREE.MathUtils.lerp(65,6,night);if(!experience.active)camera.position.y=1.75+(camera.position.z>13?exterior.groundAt(camera.position.z):0);scene.background.set(camera.position.z>14?'#b6cbd5':'#c9bda5');const nextRoom=camera.position.z>17?3:camera.position.z<-17.4?2:1;if(nextRoom!==currentRoom){currentRoom=nextRoom;prayer.setInChapel(nextRoom===2);roomNumber.textContent=nextRoom===3?'03 / 03 · PLACE SAINT-PIERRE':nextRoom===2?'02 / 03 · LA CHAIRE':'01 / 03 · LES MARBRES';}renderer.render(scene,camera);});
 // État observable pour les tests navigateur, sans modifier la scène.
-window.room={camera,scene,renderer,allowed,reset,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};
+window.room={camera,scene,renderer,allowed,reset,visitors,experience,exterior,ambience,interactions,prayerAudio:prayer.audio,get active(){return active;}};

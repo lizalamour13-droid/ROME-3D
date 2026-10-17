@@ -42,17 +42,17 @@ Dans GitHub : **Settings → Pages → Build and deployment → Source: Deploy f
 
 Deux niches cintrées avec statues géométriques en pierre claire encadrent désormais une porte monumentale à panneaux bronze et or ancien. Des cadres en marbre rouge brun, un fronton et des médaillons complètent le mur du fond. La salle, la palette, les quatre colonnes et les commandes de visite sont conservées ; les deux vantaux sont ouverts pour accéder à la salle de la chaire.
 
-## Fontaine et galerie
+## Maquette centrale et galerie
 
-La salle comporte désormais une fontaine centrale à vasques superposées, en pierre crème avec bordures en or ancien. L'eau et les gouttes sont animées ; les gouttes partagent un seul objet instancié. Une collision circulaire laisse une marge autour du socle et permet de contourner le bassin.
+La fontaine intérieure a été retirée : la maquette de la basilique et sa vitrine occupent maintenant le centre de la salle. Une collision rectangulaire protège le socle et le verre ; la circulation reste possible autour.
 
 Quatre tableaux originaux (Saint-Pierre, le Tibre, une nature morte et une figure drapée) sont dessinés localement sur Canvas, dans une palette terre, pierre et vert grisé, avec des cadres dorés. Des rosaces et feuilles géométriques complètent les pilastres et chapiteaux. Aucun téléchargement de texture, aucune image personnelle ou œuvre historique reproduite.
 
-Les tests navigateur vérifient aussi la collision de la fontaine, le passage tout autour, l'animation de l'eau et la présence des quatre tableaux.
+Les tests navigateur vérifient la collision de la vitrine, les passages autour de la maquette et la présence des six tableaux différents.
 
 ## Marbre noir et plafond de Saint-Pierre
 
-Des filets de marbre noir soulignent les soubassements, socles de colonnes, bordures de la fontaine et encadrements du fond. Les moulures du plafond ont un profil concave arrondi : les bords descendent et le centre remonte dans le plafond pour former un creux. Les rosaces et filets en or ancien restent sobres. Le médaillon noir aux clés croisées a été retiré. La circulation et l'éclairage sont conservés.
+Des filets de marbre noir soulignent les soubassements, socles de colonnes et encadrements du fond. Les moulures du plafond ont un profil concave arrondi : les bords descendent et le centre remonte dans le plafond pour former un creux. Les rosaces et filets en or ancien restent sobres. Le médaillon noir aux clés croisées a été retiré. La circulation et l'éclairage sont conservés.
 
 Les quatre tableaux sont tous différents et répartis à raison de deux par côté, sans duplication : Saint-Pierre, le Tibre, une nature morte et une figure drapée. Les textures sont créées localement sans téléchargement.
 
@@ -62,9 +62,9 @@ Le panneau central du mur gauche reçoit une cinquième composition originale re
 
 ## Maquette sous verre
 
-Au centre de la largeur de la salle, du côté opposé à la porte et aux statues (x = 0 ; z = 9,4), une vitrine présente une interprétation miniature de l'extérieur de Saint-Pierre : façade à portails et fronton, nef et transept, abside, grande coupole nervurée, lanterne, croix et deux petites coupoles. La place ovale comporte un obélisque, deux fontaines et une double colonnade, dont les 80 colonnes sont instanciées. Les proportions sont simplifiées pour rester dans le style du projet, sans prétendre à une reproduction architecturale exacte.
+Au centre de la salle (x = 0 ; z = 0), une vitrine présente une interprétation miniature de l'extérieur de Saint-Pierre : façade à portails et fronton, nef et transept, abside, grande coupole nervurée, lanterne, croix et deux petites coupoles. La place ovale comporte un obélisque, deux fontaines et une double colonnade, dont les 80 colonnes sont instanciées. Les proportions sont simplifiées pour rester dans le style du projet, sans prétendre à une reproduction architecturale exacte.
 
-Le verre transparent ne projette pas d'ombre opaque. Le socle dispose d'une collision rectangulaire avec marge pour empêcher de traverser la vitrine ; les passages sur les deux côtés et l'espace entre la vitrine et la fontaine restent ouverts. La capture `artifacts/maquette-saint-pierre.png` montre la vitrine à hauteur de visite.
+Le verre transparent ne projette pas d'ombre opaque. Le socle dispose d'une collision rectangulaire avec marge pour empêcher de traverser la vitrine ; les passages autour restent ouverts. La capture `artifacts/maquette-centrale-visiteurs.png` montre la disposition actuelle.
 
 ## Tableau du panneau droit
 
@@ -152,7 +152,7 @@ La seconde salle accueille dix-huit bougies flottantes au-dessus des rangées, a
 
 ## Vie urbaine autour de la place
 
-Vingt-deux immeubles stylisés aux couleurs romaines bordent la scène : enduits ocre/crème, toits de terre cuite, fenêtres à volets, cheminées et petits balcons. Les éléments de façade sont regroupés par matériau dans des objets instanciés. La ville forme un décor périphérique ; les limites de visite restent celles de la place. Huit bancs accueillent seize personnes assises, seize passants marchent avec jambes articulées et des lampadaires ponctuent les parcours. Les passants s’arrêtent près du joueur et les bancs ont des collisions.
+Vingt-deux immeubles stylisés aux couleurs romaines bordent la scène : enduits ocre/crème, toits de terre cuite, fenêtres à volets, cheminées et petits balcons. Les éléments de façade sont regroupés par matériau dans des objets instanciés. La ville forme un décor périphérique ; les limites de visite restent celles de la place. Huit bancs accueillent huit personnes assises, huit passants marchent avec jambes articulées et des lampadaires ponctuent les parcours. Les passants s’arrêtent près du joueur et les bancs ont des collisions.
 
 ## Ambiances, scène et verrière
 
@@ -170,12 +170,22 @@ Le maître, son pupitre et l’estrade sont centrés sous le baldaquin. L’all�
 
 Approchez d’un personnage proposant un échange : **E** ouvre la discussion, **1/2/3** ou les boutons sélectionnent une question, **E** ferme. Le guide explique la place, une visiteuse partage ses impressions et les familles proposent de petites conversations. Le maître et le prêtre permettent aussi de lancer/arrêter la prière. Ce sont des dialogues écrits à choix, sans service en ligne. La marche est suspendue pendant un échange.
 
-Un prêtre blanc et or, avec mitre et crosse, marche sur le tapis rouge. Six enfants et trois femmes avec poussettes rejoignent la place. Une musique de piano douce démarre avec les ambiances ; décochez « Musique douce » après Échap pour la couper seule. M coupe tous les sons d’ambiance. Crédits et licence du piano dans `public/audio/ambient/README.md`.
+Un prêtre blanc et or, avec mitre et crosse, marche sur le tapis rouge. Trois enfants et deux femmes avec poussettes rejoignent la place. Une musique de piano douce démarre avec les ambiances ; décochez « Musique douce » après Échap pour la couper seule. M coupe tous les sons d’ambiance. Crédits et licence du piano dans `public/audio/ambient/README.md`.
 
 Les vingt personnes assises dans la deuxième salle disposent d’un livret ouvert du Pater Noster ; le pupitre porte également un livre ouvert plus grand. La prière se lance automatiquement en entrant après le clic initial de visite, puis sa présence diminue dans le passage et son volume descend en fondu avant la pause. P reste disponible et un choix de coupure est conservé lors des entrées suivantes. Le curseur règle le niveau maximal ; masquer l’onglet met toujours le son en pause.
 
-La répartition des passants utilise désormais quatre circuits emboîtés, des départs espacés et une vitesse commune par circuit. Les passants contournent doucement une personne arrêtée au lieu de converger sur les mêmes carrefours et de former des amas. Les personnages assis restent par deux sur les bancs.
+La répartition des passants utilise désormais quatre circuits emboîtés, des départs espacés et une vitesse commune par circuit. Les passants contournent doucement une personne arrêtée au lieu de converger sur les mêmes carrefours et de former des amas. Les personnages assis sont répartis à raison d’une personne par banc.
 
 ## Grande entrée centrale
 
-Une grande porte ouverte au centre de la façade relie désormais la place à la salle des marbres. Le passage passe derrière la maquette, que l’on contourne par un côté. Les deux vantaux bronze, bordeaux et or sont ouverts vers la place. Un drapeau carré jaune et blanc du Vatican, avec clefs croisées et tiare, flotte légèrement au-dessus de l’entrée. La petite porte latérale reste utilisable.
+Une grande porte ouverte au centre de la façade relie désormais la place à la salle des marbres. La maquette se trouve au centre de la première salle, sous sa vitrine, à la place de la fontaine retirée. Les deux vantaux bronze, bordeaux et or sont ouverts vers la place. Un drapeau carré jaune et blanc du Vatican, avec clefs croisées et tiare, flotte sur une hampe en bois décalée à droite de l’entrée, en laissant les fenêtres dégagées. La petite porte latérale a été retirée et son passage fermé.
+
+## Visiteurs et expériences
+
+La place accueille désormais huit promeneurs adultes, trois enfants, deux parents avec poussette et huit personnes assises, au lieu de quarante et une personnes. Cinq visiteurs regardent la maquette centrale, les tableaux et les sculptures de la première salle ; deux autres circulent entre les salles en contournant les œuvres et les colonnes. La fontaine intérieure et son ambiance d’eau ont été retirées ; les fontaines de la place sont conservées.
+
+Dans la seconde salle, approchez du Père Matteo et appuyez sur **E**, puis **3**, pour prendre une place assise et assister à une **courte reconstitution de messe** : accueil, lecture, intentions, Notre Père latin et bénédiction. Il s’agit d’une évocation guidée, pas d’une messe intégrale ou d’une célébration en direct. Les étapes se succèdent avec voix locales et sous-titres ; les boutons permettent de continuer, couper la voix ou reprendre la visite. **Échap** quitte et restitue le point de vue initial.
+
+Le petit cartel « Mémoire de Pierre », à droite devant l’estrade, propose **E**, puis **1** : une apparition symbolique se lève au-dessus du monument funéraire et raconte brièvement les origines de Pierre et de la basilique. La narration précise les éléments relevant de la tradition chrétienne. La prière et les ambiances s’atténuent pendant ces séquences. Tous les fichiers audio sont locaux, avec textes et crédits dans `public/audio/experiences/README.md`.
+
+Validation : `tests/visitors-experiences.cjs` vérifie les dialogues réels au clavier, les pistes audio, la succession des étapes, la caméra assise, la sortie, l’apparition, les passages entre salles et la nouvelle disposition.

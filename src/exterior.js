@@ -8,10 +8,6 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   const box=(w,h,d,x,y,z,m,parent)=>add(new THREE.BoxGeometry(w,h,d),m,x,y,z,parent);
   const cyl=(rt,rb,h,x,y,z,m,n=16,parent)=>add(new THREE.CylinderGeometry(rt,rb,h,n),m,x,y,z,parent);
   // Porte de la galerie : un passage continu, sans téléportation.
-  const door=new THREE.Group();door.name='exterior-door';group.add(door);
-  for(const x of [3.88,7.12]){box(.24,5.6,.7,x,2.8,13,cream,door);box(.07,5.6,.08,x,2.8,12.6,gold,door);}
-  box(3.5,.28,.75,5.5,5.65,13,cream,door);
-  for(const side of [-1,1]){const leaf=box(.16,5.25,1.4,5.5+side*1.45,2.65,13.7,bronze,door);for(const y of [1,2.6,4.2])box(.04,1.1,1.1,leaf.position.x-side*.09,y,13.7,gold,door);}
   const centralDoor=new THREE.Group();centralDoor.name='central-entry-door';group.add(centralDoor);
   for(const x of [-2.72,2.72]){box(.28,6.5,.7,x,3.25,13,cream,centralDoor);box(.055,6.35,.08,x,3.25,12.6,gold,centralDoor);box(.3,6.4,4,x,3.2,15,cream,centralDoor);}
   box(5.8,.3,4.5,0,6.6,15,cream,centralDoor);box(5.8,.2,4.5,0,-.1,15.2,cream,centralDoor);
@@ -77,7 +73,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     const mesh=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,width,6,false),m);parent.add(mesh);return mesh;
   };
   const triangle=(x,y,z,w,h,m)=>{const shape=new THREE.Shape();shape.moveTo(-w/2,0);shape.lineTo(w/2,0);shape.lineTo(0,h);shape.closePath();return add(new THREE.ExtrudeGeometry(shape,{depth:.25,bevelEnabled:false}),m,x,y,z,basilica);};
-  box(27.5,5,1.3,-16.25,2.5,17,cream,basilica);box(1.5,5,1.3,3.25,2.5,17,cream,basilica);box(23,5,1.3,18.5,2.5,17,cream,basilica);
+  box(27.5,5,1.3,-16.25,2.5,17,cream,basilica);box(27.5,5,1.3,16.25,2.5,17,cream,basilica);
   box(60,16.3,1.3,0,14.85,17,cream,basilica);for(const x of [-16.25,16.25])box(27.5,1.7,1.3,x,5.85,17,cream,basilica);
   for(const y of [.25,9.1,18.4,19,23.3]){box(61.2,.32,2,0,y,17.35,warm,basilica);box(61.6,.12,2.3,0,y+.24,17.45,cream,basilica);}
   for(const [index,x] of [-24,-12,0,12,24].entries()){
@@ -130,7 +126,10 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   for(const y of [177,194,211]){fc.fillStyle='#b59a4f';fc.fillRect(353,y,62,7);fc.fillStyle='#efe9d3';for(let x=359;x<413;x+=12)fc.fillRect(x,y+1,4,4);}
   fc.fillStyle='#b59a4f';fc.fillRect(381,137,6,26);fc.fillRect(373,144,22,5);
   const flagTexture=new THREE.CanvasTexture(flagCanvas);flagTexture.colorSpace=THREE.SRGBColorSpace;
-  const flagGeometry=new THREE.PlaneGeometry(3.4,3.4,16,12),flag=new THREE.Mesh(flagGeometry,new THREE.MeshStandardMaterial({map:flagTexture,side:THREE.DoubleSide,roughness:.95}));flag.name='vatican-entrance-flag';flag.position.set(0,13.6,18.75);basilica.add(flag);box(3.65,.08,.1,0,15.36,18.75,gold,basilica);
+  const flagGeometry=new THREE.PlaneGeometry(3.4,3.4,16,12),flag=new THREE.Mesh(flagGeometry,new THREE.MeshStandardMaterial({map:flagTexture,side:THREE.DoubleSide,roughness:.95}));flag.name='vatican-entrance-flag';flag.scale.setScalar(.65);flag.position.set(5.75,9.55,20.15);basilica.add(flag);
+  const flagWood=mat('#71543a');const pole=cyl(.055,.075,5.3,4.6,8.1,20.15,flagWood,10,basilica);pole.name='vatican-wooden-flagpole';
+  add(new THREE.SphereGeometry(.09,8,6),gold,4.6,10.8,20.15,basilica);
+  for(const y of [6.15,7.2])box(.2,.12,2.2,4.6,y,19.15,bronze,basilica);
   triangle(0,18.6,18,18,3.5,warm);triangle(0,19,18.3,14.9,2.6,cream);
   const crest=add(new THREE.TorusGeometry(.7,.14,6,24),gold,0,20,18.65,basilica);
   // Dédicace locale, sans texture externe.
@@ -200,7 +199,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   const city=createExteriorCity({parent:group,mat,cream,stone,planters});
   function animate(time,viewer){
     city.animate(time,viewer);
-    const cloth=flagGeometry.attributes.position;for(let i=0;i<cloth.count;i++){const free=(1.7-cloth.getY(i))/3.4;cloth.setZ(i,Math.sin(time*1.4+cloth.getX(i)*2)*.055*free);}cloth.needsUpdate=true;
+    const cloth=flagGeometry.attributes.position;for(let i=0;i<cloth.count;i++){const free=(cloth.getX(i)+1.7)/3.4;cloth.setZ(i,Math.sin(time*1.4+cloth.getX(i)*2)*.055*free);}cloth.needsUpdate=true;
     for(let i=0;i<160;i++){
       const t=(time*(.7+(i%5)*.06)+i*.137)%1,a=i*2.39996,r=1.9+t*.5,x=i<80?-15:15;
       splashPositions[i*3]=x+Math.cos(a)*r;splashPositions[i*3+1]=-1.4+Math.sin(t*Math.PI)*(.2+(i%4)*.08);splashPositions[i*3+2]=66+Math.sin(a)*r;
@@ -216,7 +215,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   }
   const groundAt=z=>z<20?0:z<26.8?-.25*Math.min(8,Math.floor((z-20)/.85)+1):-2;
   function allowed(x,z){
-    if(z<20)return (Math.abs(x)<2.1||Math.abs(x-5.5)<1.18)&&z>11.8;
+    if(z<20)return Math.abs(x)<2.1&&z>11.8;
     if(z<34)return Math.abs(x)<28;
     if((x/40)**2+((z-66)/39)**2>1||z<27)return false;
     if(city.blocked(x,z))return false;

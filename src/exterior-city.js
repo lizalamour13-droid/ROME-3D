@@ -66,21 +66,21 @@ export function createExteriorCity({parent,mat,cream,stone,planters=[]}){
     for(const dx of [-1.1,1.1]){box(.12,.55,.65,dx,.28,0,iron,g);box(.1,1,.1,dx,.75,-.25,iron,g);}
     for(let i=0;i<4;i++){box(2.7,.07,.13,0,.58,-.23+i*.15,wood,g);box(2.7,.1,.08,0,.85+i*.13,-.28,wood,g);}
     obstacles.push({x,z,hx:.85,hz:1.65});
-    for(const offset of [-.65,.65]){const actor=person(index+(side+1)*3+Math.round(offset),true);actor.group.position.set(x+Math.cos(yaw)*offset,-2,z-Math.sin(yaw)*offset);actor.group.rotation.y=yaw;seated.push(actor);}
+    for(const offset of [index%2===0?-.45:.45]){const actor=person(index+(side+1)*3+Math.round(offset),true);actor.group.position.set(x+Math.cos(yaw)*offset,-2,z-Math.sin(yaw)*offset);actor.group.rotation.y=yaw;seated.push(actor);}
   }
   // Trajets qui contournent fontaines, obélisque et bancs ; l'allée de sortie reste libre.
   const routes=[[[8,36],[12,43],[18,50],[20,71],[14,86]], [[-8,37],[-12,44],[-19,54],[-20,75],[-13,89]], [[-10,91],[0,96],[12,90],[20,82]], [[-21,48],[-9,52],[0,55],[10,52],[21,48]]];
-  for(let i=0;i<16;i++){
+  for(let i=0;i<8;i++){
     const actor=person(i);const route=routes[i%4],start=Math.floor(i/4)%route.length;
     actor.group.position.set(route[start][0],-2,route[start][1]);walkers.push({...actor,route,target:(start+1)%route.length,distance:i*.3});
   }
   // Familles : enfants accompagnés et poussettes qui suivent leur parent.
-  for(let i=0;i<6;i++){
+  for(let i=0;i<3;i++){
     const child=person(i+2);child.group.name='square-child';child.group.scale.setScalar(.62+(i%2)*.07);
     const route=routes[i%2],start=1+Math.floor(i/2)%3;child.group.position.set(route[start][0]+(i%2?.9:-.9),-2,route[start][1]-.7);
     walkers.push({...child,route,target:(start+1)%route.length,distance:i*.4,speed:.7});
   }
-  for(let i=0;i<3;i++){
+  for(let i=0;i<2;i++){
     const mother=person(i+3);mother.group.name='square-mother';mother.group.userData.dialogueName=['Lucia et son bébé','Sofia et sa famille','Anna en promenade'][i];mother.group.userData.dialogueRole='family';
     const skirt=add(new THREE.CylinderGeometry(.18,.3,.55,10),clothes[(i+3)%clothes.length],0,.69,0,mother.group);
     const stroller=new THREE.Group();stroller.name='square-stroller';stroller.position.z=.95;mother.group.add(stroller);

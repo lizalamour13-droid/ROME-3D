@@ -15,13 +15,13 @@ export function setupAmbientAudio({enter,prayerAudio,exterior}){
   enter.addEventListener('click',()=>{panel.hidden=false;if(!chosen){enabled=true;label();}if(enabled)void play();});
   addEventListener('keydown',e=>{if(e.code==='KeyM'&&!e.repeat&&!(e.target instanceof HTMLInputElement)){e.preventDefault();toggle();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)Object.values(tracks).forEach(a=>a.pause());else if(enabled)void play();});
-  function update(position){
+  function update(position,experienceActive=false){
     if(!enabled||document.hidden)return;
     const outside=Math.max(0,Math.min(1,(position.z-14)/5)),chapel=position.z<-17;
     const distance=(x,z)=>Math.hypot(position.x-x,position.z-z);
-    const nearFountain=outside?Math.max(...[-15,15].map(x=>1/(1+(distance(x,66)/8)**2))):chapel?0:1/(1+(distance(0,0)/4)**2);
+    const nearFountain=outside?Math.max(...[-15,15].map(x=>1/(1+(distance(x,66)/8)**2))):0;
     const targets={music:musicEnabled.checked?(prayerAudio.paused?.2:.04):0,conversation:outside*exterior.conversationGain(position)*.45,birds:outside*.28,stream:nearFountain*.5,wind:chapel?(prayerAudio.paused?.025:.008):.04+outside*.12};
-    for(const [name,audio] of Object.entries(tracks))audio.volume+=((targets[name]*level)-audio.volume)*.08;
+    for(const [name,audio] of Object.entries(tracks))audio.volume+=((targets[name]*level*(experienceActive?.08:1))-audio.volume)*.08;
   }
   return {tracks,update,get enabled(){return enabled;}};
 }
