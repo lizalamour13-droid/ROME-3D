@@ -175,3 +175,7 @@ Un prêtre blanc et or, avec mitre et crosse, marche sur le tapis rouge. Six enf
 Les vingt personnes assises dans la deuxième salle disposent d’un livret ouvert du Pater Noster ; le pupitre porte également un livre ouvert plus grand. La prière se lance automatiquement en entrant après le clic initial de visite, puis sa présence diminue dans le passage et son volume descend en fondu avant la pause. P reste disponible et un choix de coupure est conservé lors des entrées suivantes. Le curseur règle le niveau maximal ; masquer l’onglet met toujours le son en pause.
 
 La répartition des passants utilise désormais quatre circuits emboîtés, des départs espacés et une vitesse commune par circuit. Les passants contournent doucement une personne arrêtée au lieu de converger sur les mêmes carrefours et de former des amas. Les personnages assis restent par deux sur les bancs.
+
+## Grande entrée centrale
+
+Une grande porte ouverte au centre de la façade relie désormais la place à la salle des marbres. Le passage passe derrière la maquette, que l’on contourne par un côté. Les deux vantaux bronze, bordeaux et or sont ouverts vers la place. Un drapeau carré jaune et blanc du Vatican, avec clefs croisées et tiare, flotte légèrement au-dessus de l’entrée. La petite porte latérale reste utilisable.

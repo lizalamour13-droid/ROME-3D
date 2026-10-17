@@ -12,6 +12,9 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   for(const x of [3.88,7.12]){box(.24,5.6,.7,x,2.8,13,cream,door);box(.07,5.6,.08,x,2.8,12.6,gold,door);}
   box(3.5,.28,.75,5.5,5.65,13,cream,door);
   for(const side of [-1,1]){const leaf=box(.16,5.25,1.4,5.5+side*1.45,2.65,13.7,bronze,door);for(const y of [1,2.6,4.2])box(.04,1.1,1.1,leaf.position.x-side*.09,y,13.7,gold,door);}
+  const centralDoor=new THREE.Group();centralDoor.name='central-entry-door';group.add(centralDoor);
+  for(const x of [-2.72,2.72]){box(.28,6.5,.7,x,3.25,13,cream,centralDoor);box(.055,6.35,.08,x,3.25,12.6,gold,centralDoor);box(.3,6.4,4,x,3.2,15,cream,centralDoor);}
+  box(5.8,.3,4.5,0,6.6,15,cream,centralDoor);box(5.8,.2,4.5,0,-.1,15.2,cream,centralDoor);
   box(14,.3,7,3.5,-.17,16.5,cream);
   for(let i=0;i<8;i++)box(60,.25,1,0,-.125-i*.25,20+i*.85,cream).name='vatican-steps';
   const plaza=add(new THREE.CircleGeometry(1,96),paving,0,-2.03,66);plaza.rotation.x=-Math.PI/2;plaza.scale.set(47,43,1);plaza.name='saint-peter-square';
@@ -74,10 +77,22 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     const mesh=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),32,width,6,false),m);parent.add(mesh);return mesh;
   };
   const triangle=(x,y,z,w,h,m)=>{const shape=new THREE.Shape();shape.moveTo(-w/2,0);shape.lineTo(w/2,0);shape.lineTo(0,h);shape.closePath();return add(new THREE.ExtrudeGeometry(shape,{depth:.25,bevelEnabled:false}),m,x,y,z,basilica);};
-  box(34,5,1.3,-13,2.5,17,cream,basilica);box(23,5,1.3,18.5,2.5,17,cream,basilica);box(60,18,1.3,0,14,17,cream,basilica);
+  box(27.5,5,1.3,-16.25,2.5,17,cream,basilica);box(1.5,5,1.3,3.25,2.5,17,cream,basilica);box(23,5,1.3,18.5,2.5,17,cream,basilica);
+  box(60,16.3,1.3,0,14.85,17,cream,basilica);for(const x of [-16.25,16.25])box(27.5,1.7,1.3,x,5.85,17,cream,basilica);
   for(const y of [.25,9.1,18.4,19,23.3]){box(61.2,.32,2,0,y,17.35,warm,basilica);box(61.6,.12,2.3,0,y+.24,17.45,cream,basilica);}
   for(const [index,x] of [-24,-12,0,12,24].entries()){
     const portal=new THREE.Group();portal.name='basilica-arched-portal';basilica.add(portal);
+    if(index===2){
+      arch(0,6.45,17.95,2.6,warm,.25,portal);
+      add(new THREE.CircleGeometry(2.45,32,0,Math.PI),recess,0,6.45,17.75,portal);
+      for(const side of [-1,1]){
+        box(.3,6.5,.4,side*2.62,3.25,17.95,warm,portal);
+        const leaf=new THREE.Group();leaf.name='central-open-door-leaf';leaf.position.set(side*2.45,0,17.95);leaf.rotation.y=side*Math.PI*.43;portal.add(leaf);
+        box(2.45,6.2,.18,-side*1.225,3.15,0,bronze,leaf);
+        for(const y of [1.15,3.15,5.15]){box(2.05,1.65,.08,-side*1.225,y,.14,burgundy,leaf);for(const dx of [-1,1])box(.055,1.7,.045,-side*1.225+dx,y,.2,gold,leaf);for(const dy of [-.83,.83])box(2.08,.055,.045,-side*1.225,y+dy,.2,gold,leaf);}
+        box(.08,.5,.1,-side*2.1,3,.24,gold,leaf);
+      }
+    }else{
     box(3.8,5.5,.1,x,2.9,17.73,recess,portal);
     const tympanum=add(new THREE.CircleGeometry(1.9,24,0,Math.PI),recess,x,5.65,17.74,portal);
     arch(x,5.65,17.95,1.97,warm,.24,portal);
@@ -85,6 +100,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     box(2.75,4.7,.12,x,2.52,17.85,index===2?burgundy:bronze,portal);
     for(const dx of [-1.28,0,1.28])box(.045,4.65,.05,x+dx,2.52,17.96,gold,portal);
     for(const y of [1.1,2.5,3.9])box(2.6,.045,.05,x,y,17.96,gold,portal);
+    }
     // Fenêtres cintrées et frontons entre les colonnes, non cachées derrière elles.
     box(2.4,3.5,.12,x,12.25,17.75,recess,basilica);arch(x,14,17.9,1.2,warm,.14);
     for(const dx of [-1.35,1.35])box(.22,3.85,.35,x+dx,12.2,17.92,warm,basilica);
@@ -104,8 +120,17 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   box(5.2,.4,1.8,0,10.15,18.1,warm,basilica);
   for(let i=0;i<10;i++)cyl(.06,.09,.85,-2.2+i*.49,10.8,18.9,cream,6,basilica);
   box(5.5,.15,.45,0,11.3,18.9,cream,basilica);
-  box(2.3,4.2,.1,0,13.7,18.3,burgundy,basilica);for(const x of [-1.13,1.13])box(.045,4.2,.03,x,13.7,18.38,gold,basilica);
-  box(.08,1.2,.04,0,13.7,18.42,gold,basilica);box(.7,.08,.04,0,13.9,18.42,gold,basilica);
+  // Drapeau carré du Vatican : jaune / blanc, clefs croisées et tiare dessinées localement.
+  const flagCanvas=document.createElement('canvas');flagCanvas.width=512;flagCanvas.height=512;const fc=flagCanvas.getContext('2d');fc.fillStyle='#ddbd43';fc.fillRect(0,0,256,512);fc.fillStyle='#f4efdf';fc.fillRect(256,0,256,512);
+  for(const [angle,color] of [[-.65,'#b69a4f'],[.65,'#a7a9a5']]){
+    fc.save();fc.translate(384,277);fc.rotate(angle);fc.strokeStyle=color;fc.lineWidth=11;fc.beginPath();fc.arc(0,-64,22,0,Math.PI*2);fc.stroke();fc.fillStyle=color;fc.fillRect(-5,-42,10,127);fc.fillRect(-5,65,35,11);fc.fillRect(19,65,11,28);fc.restore();
+  }
+  fc.strokeStyle='#954738';fc.lineWidth=6;fc.beginPath();fc.moveTo(346,335);fc.bezierCurveTo(320,375,440,375,420,335);fc.stroke();
+  fc.fillStyle='#d1bf88';fc.beginPath();fc.moveTo(353,219);fc.lineTo(360,174);fc.quadraticCurveTo(384,132,408,174);fc.lineTo(415,219);fc.closePath();fc.fill();
+  for(const y of [177,194,211]){fc.fillStyle='#b59a4f';fc.fillRect(353,y,62,7);fc.fillStyle='#efe9d3';for(let x=359;x<413;x+=12)fc.fillRect(x,y+1,4,4);}
+  fc.fillStyle='#b59a4f';fc.fillRect(381,137,6,26);fc.fillRect(373,144,22,5);
+  const flagTexture=new THREE.CanvasTexture(flagCanvas);flagTexture.colorSpace=THREE.SRGBColorSpace;
+  const flagGeometry=new THREE.PlaneGeometry(3.4,3.4,16,12),flag=new THREE.Mesh(flagGeometry,new THREE.MeshStandardMaterial({map:flagTexture,side:THREE.DoubleSide,roughness:.95}));flag.name='vatican-entrance-flag';flag.position.set(0,13.6,18.75);basilica.add(flag);box(3.65,.08,.1,0,15.36,18.75,gold,basilica);
   triangle(0,18.6,18,18,3.5,warm);triangle(0,19,18.3,14.9,2.6,cream);
   const crest=add(new THREE.TorusGeometry(.7,.14,6,24),gold,0,20,18.65,basilica);
   // Dédicace locale, sans texture externe.
@@ -175,6 +200,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   const city=createExteriorCity({parent:group,mat,cream,stone,planters});
   function animate(time,viewer){
     city.animate(time,viewer);
+    const cloth=flagGeometry.attributes.position;for(let i=0;i<cloth.count;i++){const free=(1.7-cloth.getY(i))/3.4;cloth.setZ(i,Math.sin(time*1.4+cloth.getX(i)*2)*.055*free);}cloth.needsUpdate=true;
     for(let i=0;i<160;i++){
       const t=(time*(.7+(i%5)*.06)+i*.137)%1,a=i*2.39996,r=1.9+t*.5,x=i<80?-15:15;
       splashPositions[i*3]=x+Math.cos(a)*r;splashPositions[i*3+1]=-1.4+Math.sin(t*Math.PI)*(.2+(i%4)*.08);splashPositions[i*3+2]=66+Math.sin(a)*r;
@@ -190,7 +216,7 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   }
   const groundAt=z=>z<20?0:z<26.8?-.25*Math.min(8,Math.floor((z-20)/.85)+1):-2;
   function allowed(x,z){
-    if(z<20)return Math.abs(x-5.5)<1.18&&z>11.8;
+    if(z<20)return (Math.abs(x)<2.1||Math.abs(x-5.5)<1.18)&&z>11.8;
     if(z<34)return Math.abs(x)<28;
     if((x/40)**2+((z-66)/39)**2>1||z<27)return false;
     if(city.blocked(x,z))return false;

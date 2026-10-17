@@ -29,7 +29,7 @@ box(18,.3,26,0,-.16,0,cream);
 for(let x=-8;x<=8;x+=2)for(let z=-12;z<=12;z+=2){box(1.94,.018,1.94,x,.008,z,((x+z)/2)%2===0?cream:white);if(x>-7&&x<7){const tile=box(.72,.025,.72,x,.024,z,red);tile.rotation.y=Math.PI/4;const inset=box(.37,.028,.37,x,.029,z,black);inset.rotation.y=Math.PI/4;}}
 for(const x of [-7,7]){box(.19,.04,25.7,x,.035,0,black);box(.14,.04,25.7,x+Math.sign(x)*.28,.035,0,red);}
 for(const z of [-10,10])box(13.8,.04,.2,0,.035,z,black);
-box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(13,12,.5,-2.5,6,13,wall);box(2,12,.5,8,6,13,wall);box(3,6.3,.5,5.5,8.85,13,wall);
+box(.5,12,26,-9,6,0,wall);box(.5,12,26,9,6,0,wall);box(6.2,12,.5,-5.9,6,13,wall);box(1.2,12,.5,3.4,6,13,wall);box(2,12,.5,8,6,13,wall);box(5.6,5.6,.5,0,9.2,13,wall);box(3,6.3,.5,5.5,8.85,13,wall);
 // Mur du fond et arche ouverte sur une niche peu profonde, dans la même salle.
 box(4.4,12,.7,-6.8,6,-13,wall);box(4.4,12,.7,6.8,6,-13,wall);box(9.2,1.4,.7,0,11.3,-13,wall);
 for(const x of [-3.45,3.45])box(2.1,11,.3,x,5.5,-14.7,stone);box(4.8,4.5,.3,0,8.75,-14.7,stone);box(9,.2,2,0,0,-13.8,cream);box(9,.3,2,0,11,-13.8,cream);
@@ -707,7 +707,7 @@ addEventListener('keydown',e=>{if(e.code==='Escape'){document.exitPointerLock();
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>keys.clear());
 let dragging=false;canvas.addEventListener('pointerdown',()=>dragging=true);addEventListener('pointerup',()=>dragging=false);
 addEventListener('mousemove',e=>{if(!active&&!dragging)return;yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2);camera.rotation.set(pitch,yaw,0);});
-function allowed(x,z){if(z>11.8&&Math.abs(x-5.5)<1.18||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
+function allowed(x,z){if(z>11.8&&(Math.abs(x)<2.1||Math.abs(x-5.5)<1.18)||z>=20)return exterior.allowed(x,z);if(z<=-11.8)return chapel.allowed(x,z);return Math.abs(x)<8.25&&z>-11.8&&z<12.15&&!(Math.abs(x-displayCase.x)<displayCase.halfWidth+.32&&Math.abs(z-displayCase.z)<displayCase.halfDepth+.32)&&!galleryStatues.some(s=>Math.abs(x-s.x)<s.halfWidth&&Math.abs(z-s.z)<s.halfDepth)&&Math.hypot(x,z)>=2.6&&!columns.some(c=>Math.hypot(x-c.x,z-c.z)<1.2);}
 function move(dt){if(interactions.open||(!active&&!dragging))return;const forward=Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const right=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyQ')||keys.has('KeyA')||keys.has('ArrowLeft'));const length=Math.hypot(forward,right)||1;const dx=(right*Math.cos(yaw)-forward*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;const dz=(-forward*Math.cos(yaw)-right*Math.sin(yaw))*(camera.position.z>20?7:3.5)*dt/length;if(allowed(camera.position.x+dx,camera.position.z))camera.position.x+=dx;if(allowed(camera.position.x,camera.position.z+dz))camera.position.z+=dz;}
 function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
 const prayer=setupPrayerAudio();
