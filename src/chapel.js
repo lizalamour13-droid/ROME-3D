@@ -6,7 +6,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
   const chapel=new THREE.Group();chapel.name='chapel';scene.add(chapel);
   const wood=mat('#65503c'),darkWood=mat('#493c30'),chairBronze=mat('#25251f',.4,.45),chairGold=mat('#b09452',.35,.65);
   const obstacles=[{x:0,z:-33.5,hx:4,hz:2.9}];
-  const {flames,candleLights}=buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze});
+  const {flames,candleLights,floatingCandles}=buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chairGold,chairBronze});
   const sparkleCanvas=document.createElement('canvas');sparkleCanvas.width=32;sparkleCanvas.height=32;
   const sparkleContext=sparkleCanvas.getContext('2d');
   const shimmer=sparkleContext.createRadialGradient(16,16,0,16,16,16);shimmer.addColorStop(0,'#fff1c7');shimmer.addColorStop(.2,'#e1b860aa');shimmer.addColorStop(1,'#bb8b3000');sparkleContext.fillStyle=shimmer;sparkleContext.fillRect(0,0,32,32);
@@ -138,6 +138,7 @@ export function createChapel({scene,box,cylinder,mat,cream,stone,gray,black,gold
       actor.group.rotation.x=rise>.95?Math.sin(time*3)*.018*travel:0;
     });
     sparkleSeeds.forEach((p,i)=>{sparklePositions[i*3]=p.x+.12*Math.sin(time*.25+p.phase);sparklePositions[i*3+1]=1+(p.y+time*p.speed)%8.1;sparklePositions[i*3+2]=p.z+.1*Math.cos(time*.22+p.phase);});sparkleGeometry.attributes.position.needsUpdate=true;
+    floatingCandles.forEach(({group,y,phase})=>{group.position.y=y+Math.sin(time*.65+phase)*.07;group.rotation.z=Math.sin(time*.4+phase)*.018;});
     flames.forEach((flame,index)=>flame.scale.y=.11*(1+.06*Math.sin(time*5+index*1.7)));
     candleLights.forEach((light,index)=>light.intensity=65*(1+.025*Math.sin(time*3+index*2)));
   }

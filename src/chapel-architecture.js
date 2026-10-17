@@ -162,5 +162,24 @@ export function buildChapelArchitecture({chapel,scene,mat,cream,gold,black,chair
   }
   for(const side of [-1,1])for(const z of [-21,-28.5]){const light=new THREE.PointLight('#ffe0b1',65,12,1.65);light.position.set(side*6.5,4,z);scene.add(light);candleLights.push(light);}
   const daylight=new THREE.PointLight('#fff1da',65,24,1.5);daylight.position.set(0,11.5,-23);scene.add(daylight);
-  return {flames,candleLights};
+  // Bougies flottantes au-dessus des rangées, sans masquer l'axe du sanctuaire.
+  const floatingCandles=[];
+  const wax=mat('#e5d5b6'),flameMaterial=new THREE.MeshBasicMaterial({color:'#ffe0a0'});
+  const glowCanvas=document.createElement('canvas');glowCanvas.width=64;glowCanvas.height=64;
+  const ctx=glowCanvas.getContext('2d'),gradient=ctx.createRadialGradient(32,32,0,32,32,32);gradient.addColorStop(0,'#ffdfaa99');gradient.addColorStop(.3,'#e7aa4b33');gradient.addColorStop(1,'#e7aa4b00');ctx.fillStyle=gradient;ctx.fillRect(0,0,64,64);
+  const glowTexture=new THREE.CanvasTexture(glowCanvas);glowTexture.colorSpace=THREE.SRGBColorSpace;
+  const glowMaterial=new THREE.SpriteMaterial({map:glowTexture,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  for(const side of [-1,1])for(let i=0;i<9;i++){
+    const candle=new THREE.Group();candle.name='chapel-floating-candle';
+    const height=.52+(i%3)*.13,y=4.4+(i%3)*.6;
+    candle.position.set(side*(2.65+(i%2)*1.1),y,-19.8-i*1.15);architecture.add(candle);
+    add(new THREE.CylinderGeometry(.075,.085,height,10),wax,0,0,0,candle);
+    add(new THREE.CylinderGeometry(.1,.1,.055,10),chairGold,0,-height/2,0,candle);
+    add(new THREE.CylinderGeometry(.009,.009,.08,5),black,0,height/2+.035,0,candle);
+    const flame=add(new THREE.SphereGeometry(1,8,6),flameMaterial,0,height/2+.15,0,candle);flame.scale.set(.05,.11,.05);flames.push(flame);
+    const glow=new THREE.Sprite(glowMaterial);glow.position.y=height/2+.15;glow.scale.set(.65,.9,1);candle.add(glow);
+    floatingCandles.push({group:candle,y,phase:i*1.3+side});
+  }
+  for(const x of [-3.1,3.1]){const light=new THREE.PointLight('#ffd59a',8,7,1.7);light.position.set(x,5,-24);scene.add(light);}
+  return {flames,candleLights,floatingCandles};
 }

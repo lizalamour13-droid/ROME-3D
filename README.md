@@ -147,3 +147,5 @@ L’extérieur est une interprétation géométrique de Saint-Pierre : place ova
 La façade extérieure a été reconstruite selon la nouvelle référence : cinq travées à portes cintrées, grandes colonnes à chapiteaux, fenêtres encadrées, loggia centrale avec tenture bordeaux, dédicace, attique, horloges et treize statues sur balustrade. La coupole plus élancée reçoit un tambour à fenêtres, des nervures, des oculi et une lanterne ; deux petites coupoles accompagnent sa silhouette. Le passage existant reste ouvert.
 
 Les deux fontaines de la place reçoivent des jets courbes et des gouttes animées. Dix oiseaux articulés suivent des trajectoires elliptiques au-dessus de la place. Huit jardinières fleuries bordent les parcours (avec collisions) ; dix pins parasols et un sol périphérique vert olive complètent le décor derrière les colonnades.
+
+La seconde salle accueille dix-huit bougies flottantes au-dessus des rangées, avec cire ivoire, base dorée, flammes vacillantes et léger mouvement vertical. Deux petites sources chaudes partagées complètent les halos. L’allée centrale, la coupole et les déplacements restent dégagés.
