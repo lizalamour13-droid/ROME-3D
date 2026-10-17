@@ -3,7 +3,7 @@ import {createExteriorCity} from './exterior-city.js';
 
 export function createExterior({scene,mat,cream,stone,gold,gray}){
   const group=new THREE.Group();group.name='vatican-exterior';scene.add(group);
-  const roof=mat('#777d7b'),paving=mat('#b4aca0'),shadow=mat('#565b58'),water=mat('#739a9b',.25),bronze=mat('#514c3e');
+  const roof=mat('#777d7b'),paving=mat('#292d31',.88),shadow=mat('#565b58'),water=mat('#739a9b',.25),bronze=mat('#514c3e');
   const add=(g,m,x,y,z,parent=group)=>{const mesh=new THREE.Mesh(g,m);mesh.position.set(x,y,z);mesh.receiveShadow=true;parent.add(mesh);return mesh;};
   const box=(w,h,d,x,y,z,m,parent)=>add(new THREE.BoxGeometry(w,h,d),m,x,y,z,parent);
   const cyl=(rt,rb,h,x,y,z,m,n=16,parent)=>add(new THREE.CylinderGeometry(rt,rb,h,n),m,x,y,z,parent);
@@ -17,12 +17,21 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
   const plaza=add(new THREE.CircleGeometry(1,96),paving,0,-2.03,66);plaza.rotation.x=-Math.PI/2;plaza.scale.set(47,43,1);plaza.name='saint-peter-square';
   box(63,.15,14,0,-2.12,27,paving);
   const terrain=add(new THREE.CircleGeometry(125,64),mat('#929775'),0,-2.25,45);terrain.rotation.x=-Math.PI/2;terrain.name='exterior-surrounding-ground';
+  // Pavés sombres à joints fins : texture locale et motifs de pierre gris clair.
+  const pavementCanvas=document.createElement('canvas');pavementCanvas.width=512;pavementCanvas.height=512;
+  const pavementContext=pavementCanvas.getContext('2d');pavementContext.fillStyle='#171b1e';pavementContext.fillRect(0,0,512,512);
+  const paverColors=['#343b40','#42474b','#30363b','#3b4145','#2c3237'];
+  for(let row=0;row<16;row++)for(let col=-1;col<9;col++){const x=col*64+(row%2)*32;pavementContext.fillStyle=paverColors[((col+9)*3+row*7)%5];pavementContext.fillRect(x+1,row*32+1,61,29);}
+  const pavementTexture=new THREE.CanvasTexture(pavementCanvas);pavementTexture.colorSpace=THREE.SRGBColorSpace;pavementTexture.wrapS=pavementTexture.wrapT=THREE.RepeatWrapping;pavementTexture.repeat.set(22,22);paving.map=pavementTexture;paving.color.set('#ffffff');paving.needsUpdate=true;
+  const motifStone=mat('#8a9090');
+  const diamonds=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),mat('#656d72'),24);diamonds.name='square-stone-patterns';const patternDummy=new THREE.Object3D();
+  for(let i=0;i<24;i++){const a=i*Math.PI/12;patternDummy.position.set(Math.sin(a)*27,-1.955,66+Math.cos(a)*24.3);patternDummy.rotation.y=a+Math.PI/4;patternDummy.scale.set(1.2,.025,1.2);patternDummy.updateMatrix();diamonds.setMatrixAt(i,patternDummy.matrix);}group.add(diamonds);
   // Rayons de pierre et anneaux du pavage, matériaux sobres.
   for(let i=0;i<24;i++){
     const a=i*Math.PI/12,points=[];for(const r of [5,39])points.push(new THREE.Vector3(Math.sin(a)*r,-1.99,66+Math.cos(a)*r*.9));
-    const line=new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(...points),1,.055,4,false),cream);group.add(line);
+    const line=new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(...points),1,.055,4,false),motifStone);group.add(line);
   }
-  for(const r of [8,20,34]){const ring=add(new THREE.TorusGeometry(r,.075,4,96),cream,0,-1.97,66);ring.rotation.x=-Math.PI/2;ring.scale.y=.9;}
+  for(const r of [8,20,34]){const ring=add(new THREE.TorusGeometry(r,.075,4,96),motifStone,0,-1.97,66);ring.rotation.x=-Math.PI/2;ring.scale.y=.9;}
   const obelisk=new THREE.Group();obelisk.name='vatican-obelisk';group.add(obelisk);
   box(3,.8,3,0,-1.6,66,gray,obelisk);box(1.8,1.7,1.8,0,-.4,66,stone,obelisk);cyl(.25,.67,14,0,7.4,66,stone,4,obelisk);
   cyl(0,.35,1,0,14.9,66,stone,4,obelisk);box(.09,1,.09,0,15.9,66,gold,obelisk);box(.55,.09,.09,0,16.1,66,gold,obelisk);
@@ -189,5 +198,5 @@ export function createExterior({scene,mat,cream,stone,gold,gray}){
     if(Math.hypot(x,z-66)<2.1||[-15,15].some(fx=>Math.hypot(x-fx,z-66)<3))return false;
     return true;
   }
-  return {allowed,groundAt,animate};
+  return {allowed,groundAt,animate,conversationGain:city.conversationGain};
 }

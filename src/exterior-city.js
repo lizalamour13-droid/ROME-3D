@@ -39,19 +39,27 @@ export function createExteriorCity({parent,mat,cream,stone}){
     const group=new THREE.Group();group.name=sitting?'square-seated-person':'square-walking-person';city.add(group);
     const skin=mat(['#c5a184','#96745a','#d0b59a'][index%3]),shirt=clothes[index%clothes.length],legs=mat('#424948');
     const upper=new THREE.Group();upper.position.y=sitting?.42:.79;group.add(upper);
-    box(.38,.5,.23,0,.43,0,shirt,upper);add(new THREE.SphereGeometry(.15,10,7),skin,0,.88,0,upper);
+    const torso=add(new THREE.CylinderGeometry(.22,.19,.5,8),shirt,0,.43,0,upper);torso.scale.z=.7;
+    const head=add(new THREE.SphereGeometry(.15,10,7),skin,0,.88,0,upper);head.rotation.y=(index%3-1)*.12;
     const hair=add(new THREE.SphereGeometry(.156,10,6,0,Math.PI*2,0,Math.PI*.5),dark,0,.92,0,upper);
     const limbs=[];
     for(const side of [-1,1]){
       const hip=new THREE.Group();hip.position.set(side*.11,0,0);upper.add(hip);
       box(.12,.35,.15,0,-.175,0,legs,hip);const knee=new THREE.Group();knee.position.y=-.35;hip.add(knee);
       box(.11,.33,.13,0,-.165,0,legs,knee);box(.15,.1,.25,0,-.38,.06,dark,knee);
-      const arm=new THREE.Group();arm.position.set(side*.25,.63,0);upper.add(arm);box(.11,.43,.14,0,-.2,0,shirt,arm);add(new THREE.SphereGeometry(.065,8,6),skin,0,-.45,0,arm);
-      if(sitting){hip.rotation.x=-Math.PI/2;knee.rotation.x=Math.PI/2;arm.rotation.x=-.3;knee.children[0].scale.y=.48;knee.children[0].position.y=-.24;knee.children[1].position.y=-.53;}
-      limbs.push({hip,knee,arm,side});
+      const arm=new THREE.Group();arm.position.set(side*.23,.63,0);upper.add(arm);
+      box(.11,.25,.13,0,-.125,0,shirt,arm);
+      const elbow=new THREE.Group();elbow.position.y=-.25;arm.add(elbow);box(.09,.23,.11,0,-.115,0,shirt,elbow);add(new THREE.SphereGeometry(.065,8,6),skin,0,-.255,0,elbow);
+      arm.rotation.z=-side*.08;elbow.rotation.x=-.18;
+      if(sitting){
+        hip.rotation.x=-Math.PI/2+(index%3-1)*.09;hip.rotation.z=side*.07;knee.rotation.x=Math.PI/2;
+        arm.rotation.x=side<0&&index%2===0?-.15:-.6;elbow.rotation.x=side<0&&index%2===0?-1:-.55;
+        knee.children[0].scale.y=.48;knee.children[0].position.y=-.24;knee.children[1].position.y=-.53;
+      }
+      limbs.push({hip,knee,arm,elbow,side});
     }
     if(sitting)upper.position.y=.58;
-    return {group,limbs,upper};
+    return {group,limbs,upper,head,pose:index%3};
   }
   for(const side of [-1,1])for(const [index,z] of [44,58,76,90].entries()){
     const x=side*25,yaw=-side*Math.PI/2,g=new THREE.Group();g.name='square-bench';g.position.set(x,-2,z);g.rotation.y=yaw;city.add(g);
@@ -82,11 +90,21 @@ export function createExteriorCity({parent,mat,cream,stone}){
       const clear=(!viewer||Math.hypot(viewer.x-nx,viewer.z-nz)>.95)&&!walkers.some(other=>other!==actor&&Math.hypot(other.group.position.x-nx,other.group.position.z-nz)<.6);
       if(clear){actor.group.position.x=nx;actor.group.position.z=nz;actor.distance+=step;actor.group.rotation.y=Math.atan2(dx,dz);}
       const phase=actor.distance*10;
-      actor.limbs.forEach(({hip,knee,arm,side})=>{const a=phase+(side<0?Math.PI:0);hip.rotation.x=clear?Math.sin(a)*.4:0;knee.rotation.x=clear?Math.max(0,-Math.sin(a))*.65:0;arm.rotation.x=clear?-Math.sin(a)*.3:0;});
+      actor.limbs.forEach(({hip,knee,arm,elbow,side})=>{const a=phase+(side<0?Math.PI:0);hip.rotation.x=clear?Math.sin(a)*.4:0;knee.rotation.x=clear?Math.max(0,-Math.sin(a))*.65:0;arm.rotation.x=clear?-Math.sin(a)*.23:-.07;elbow.rotation.x=-.22+(clear?Math.sin(a)*.06:0);});
       actor.group.position.y=-2+(clear?Math.abs(Math.sin(phase))*.025:0);
     });
-    seated.forEach((actor,i)=>actor.upper.rotation.x=Math.sin(time*.5+i)*.012);
+    seated.forEach((actor,i)=>{
+      actor.upper.rotation.x=[-.06,.08,-.02][actor.pose]+Math.sin(time*.5+i)*.012;
+      actor.upper.rotation.z=Math.sin(i*1.7)*.025;
+      actor.head.rotation.y=Math.sin(time*.35+i)*.12+(i%2?.18:-.18);
+      actor.limbs[1].elbow.rotation.x=-.55+Math.sin(time*.6+i)*.05;
+    });
   }
   function blocked(x,z){return obstacles.some(o=>Math.abs(x-o.x)<o.hx&&Math.abs(z-o.z)<o.hz)||walkers.some(a=>Math.hypot(x-a.group.position.x,z-a.group.position.z)<.45);}
-  return {animate,blocked};
+  function conversationGain(position){
+    let nearest=Infinity;
+    for(const actor of [...walkers,...seated])nearest=Math.min(nearest,Math.hypot(position.x-actor.group.position.x,position.z-actor.group.position.z));
+    return nearest>=7?0:(1-Math.max(0,(nearest-1.5)/5.5))**2;
+  }
+  return {animate,blocked,conversationGain};
 }
